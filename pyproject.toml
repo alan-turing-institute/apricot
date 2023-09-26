@@ -1,0 +1,127 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "apricot"
+dynamic = ["version"]
+description = "A proxy for delegating LDAP requests to an OpenID Connect backend."
+readme = "README.md"
+requires-python = ">=3.7"
+license = "BSD-3-Clause"
+keywords = []
+authors = [
+  { name = "James Robinson", email = "james.em.robinson@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "ldaptor~=21.2.0",
+  "Twisted~=23.8.0",
+  "zope.interface~=6.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/alan-turing-institute/apricot#readme"
+Issues = "https://github.com/alan-turing-institute/apricot/issues"
+Source = "https://github.com/alan-turing-institute/apricot"
+
+[tool.hatch.version]
+path = "apricot/__about__.py"
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "ruff>=0.0.243",
+]
+
+[tool.hatch.envs.lint.scripts]
+typing = "mypy {args:apricot}"
+
+style = [
+  "ruff {args:apricot}",
+  "black --check --diff {args:apricot}",
+]
+fmt = [
+  "black {args:apricot}",
+  "ruff --fix {args:apricot}",
+  "style",
+]
+all = [
+  "style",
+  "typing",
+]
+
+[tool.black]
+target-version = ["py310", "py311"]
+
+[tool.ruff]
+select = [
+  # See https://beta.ruff.rs/docs/rules/
+  "A",   # flake8-builtins
+  "ARG", # flake8-unused-arguments
+  "B",   # flake8-bugbear
+  "C",   # complexity, mcabe and flake8-comprehensions
+  "DTZ", # flake8-datetimez
+  "E",   # pycodestyle errors
+  "EM",  # flake8-errmsg
+  "F",   # pyflakes
+  "FBT", # flake8-boolean-trap
+  "I",   # isort
+  "ICN", # flake8-import-conventions
+  "ISC", # flake8-implicit-str-concat
+  "N",   # pep8-naming
+  "PLC", # pylint convention
+  "PLE", # pylint error
+  "PLR", # pylint refactor
+  "PLW", # pylint warning
+  "Q",   # flake8-quotes
+  "RUF", # ruff rules
+  "S",   # flake8-bandits
+  "T",   # flake8-debugger and flake8-print
+  "TID", # flake8-tidy-imports
+  "UP",  # pyupgrade
+  "W",   # pycodestyle warnings
+  "YTT", # flake8-2020
+]
+ignore = [
+  "E501",     # ignore line length
+  "S106",     # ignore check for possible passwords
+  "S603",     # allow subprocess without shell=True
+  "S607",     # allow subprocess without absolute path
+  "C901",     # ignore complex-structure
+  "PLR0912",  # ignore too-many-branches
+  "PLR0913",  # ignore too-many-arguments
+  "PLR0915",  # ignore too-many-statements
+]
+
+[tool.ruff.isort]
+combine-as-imports = true
+known-first-party = ["apricot"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+[tool.mypy]
+disallow_subclassing_any = false  # allow subclassing of types from third-party libraries
+files = "apricot"         # run mypy over this directory
+strict = true                     # enable all optional error checking flags
+
+[[tool.mypy.overrides]]
+module = [
+    "ldaptor.*",
+    "twisted.*",
+    "zope.interface.*",
+]
+ignore_missing_imports = true
