@@ -1,0 +1,9 @@
+# OS files
+.DS_Store
+
+# Environments
+.python-version
+
+# Tools
+.ruff_cache
+.mypy_cache
