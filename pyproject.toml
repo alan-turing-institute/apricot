@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "apricot"
+name = "apricot-server"
 dynamic = ["version"]
 description = "A proxy for delegating LDAP requests to an OpenID Connect backend."
 readme = "README.md"
