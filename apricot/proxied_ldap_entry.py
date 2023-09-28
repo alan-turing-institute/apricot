@@ -1,3 +1,5 @@
+from typing import cast
+
 from ldaptor.inmemory import ReadOnlyInMemoryLDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import (
     DistinguishedName,
@@ -29,7 +31,7 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         super().__init__(dn, attributes)
 
     def __str__(self) -> str:
-        output = self.toWire().decode("utf-8")
+        output = bytes(self.toWire()).decode("utf-8")
         for child in self._children.values():
             try:
                 output += f"\n- {child!s}"
@@ -55,14 +57,15 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
 
     def add_child(
         self, rdn: RelativeDistinguishedName | str, attributes: LDAPAttributeDict
-    ) -> "ProxiedLDAPEntry | None":
+    ) -> "ProxiedLDAPEntry":
         if isinstance(rdn, str):
             rdn = RelativeDistinguishedName(stringValue=rdn)
         try:
-            return self.addChild(rdn, attributes)
+            output = self.addChild(rdn, attributes)
         except LDAPEntryAlreadyExists:
             log.msg(f"Refusing to add child '{rdn.getText()}' as it already exists.")
-        return None
+            output = self._children[rdn.getText()]
+        return cast(ProxiedLDAPEntry, output)
 
     def bind(self, password: bytes) -> defer.Deferred["ProxiedLDAPEntry"]:
         def _bind(password: bytes) -> "ProxiedLDAPEntry":

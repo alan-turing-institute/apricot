@@ -31,13 +31,13 @@ class MicrosoftEntraClient(OAuthClient):
 
     def domain(self) -> str:
         users = self.users()
-        domains = {user["domain"][0] for user in users}
+        domains = {str(user["domain"][0]) for user in users}
         if len(domains) > 1:
-            domains = [domain for domain in domains if "onmicrosoft.com" not in domain]
+            domains = {domain for domain in domains if "onmicrosoft.com" not in domain}
         return sorted(domains)[0]
 
-    def extract_token(self, json_response: dict[str, str | list[str]]) -> None:
-        return json_response["access_token"]
+    def extract_token(self, json_response: dict[str, str | list[str]]) -> str:
+        return str(json_response["access_token"])
 
     def groups(self) -> list[LDAPAttributeDict]:
         output = []

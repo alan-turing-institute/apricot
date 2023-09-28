@@ -75,7 +75,7 @@ class OAuthClient(ABC):
             client_id=self.session_application._client.client_id,
             client_secret=self.client_secret,
         )
-        return result.json()
+        return result.json()  # type: ignore
 
     def verify(self, username: str, password: str) -> bool:
         try:
