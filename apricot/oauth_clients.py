@@ -1,4 +1,5 @@
 import os
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any
 
@@ -19,7 +20,7 @@ class OAuthBackend(str, Enum):
     MICROSOFT_ENTRA = "MicrosoftEntra"
 
 
-class OAuthClient:
+class OAuthClient(ABC):
     def __init__(
         self,
         client_id: str,
@@ -55,9 +56,21 @@ class OAuthClient:
         )
         self.bearer_token = self.extract_token(json_response)
 
+    @abstractmethod
+    def domain(self) -> str:
+        pass
+
+    @abstractmethod
     def extract_token(self, json_response: dict[str, str | list[str]]) -> str:
-        id(json_response)
-        raise NotImplementedError
+        pass
+
+    @abstractmethod
+    def groups(self) -> LDAPEntryList:
+        pass
+
+    @abstractmethod
+    def users(self) -> LDAPEntryList:
+        pass
 
     def query(self, url: str) -> dict[str, Any]:
         result = self.session_application.request(
@@ -68,15 +81,6 @@ class OAuthClient:
             client_secret=self.client_secret,
         )
         return result.json()
-
-    def domain(self) -> str:
-        raise NotImplementedError
-
-    def groups(self) -> LDAPEntryList:
-        raise NotImplementedError
-
-    def users(self) -> LDAPEntryList:
-        raise NotImplementedError
 
     def verify(self, username: str, password: str) -> bool:
         try:

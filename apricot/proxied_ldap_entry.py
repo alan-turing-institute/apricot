@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractmethod
 from typing import Any
 
 from ldaptor.inmemory import ReadOnlyInMemoryLDAPEntry
@@ -17,7 +18,7 @@ from apricot.oauth_clients import OAuthClient
 LDAPEntryList = list[tuple[RelativeDistinguishedName, dict[str, list[Any]]]]
 
 
-class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
+class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry, metaclass=ABCMeta):
     oauth_client: OAuthClient
     dn: DistinguishedName
     attributes: LDAPEntryList
@@ -58,6 +59,14 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         domain = self.dn.getDomainName()
         return f"{username}@{domain}"
 
+    @abstractmethod
+    def groups(self) -> LDAPEntryList:
+        pass
+
+    @abstractmethod
+    def users(self) -> LDAPEntryList:
+        pass
+
     def add_child(
         self, rdn: RelativeDistinguishedName | str, attributes: LDAPEntryList
     ) -> "ProxiedLDAPEntry | None":
@@ -78,12 +87,6 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             raise LDAPInvalidCredentials(msg)
 
         return defer.maybeDeferred(_bind, password)
-
-    def groups(self) -> LDAPEntryList:
-        raise NotImplementedError
-
-    def users(self) -> LDAPEntryList:
-        raise NotImplementedError
 
 
 class MicrosoftEntraLDAPEntry(ProxiedLDAPEntry):
