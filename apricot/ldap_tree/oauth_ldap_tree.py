@@ -5,16 +5,15 @@ from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
 from twisted.internet import defer
 from zope.interface import implementer
 
-from apricot.oauth_clients import MicrosoftEntraClient, OAuthClient
+from apricot.oauth_clients import OAuthClient
 from apricot.proxied_ldap_entry import (
     LDAPEntryList,
-    MicrosoftEntraLDAPEntry,
     ProxiedLDAPEntry,
 )
 
 
 @implementer(IConnectedLDAPEntry)
-class OAuthLookupTree(ABC):
+class OAuthLDAPTree(ABC):
     oauth_client: OAuthClient
 
     def __init__(self) -> None:
@@ -51,18 +50,3 @@ class OAuthLookupTree(ABC):
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
         return self.root.lookup(dn)
-
-
-class MicrosoftEntraLookupTree(OAuthLookupTree):
-    def __init__(self, client_id: str, client_secret: str, tenant_id: str):
-        self.oauth_client = MicrosoftEntraClient(
-            client_id=client_id,
-            client_secret=client_secret,
-            tenant_id=tenant_id,
-        )
-        super().__init__()
-
-    def build_root(self, dn: str, attributes: LDAPEntryList) -> ProxiedLDAPEntry:
-        return MicrosoftEntraLDAPEntry(
-            dn=dn, attributes=attributes, oauth_client=self.oauth_client
-        )
