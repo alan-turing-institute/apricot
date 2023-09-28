@@ -1,3 +1,5 @@
+from typing import Any
+
 from .oauth_client import OAuthClient
 from .types import JSONDict, LDAPAttributeDict
 
@@ -9,12 +11,16 @@ class MicrosoftEntraClient(OAuthClient):
         self,
         client_id: str,
         client_secret: str,
-        tenant_id: str,
+        entra_tenant_id: str,
+        **kwargs: Any,
     ):
+        del kwargs  # consume any unused arguments
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         scopes = ["https://graph.microsoft.com/.default"]  # this is the default scope
-        token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
-        self.tenant_id = tenant_id
+        token_url = (
+            f"https://login.microsoftonline.com/{entra_tenant_id}/oauth2/v2.0/token"
+        )
+        self.tenant_id = entra_tenant_id
         super().__init__(
             client_id=client_id,
             client_secret=client_secret,

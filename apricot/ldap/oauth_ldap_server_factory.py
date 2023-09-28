@@ -1,10 +1,10 @@
-from ldaptor.interfaces import IConnectedLDAPEntry
 from ldaptor.protocols.ldap.ldapserver import LDAPServer
 from twisted.internet.interfaces import IAddress
 from twisted.internet.protocol import Protocol, ServerFactory
 
-from .oauth_ldap_tree import OAuthLDAPTree
 from apricot.oauth import OAuthClient
+
+from .oauth_ldap_tree import OAuthLDAPTree
 
 
 class OAuthLDAPServerFactory(ServerFactory):

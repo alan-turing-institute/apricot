@@ -7,7 +7,7 @@ from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 from twisted.python import log
 
 from apricot.ldap import OAuthLDAPServerFactory
-from apricot.oauth import MicrosoftEntraClient, OAuthBackend
+from apricot.oauth import OAuthBackend, OAuthClientMap
 
 
 class ApricotServer:
@@ -23,16 +23,13 @@ class ApricotServer:
         log.startLogging(sys.stdout)
 
         # Initialize the appropriate OAuth client
-        oauth_client = None
-        if backend == OAuthBackend.MICROSOFT_ENTRA:
-            oauth_client = MicrosoftEntraClient(
-                client_id=client_id,
-                client_secret=client_secret,
-                tenant_id=kwargs["entra_tenant_id"],
+        try:
+            oauth_client = OAuthClientMap[backend](
+                client_id=client_id, client_secret=client_secret, **kwargs
             )
-        if not oauth_client:
+        except Exception as exc:
             msg = f"Could not construct an OAuth client for the '{backend}' backend."
-            raise ValueError(msg)
+            raise ValueError(msg) from exc
 
         # Create an LDAPServerFactory
         factory = OAuthLDAPServerFactory(oauth_client)

@@ -3,8 +3,8 @@ from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
 from twisted.internet import defer
 from zope.interface import implementer
 
-from apricot.oauth import LDAPAttributeDict, OAuthClient
 from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
+from apricot.oauth import LDAPAttributeDict, OAuthClient
 
 
 @implementer(IConnectedLDAPEntry)
