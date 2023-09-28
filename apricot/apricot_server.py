@@ -16,6 +16,7 @@ class ApricotServer:
         backend: OAuthBackend,
         client_id: str,
         client_secret: str,
+        domain: str,
         port: int,
         **kwargs: Any,
     ) -> None:
@@ -25,7 +26,10 @@ class ApricotServer:
         # Initialize the appropriate OAuth client
         try:
             oauth_client = OAuthClientMap[backend](
-                client_id=client_id, client_secret=client_secret, **kwargs
+                client_id=client_id,
+                client_secret=client_secret,
+                domain=domain,
+                **kwargs,
             )
         except Exception as exc:
             msg = f"Could not construct an OAuth client for the '{backend}' backend."

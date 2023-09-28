@@ -41,7 +41,12 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         output = bytes(self.toWire()).decode("utf-8")
         for child in self._children.values():
             try:
-                output += f"\n- {child!s}"
+                # Indent children by two spaces
+                indent = "  "
+                output += (
+                    f"{indent}{str(child).strip()}".replace("\n", f"\n{indent}")
+                    + "\n\n"
+                )
             except TypeError:
                 pass
         return output

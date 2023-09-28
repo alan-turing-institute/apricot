@@ -20,9 +20,8 @@ class OAuthLDAPTree:
         self.oauth_client = oauth_client
 
         # Create a root node for the tree
-        root_dn = "DC=" + self.oauth_client.domain().replace(".", ",DC=")
         self.root = self.build_root(
-            dn=root_dn, attributes={"objectClass": ["dcObject"]}
+            dn=self.oauth_client.root_dn, attributes={"objectClass": ["dcObject"]}
         )
         # Add OUs for users and groups
         groups_ou = self.root.add_child(

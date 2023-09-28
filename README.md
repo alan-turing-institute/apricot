@@ -8,7 +8,42 @@ The name is a slightly tortured acronym for: LD**A**P **pr**oxy for Open**I**D *
 Start the `Apricot` server on port 8080 by running:
 
 ```bash
-python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend <your backend> --port 8080
+python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 8080 --domain "<your domain name>"
+```
+
+This will create an LDAP tree that looks like this:
+
+```ldif
+dn: DC=<your domain>
+objectClass: dcObject
+
+dn: OU=users,DC=<your domain>
+objectClass: organizationalUnit
+ou: users
+
+dn: OU=groups,DC=<your domain>
+objectClass: organizationalUnit
+ou: groups
+```
+
+Each user will have an entry like
+
+```ldif
+dn: CN=<user name>,OU=users,DC=<your domain>
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+objectClass: user
+<user data fields here>
+```
+
+Each group will have an entry like
+
+```ldif
+dn: CN=<group name>,OU=groups,DC=<your domain>
+objectClass: group
+objectClass: top
+<group data fields here>
 ```
 
 ## OpenID Connect

@@ -1,14 +1,14 @@
-from ldaptor.protocols.ldap.ldapserver import LDAPServer
 from twisted.internet.interfaces import IAddress
 from twisted.internet.protocol import Protocol, ServerFactory
 
 from apricot.oauth import OAuthClient
 
 from .oauth_ldap_tree import OAuthLDAPTree
+from .read_only_ldap_server import ReadOnlyLDAPServer
 
 
 class OAuthLDAPServerFactory(ServerFactory):
-    protocol = LDAPServer
+    protocol = ReadOnlyLDAPServer
 
     def __init__(self, oauth_client: OAuthClient):
         """
