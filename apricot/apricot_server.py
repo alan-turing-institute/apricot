@@ -1,21 +1,38 @@
 import sys
-from typing import cast
+from typing import Any, cast
 
 from twisted.internet import reactor
 from twisted.internet.endpoints import serverFromString
 from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 from twisted.python import log
 
-from .ldap_lookup_tree import LDAPLookupTree
-from .ldap_server_factory import LDAPServerFactory
+from apricot.ldap_server_factory import LDAPServerFactory
+from apricot.oauth_clients import OAuthBackend
+from apricot.oauth_lookup_tree import MicrosoftEntraLookupTree
 
-class ApricotServer():
-    def __init__(self, port: int) -> None:
+
+class ApricotServer:
+    def __init__(
+        self,
+        backend: OAuthBackend,
+        client_id: str,
+        client_secret: str,
+        port: int,
+        **kwargs: Any,
+    ) -> None:
         # Log to stdout
         log.startLogging(sys.stdout)
 
         # Initialize the LDAP lookup tree
-        tree = LDAPLookupTree()
+        if backend == OAuthBackend.MICROSOFT_ENTRA:
+            tree = MicrosoftEntraLookupTree(
+                client_id=client_id,
+                client_secret=client_secret,
+                tenant_id=kwargs["tenant_id"],
+            )
+        else:
+            msg = f"Could not construct a lookup tree for the '{backend}' backend."
+            raise ValueError(msg)
 
         # Create an LDAPServerFactory
         factory = LDAPServerFactory(tree)
