@@ -1,0 +1,45 @@
+---
+name: Lint
+
+# Run workflow on pushes to matching branches
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint_markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Lint Markdown
+        uses: articulate/actions-markdownlint@v1
+        with:
+          config: .markdownlint.json
+
+  lint_python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install hatch
+        run: pip install hatch
+      - name: Lint Python
+        run: hatch run lint:all
+
+  lint_yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Lint YAML
+        uses: karancode/yamllint-github-action@v2.1.1
+        with:
+          yamllint_strict: true
+          yamllint_comment: false
