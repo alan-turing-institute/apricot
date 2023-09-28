@@ -1,7 +1,7 @@
 from typing import Any
 
 from .oauth_client import OAuthClient
-from .types import LDAPEntryList
+from .types import LDAPAttributeDict
 
 
 class MicrosoftEntraClient(OAuthClient):
@@ -39,7 +39,7 @@ class MicrosoftEntraClient(OAuthClient):
     def extract_token(self, json_response: dict[str, str | list[str]]) -> None:
         return json_response["access_token"]
 
-    def groups(self) -> LDAPEntryList:
+    def groups(self) -> list[LDAPAttributeDict]:
         output = []
         try:
             group_data = self.query("https://graph.microsoft.com/v1.0/groups/")
@@ -52,7 +52,7 @@ class MicrosoftEntraClient(OAuthClient):
             pass
         return output
 
-    def users(self) -> LDAPEntryList:
+    def users(self) -> list[LDAPAttributeDict]:
         output = []
         try:
             user_data = self.query("https://graph.microsoft.com/v1.0/users/")

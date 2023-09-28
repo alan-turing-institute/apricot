@@ -1,5 +1,3 @@
-from typing import Any
-
 from ldaptor.inmemory import ReadOnlyInMemoryLDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import (
     DistinguishedName,
@@ -12,20 +10,17 @@ from ldaptor.protocols.ldap.ldaperrors import (
 from twisted.internet import defer
 from twisted.python import log
 
-from apricot.oauth_clients import OAuthClient, LDAPEntry
-
-LDAPEntryList = list[tuple[RelativeDistinguishedName, LDAPEntry]]
+from apricot.oauth_clients import LDAPAttributeDict, OAuthClient
 
 
 class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
-    oauth_client: OAuthClient
     dn: DistinguishedName
-    attributes: LDAPEntryList
+    attributes: LDAPAttributeDict
 
     def __init__(
         self,
         dn: DistinguishedName | str,
-        attributes: dict[str, Any],
+        attributes: LDAPAttributeDict,
         oauth_client: OAuthClient | None = None,
     ) -> None:
         self.oauth_client_ = oauth_client
@@ -59,7 +54,7 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return f"{username}@{domain}"
 
     def add_child(
-        self, rdn: RelativeDistinguishedName | str, attributes: LDAPEntryList
+        self, rdn: RelativeDistinguishedName | str, attributes: LDAPAttributeDict
     ) -> "ProxiedLDAPEntry | None":
         if isinstance(rdn, str):
             rdn = RelativeDistinguishedName(stringValue=rdn)

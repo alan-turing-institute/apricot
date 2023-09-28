@@ -5,11 +5,8 @@ from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
 from twisted.internet import defer
 from zope.interface import implementer
 
-from apricot.oauth_clients import OAuthClient
-from apricot.proxied_ldap_entry import (
-    LDAPEntryList,
-    ProxiedLDAPEntry,
-)
+from apricot.oauth_clients import LDAPAttributeDict, OAuthClient
+from apricot.proxied_ldap_entry import ProxiedLDAPEntry
 
 
 @implementer(IConnectedLDAPEntry)
@@ -37,7 +34,7 @@ class OAuthLDAPTree(ABC):
             users_ou.add_child(f"CN={user_attrs['name'][0]}", user_attrs)
 
     @abstractmethod
-    def build_root(self, dn: str, attributes: LDAPEntryList) -> ProxiedLDAPEntry:
+    def build_root(self, dn: str, attributes: LDAPAttributeDict) -> ProxiedLDAPEntry:
         pass
 
     def lookup(self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:

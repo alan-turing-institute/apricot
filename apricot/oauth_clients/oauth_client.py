@@ -10,7 +10,7 @@ from oauthlib.oauth2 import (
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
-from .types import LDAPEntryList
+from .types import LDAPAttributeDict
 
 
 class OAuthClient(ABC):
@@ -60,11 +60,11 @@ class OAuthClient(ABC):
         pass
 
     @abstractmethod
-    def groups(self) -> LDAPEntryList:
+    def groups(self) -> list[LDAPAttributeDict]:
         pass
 
     @abstractmethod
-    def users(self) -> LDAPEntryList:
+    def users(self) -> list[LDAPAttributeDict]:
         pass
 
     def query(self, url: str) -> dict[str, Any]:
