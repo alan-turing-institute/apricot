@@ -3,8 +3,8 @@ from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
 from twisted.internet import defer
 from zope.interface import implementer
 
-from apricot.oauth_clients import LDAPAttributeDict, OAuthClient
-from apricot.proxied_ldap_entry import ProxiedLDAPEntry
+from apricot.oauth import LDAPAttributeDict, OAuthClient
+from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
 
 
 @implementer(IConnectedLDAPEntry)
@@ -12,6 +12,11 @@ class OAuthLDAPTree:
     oauth_client: OAuthClient
 
     def __init__(self, oauth_client: OAuthClient) -> None:
+        """
+        Initialise an OAuthLDAPTree
+
+        @param oauth_client: An OAuth client used to construct the LDAP tree
+        """
         self.oauth_client = oauth_client
 
         # Create a root node for the tree
@@ -33,8 +38,16 @@ class OAuthLDAPTree:
         for user_attrs in self.oauth_client.users():
             users_ou.add_child(f"CN={user_attrs['name'][0]}", user_attrs)
 
-    def build_root(self, dn: str, attributes: LDAPAttributeDict) -> ProxiedLDAPEntry:
-        return ProxiedLDAPEntry(
+    def build_root(self, dn: str, attributes: LDAPAttributeDict) -> OAuthLDAPEntry:
+        """
+        Construct the root of the LDAP tree
+
+        @param dn: Distinguished Name of the object
+        @param attributes: Attributes of the object.
+
+        @return: An OAuthLDAPEntry
+        """
+        return OAuthLDAPEntry(
             dn=dn, attributes=attributes, oauth_client=self.oauth_client
         )
 
@@ -42,8 +55,9 @@ class OAuthLDAPTree:
         """
         Lookup the referred to by dn.
 
-        @return: A Deferred returning an ILDAPEntry, or failing with e.g.
-        LDAPNoSuchObject.
+        @return: A Deferred returning an ILDAPEntry.
+
+        @raises: LDAPNoSuchObject.
         """
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)

@@ -12,10 +12,10 @@ from ldaptor.protocols.ldap.ldaperrors import (
 from twisted.internet import defer
 from twisted.python import log
 
-from apricot.oauth_clients import LDAPAttributeDict, OAuthClient
+from apricot.oauth import LDAPAttributeDict, OAuthClient
 
 
-class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
+class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
     dn: DistinguishedName
     attributes: LDAPAttributeDict
 
@@ -25,6 +25,13 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         attributes: LDAPAttributeDict,
         oauth_client: OAuthClient | None = None,
     ) -> None:
+        """
+        Initialize the object.
+
+        @param dn: Distinguished Name of the object
+        @param attributes: Attributes of the object.
+        @param oauth_client: An OAuth client used for binding
+        """
         self.oauth_client_ = oauth_client
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
@@ -57,7 +64,7 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
 
     def add_child(
         self, rdn: RelativeDistinguishedName | str, attributes: LDAPAttributeDict
-    ) -> "ProxiedLDAPEntry":
+    ) -> "OAuthLDAPEntry":
         if isinstance(rdn, str):
             rdn = RelativeDistinguishedName(stringValue=rdn)
         try:
@@ -65,10 +72,10 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         except LDAPEntryAlreadyExists:
             log.msg(f"Refusing to add child '{rdn.getText()}' as it already exists.")
             output = self._children[rdn.getText()]
-        return cast(ProxiedLDAPEntry, output)
+        return cast(OAuthLDAPEntry, output)
 
-    def bind(self, password: bytes) -> defer.Deferred["ProxiedLDAPEntry"]:
-        def _bind(password: bytes) -> "ProxiedLDAPEntry":
+    def bind(self, password: bytes) -> defer.Deferred["OAuthLDAPEntry"]:
+        def _bind(password: bytes) -> "OAuthLDAPEntry":
             s_password = password.decode("utf-8")
             if self.oauth_client.verify(username=self.username, password=s_password):
                 return self

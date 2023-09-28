@@ -6,9 +6,8 @@ from twisted.internet.endpoints import serverFromString
 from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 from twisted.python import log
 
-from apricot.ldap_server_factory import LDAPServerFactory
-from apricot.ldap_tree import OAuthLDAPTree
-from apricot.oauth_clients import MicrosoftEntraClient, OAuthBackend
+from apricot.ldap import OAuthLDAPServerFactory
+from apricot.oauth import MicrosoftEntraClient, OAuthBackend
 
 
 class ApricotServer:
@@ -35,11 +34,8 @@ class ApricotServer:
             msg = f"Could not construct an OAuth client for the '{backend}' backend."
             raise ValueError(msg)
 
-        # Create an LDAP lookup tree
-        tree = OAuthLDAPTree(oauth_client)
-
         # Create an LDAPServerFactory
-        factory = LDAPServerFactory(tree)
+        factory = OAuthLDAPServerFactory(oauth_client)
 
         # Attach a listening endpoint
         endpoint: IStreamServerEndpoint = serverFromString(reactor, f"tcp:{port}")

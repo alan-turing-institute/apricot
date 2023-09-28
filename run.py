@@ -1,7 +1,7 @@
 import argparse
 
 from apricot import ApricotServer
-from apricot.oauth_clients import OAuthBackend
+from apricot.oauth import OAuthBackend
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
