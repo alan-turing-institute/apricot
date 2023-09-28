@@ -1,4 +1,3 @@
-from abc import ABCMeta, abstractmethod
 from typing import Any
 
 from ldaptor.inmemory import ReadOnlyInMemoryLDAPEntry
@@ -13,12 +12,12 @@ from ldaptor.protocols.ldap.ldaperrors import (
 from twisted.internet import defer
 from twisted.python import log
 
-from apricot.oauth_clients import OAuthClient
+from apricot.oauth_clients import OAuthClient, LDAPEntry
 
-LDAPEntryList = list[tuple[RelativeDistinguishedName, dict[str, list[Any]]]]
+LDAPEntryList = list[tuple[RelativeDistinguishedName, LDAPEntry]]
 
 
-class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry, metaclass=ABCMeta):
+class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry):
     oauth_client: OAuthClient
     dn: DistinguishedName
     attributes: LDAPEntryList
@@ -59,14 +58,6 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry, metaclass=ABCMeta):
         domain = self.dn.getDomainName()
         return f"{username}@{domain}"
 
-    @abstractmethod
-    def groups(self) -> LDAPEntryList:
-        pass
-
-    @abstractmethod
-    def users(self) -> LDAPEntryList:
-        pass
-
     def add_child(
         self, rdn: RelativeDistinguishedName | str, attributes: LDAPEntryList
     ) -> "ProxiedLDAPEntry | None":
@@ -87,56 +78,3 @@ class ProxiedLDAPEntry(ReadOnlyInMemoryLDAPEntry, metaclass=ABCMeta):
             raise LDAPInvalidCredentials(msg)
 
         return defer.maybeDeferred(_bind, password)
-
-
-class MicrosoftEntraLDAPEntry(ProxiedLDAPEntry):
-    def groups(self) -> LDAPEntryList:
-        output = []
-        try:
-            group_data = self.oauth_client.query(
-                "https://graph.microsoft.com/v1.0/groups/"
-            )
-            for group_dict in group_data["value"]:
-                attributes = {k: [v if v else ""] for k, v in dict(group_dict).items()}
-                attributes["objectclass"] = ["top", "group"]
-                group_name = str(group_dict["displayName"]).split("@")[0]
-                output.append(
-                    (
-                        RelativeDistinguishedName(stringValue=f"CN={group_name}"),
-                        attributes,
-                    )
-                )
-        except KeyError:
-            pass
-        return output
-
-    def users(self) -> LDAPEntryList:
-        output = []
-        try:
-            user_data = self.oauth_client.query(
-                "https://graph.microsoft.com/v1.0/users/"
-            )
-            for user_dict in user_data["value"]:
-                attributes = {k: [v if v else ""] for k, v in dict(user_dict).items()}
-                attributes["objectclass"] = [
-                    "top",
-                    "person",
-                    "organizationalPerson",
-                    "user",
-                ]
-                group_memberships = self.oauth_client.query(
-                    f"https://graph.microsoft.com/v1.0/users/{user_dict['id']}/memberOf"
-                )
-                attributes["memberOf"] = [
-                    group["displayName"] for group in group_memberships["value"]
-                ]
-                user_name = str(user_dict["userPrincipalName"]).split("@")[0]
-                output.append(
-                    (
-                        RelativeDistinguishedName(stringValue=f"CN={user_name}"),
-                        attributes,
-                    )
-                )
-        except KeyError:
-            pass
-        return output
