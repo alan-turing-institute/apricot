@@ -7,8 +7,8 @@ from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 from twisted.python import log
 
 from apricot.ldap_server_factory import LDAPServerFactory
-from apricot.ldap_tree import MicrosoftEntraLDAPTree
-from apricot.oauth_clients import OAuthBackend
+from apricot.ldap_tree import OAuthLDAPTree
+from apricot.oauth_clients import MicrosoftEntraClient, OAuthBackend
 
 
 class ApricotServer:
@@ -23,16 +23,20 @@ class ApricotServer:
         # Log to stdout
         log.startLogging(sys.stdout)
 
-        # Initialize the LDAP lookup tree
+        # Initialize the appropriate OAuth client
+        oauth_client = None
         if backend == OAuthBackend.MICROSOFT_ENTRA:
-            tree = MicrosoftEntraLDAPTree(
+            oauth_client = MicrosoftEntraClient(
                 client_id=client_id,
                 client_secret=client_secret,
-                tenant_id=kwargs["tenant_id"],
+                tenant_id=kwargs["entra_tenant_id"],
             )
-        else:
-            msg = f"Could not construct a lookup tree for the '{backend}' backend."
+        if not oauth_client:
+            msg = f"Could not construct an OAuth client for the '{backend}' backend."
             raise ValueError(msg)
+
+        # Create an LDAP lookup tree
+        tree = OAuthLDAPTree(oauth_client)
 
         # Create an LDAPServerFactory
         factory = LDAPServerFactory(tree)

@@ -11,7 +11,9 @@ from apricot.proxied_ldap_entry import ProxiedLDAPEntry
 class OAuthLDAPTree:
     oauth_client: OAuthClient
 
-    def __init__(self) -> None:
+    def __init__(self, oauth_client: OAuthClient) -> None:
+        self.oauth_client = oauth_client
+
         # Create a root node for the tree
         root_dn = "DC=" + self.oauth_client.domain().replace(".", ",DC=")
         self.root = self.build_root(

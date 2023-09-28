@@ -10,7 +10,7 @@ from oauthlib.oauth2 import (
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
-from .types import LDAPAttributeDict
+from .types import JSONDict, LDAPAttributeDict
 
 
 class OAuthClient(ABC):
@@ -56,7 +56,7 @@ class OAuthClient(ABC):
         pass
 
     @abstractmethod
-    def extract_token(self, json_response: dict[str, str | list[str]]) -> str:
+    def extract_token(self, json_response: JSONDict) -> str:
         pass
 
     @abstractmethod
