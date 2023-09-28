@@ -20,10 +20,15 @@ class OAuthClient(ABC):
         self,
         client_id: str,
         client_secret: str,
+        domain: str,
         redirect_uri: str,
         scopes: list[str],
         token_url: str,
     ) -> None:
+        # Set attributes
+        self.client_secret = client_secret
+        self.domain = domain
+        self.token_url = token_url
         # Allow token scope to not match requested scope. (Other auth libraries allow
         # this, but Requests-OAuthlib raises exception on scope mismatch by default.)
         os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"  # noqa: S105
@@ -40,9 +45,6 @@ class OAuthClient(ABC):
                 client_id=client_id, scope=scopes, redirect_uri=redirect_uri
             )
         )
-        # Store client secret and token URL
-        self.client_secret = client_secret
-        self.token_url = token_url
         # Request a new bearer token
         json_response = self.session_application.fetch_token(
             token_url=self.token_url,
@@ -50,10 +52,6 @@ class OAuthClient(ABC):
             client_secret=self.client_secret,
         )
         self.bearer_token = self.extract_token(json_response)
-
-    @abstractmethod
-    def domain(self) -> str:
-        pass
 
     @abstractmethod
     def extract_token(self, json_response: JSONDict) -> str:
@@ -66,6 +64,10 @@ class OAuthClient(ABC):
     @abstractmethod
     def users(self) -> list[LDAPAttributeDict]:
         pass
+
+    @property
+    def root_dn(self) -> str:
+        return "DC=" + self.domain.replace(".", ",DC=")
 
     def query(self, url: str) -> dict[str, Any]:
         result = self.session_application.request(

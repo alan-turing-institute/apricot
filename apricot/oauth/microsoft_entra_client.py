@@ -9,12 +9,9 @@ class MicrosoftEntraClient(OAuthClient):
 
     def __init__(
         self,
-        client_id: str,
-        client_secret: str,
         entra_tenant_id: str,
         **kwargs: Any,
     ):
-        del kwargs  # consume any unused arguments
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         scopes = ["https://graph.microsoft.com/.default"]  # this is the default scope
         token_url = (
@@ -22,19 +19,8 @@ class MicrosoftEntraClient(OAuthClient):
         )
         self.tenant_id = entra_tenant_id
         super().__init__(
-            client_id=client_id,
-            client_secret=client_secret,
-            redirect_uri=redirect_uri,
-            scopes=scopes,
-            token_url=token_url,
+            redirect_uri=redirect_uri, scopes=scopes, token_url=token_url, **kwargs
         )
-
-    def domain(self) -> str:
-        users = self.users()
-        domains = {str(user["domain"][0]) for user in users}
-        if len(domains) > 1:
-            domains = {domain for domain in domains if "onmicrosoft.com" not in domain}
-        return sorted(domains)[0]
 
     def extract_token(self, json_response: JSONDict) -> str:
         return str(json_response["access_token"])
@@ -68,7 +54,7 @@ class MicrosoftEntraClient(OAuthClient):
                     f"https://graph.microsoft.com/v1.0/users/{user_dict['id']}/memberOf"
                 )
                 attributes["memberOf"] = [
-                    group["displayName"]
+                    f"CN={group['displayName']},OU=groups,{self.root_dn}"
                     for group in group_memberships["value"]
                     if group["displayName"]
                 ]
