@@ -1,5 +1,3 @@
-from abc import ABC, abstractmethod
-
 from ldaptor.interfaces import IConnectedLDAPEntry, ILDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
 from twisted.internet import defer
@@ -10,7 +8,7 @@ from apricot.proxied_ldap_entry import ProxiedLDAPEntry
 
 
 @implementer(IConnectedLDAPEntry)
-class OAuthLDAPTree(ABC):
+class OAuthLDAPTree:
     oauth_client: OAuthClient
 
     def __init__(self) -> None:
@@ -33,9 +31,10 @@ class OAuthLDAPTree(ABC):
         for user_attrs in self.oauth_client.users():
             users_ou.add_child(f"CN={user_attrs['name'][0]}", user_attrs)
 
-    @abstractmethod
     def build_root(self, dn: str, attributes: LDAPAttributeDict) -> ProxiedLDAPEntry:
-        pass
+        return ProxiedLDAPEntry(
+            dn=dn, attributes=attributes, oauth_client=self.oauth_client
+        )
 
     def lookup(self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
         """
