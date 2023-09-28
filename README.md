@@ -13,7 +13,7 @@ python run.py --client-id "<your client ID>" --client-secret "<your client secre
 
 This will create an LDAP tree that looks like this:
 
-```
+```ldif
 dn: DC=<your domain>
 objectClass: dcObject
 
@@ -28,7 +28,7 @@ ou: groups
 
 Each user will have an entry like
 
-```
+```ldif
 dn: CN=<user name>,OU=users,DC=<your domain>
 objectClass: organizationalPerson
 objectClass: person
@@ -39,7 +39,7 @@ objectClass: user
 
 Each group will have an entry like
 
-```
+```ldif
 dn: CN=<group name>,OU=groups,DC=<your domain>
 objectClass: group
 objectClass: top
