@@ -8,15 +8,20 @@ The name is a slightly tortured acronym for: LD**A**P **pr**oxy for Open**I**D *
 Start the `Apricot` server on port 8080 by running:
 
 ```bash
-python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --tenant-id "<your tenant ID>" --backend MicrosoftEntra --port 8080
+python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend <your backend> --port 8080
 ```
 
-## OpenID Connect
+## OpenID Connect
 
 Instructions for specific OpenID Connect backends below.
 
-
 ### Microsoft Entra
+
+You will need to use the following command line arguments:
+
+```bash
+--backend MicrosoftEntra --entra-tenant-id "<your tenant ID>"
+```
 
 You will need to register an application to interact with `Microsoft Entra`.
 Do this as follows:
