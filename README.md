@@ -5,10 +5,10 @@ The name is a slightly tortured acronym for: LD**A**P **pr**oxy for Open**I**D *
 
 ## Usage
 
-Start the `Apricot` server on port 8080 by running:
+Start the `Apricot` server on port 1389 by running:
 
 ```bash
-python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 8080 --domain "<your domain name>"
+python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 1389 --domain "<your domain name>"
 ```
 
 This will create an LDAP tree that looks like this:
