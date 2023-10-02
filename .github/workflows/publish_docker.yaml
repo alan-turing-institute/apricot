@@ -1,6 +1,8 @@
+---
 name: Build and publish a Docker image
 
-on:
+# Run workflow on pushes to matching branches
+on:  # yamllint disable-line rule:truthy
   push:
     branches: ["main"]
     tags: ["*"]
