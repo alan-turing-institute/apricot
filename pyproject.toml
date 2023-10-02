@@ -26,6 +26,7 @@ classifiers = [
 ]
 dependencies = [
   "ldaptor~=21.2.0",
+  "oauthlib~=3.2.2",
   "Twisted~=23.8.0",
   "zope.interface~=6.0",
 ]
