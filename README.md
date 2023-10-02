@@ -11,6 +11,16 @@ Start the `Apricot` server on port 1389 by running:
 python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 1389 --domain "<your domain name>"
 ```
 
+Alternatively, you can run in Docker by editing `docker/docker-compose.yaml` and running:
+
+```bash
+docker-compose up
+```
+
+from the `docker` directory.
+
+## Outputs
+
 This will create an LDAP tree that looks like this:
 
 ```ldif

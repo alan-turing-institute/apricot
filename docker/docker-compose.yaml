@@ -1,0 +1,16 @@
+---
+version: "3"
+services:
+  apricot:
+    container_name: apricot
+    image: apricot
+    build: .
+    environment:
+      BACKEND: "MicrosoftEntra"
+      CLIENT_ID: "<your OpenID client ID here"
+      CLIENT_SECRET: "<your OpenID client secret here>"
+      DOMAIN: "<your domain here>"
+      ENTRA_TENANT_ID: "<your Entra tenant ID here>"
+    ports:
+      - "1389:1389"
+    restart: always
