@@ -37,6 +37,9 @@ class OAuthLDAPTree:
         for user_attrs in self.oauth_client.users():
             users_ou.add_child(f"CN={user_attrs['name'][0]}", user_attrs)
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
+
     def build_root(self, dn: str, attributes: LDAPAttributeDict) -> OAuthLDAPEntry:
         """
         Construct the root of the LDAP tree

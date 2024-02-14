@@ -19,6 +19,9 @@ class OAuthLDAPServerFactory(ServerFactory):
         # Create an LDAP lookup tree
         self.adaptor = OAuthLDAPTree(oauth_client)
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} using adaptor {self.adaptor}"
+
     def buildProtocol(self, addr: IAddress) -> Protocol:  # noqa: N802
         """
         Create an LDAPServer instance.
