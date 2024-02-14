@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from apricot import ApricotServer
 from apricot.oauth import OAuthBackend
@@ -23,9 +24,10 @@ if __name__ == "__main__":
 
         # Create the Apricot server
         reactor = ApricotServer(**vars(args))
-    except Exception:
-        msg = "Unable to initialise Apricot server from provided command line arguments."
-        raise ValueError(msg)
+    except Exception as exc:
+        msg = f"Unable to initialise Apricot server from provided command line arguments.\n{str(exc)}"
+        print(msg)
+        sys.exit(1)
 
     # Run the Apricot server
     reactor.run()
