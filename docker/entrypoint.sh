@@ -2,6 +2,7 @@
 # shellcheck disable=SC2086
 # shellcheck disable=SC2089
 
+# Required arguments
 if [ -z "${BACKEND}" ]; then
     echo "BACKEND environment variable is not set"
     exit 1
@@ -22,6 +23,12 @@ if [ -z "${DOMAIN}" ]; then
     exit 1
 fi
 
+# Arguments with defaults
+if [ -z "${PORT}" ]; then
+    echo "PORT environment variable is not set: using default of 1389"
+    PORT="1389"
+fi
+
 # Optional arguments
 EXTRA_OPTS=""
 if [ -n "${ENTRA_TENANT_ID}" ]; then
@@ -34,5 +41,5 @@ hatch run python run.py \
     --client-id "$CLIENT_ID" \
     --client-secret "$CLIENT_SECRET"  \
     --domain "$DOMAIN" \
-    --port 1389 \
+    --port "${PORT}" \
     $EXTRA_OPTS
