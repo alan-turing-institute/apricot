@@ -40,6 +40,9 @@ Source = "https://github.com/alan-turing-institute/apricot"
 [tool.hatch.version]
 path = "apricot/__about__.py"
 
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
