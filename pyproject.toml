@@ -43,9 +43,9 @@ path = "apricot/__about__.py"
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
-  "black>=23.1.0",
-  "mypy>=1.0.0",
-  "ruff>=0.0.243",
+  "black>=24.2.0",
+  "mypy>=1.8.0",
+  "ruff>=0.2.0",
   "types-oauthlib>=3.2.0",
 ]
 
@@ -69,7 +69,7 @@ all = [
 [tool.black]
 target-version = ["py310", "py311"]
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
   # See https://beta.ruff.rs/docs/rules/
   "A",   # flake8-builtins
@@ -109,12 +109,12 @@ ignore = [
   "PLR0915",  # ignore too-many-statements
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+[tool.ruff.lint.isort]
 combine-as-imports = true
 known-first-party = ["apricot"]
-
-[tool.ruff.flake8-tidy-imports]
-ban-relative-imports = "parents"
 
 [tool.mypy]
 disallow_subclassing_any = false  # allow subclassing of types from third-party libraries
