@@ -32,7 +32,7 @@ class ApricotServer:
                 **kwargs,
             )
         except Exception as exc:
-            msg = f"Could not construct an OAuth client for the '{backend}' backend."
+            msg = f"Could not construct an OAuth client for the '{backend}' backend.\n{exc!s}"
             raise ValueError(msg) from exc
 
         # Create an LDAPServerFactory

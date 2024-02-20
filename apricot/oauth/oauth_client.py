@@ -33,25 +33,40 @@ class OAuthClient(ABC):
         # this, but Requests-OAuthlib raises exception on scope mismatch by default.)
         os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"  # noqa: S105
         os.environ["OAUTHLIB_IGNORE_SCOPE_CHANGE"] = "1"
-        # OAuth client that uses application credentials
-        self.session_application = OAuth2Session(
-            client=BackendApplicationClient(
-                client_id=client_id, scope=scopes, redirect_uri=redirect_uri
+
+        try:
+            # OAuth client that uses application credentials
+            self.session_application = OAuth2Session(
+                client=BackendApplicationClient(
+                    client_id=client_id, scope=scopes, redirect_uri=redirect_uri
+                )
             )
-        )
-        # OAuth client that uses delegated credentials
-        self.session_interactive = OAuth2Session(
-            client=LegacyApplicationClient(
-                client_id=client_id, scope=scopes, redirect_uri=redirect_uri
+        except Exception as exc:
+            msg = f"Failed to initialise application credential client.\n{exc!s}"
+            raise RuntimeError(msg) from exc
+
+        try:
+            # OAuth client that uses delegated credentials
+            self.session_interactive = OAuth2Session(
+                client=LegacyApplicationClient(
+                    client_id=client_id, scope=scopes, redirect_uri=redirect_uri
+                )
             )
-        )
-        # Request a new bearer token
-        json_response = self.session_application.fetch_token(
-            token_url=self.token_url,
-            client_id=self.session_application._client.client_id,
-            client_secret=self.client_secret,
-        )
-        self.bearer_token = self.extract_token(json_response)
+        except Exception as exc:
+            msg = f"Failed to initialise delegated credential client.\n{exc!s}"
+            raise RuntimeError(msg) from exc
+
+        try:
+            # Request a new bearer token
+            json_response = self.session_application.fetch_token(
+                token_url=self.token_url,
+                client_id=self.session_application._client.client_id,
+                client_secret=self.client_secret,
+            )
+            self.bearer_token = self.extract_token(json_response)
+        except Exception as exc:
+            msg = f"Failed to fetch bearer token from OAuth endpoint.\n{exc!s}"
+            raise RuntimeError(msg) from exc
 
     @abstractmethod
     def extract_token(self, json_response: JSONDict) -> str:
