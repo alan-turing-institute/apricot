@@ -41,7 +41,18 @@ class MicrosoftEntraClient(OAuthClient):
     def users(self) -> list[LDAPAttributeDict]:
         output = []
         try:
-            user_data = self.query("https://graph.microsoft.com/v1.0/users/")
+            queries = [
+                "displayName",
+                "givenName",
+                "id",
+                "mail",
+                "surname",
+                "userPrincipalName",
+                self.uid_attribute,
+            ]
+            user_data = self.query(
+                f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}"
+            )
             for user_dict in user_data["value"]:
                 attributes = {k: [v if v else ""] for k, v in dict(user_dict).items()}
                 attributes["objectclass"] = [
@@ -62,6 +73,7 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["domain"] = [
                     str(user_dict["userPrincipalName"]).split("@")[1]
                 ]
+                attributes["uid"] = [str(user_dict[self.uid_attribute])]
                 output.append(attributes)
         except KeyError:
             pass

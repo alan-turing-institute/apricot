@@ -23,6 +23,11 @@ if [ -z "${DOMAIN}" ]; then
     exit 1
 fi
 
+if [ -z "${UID_ATTRIBUTE}" ]; then
+    echo "UID_ATTRIBUTE environment variable is not set"
+    exit 1
+fi
+
 # Arguments with defaults
 if [ -z "${PORT}" ]; then
     echo "PORT environment variable is not set: using default of 1389"
@@ -42,4 +47,5 @@ hatch run python run.py \
     --client-secret "$CLIENT_SECRET"  \
     --domain "$DOMAIN" \
     --port "${PORT}" \
+    --uid-attribute "${UID_ATTRIBUTE}" \
     $EXTRA_OPTS

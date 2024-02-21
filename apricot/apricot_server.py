@@ -18,6 +18,7 @@ class ApricotServer:
         client_secret: str,
         domain: str,
         port: int,
+        uid_attribute: str,
         **kwargs: Any,
     ) -> None:
         # Log to stdout
@@ -29,6 +30,7 @@ class ApricotServer:
                 client_id=client_id,
                 client_secret=client_secret,
                 domain=domain,
+                uid_attribute=uid_attribute,
                 **kwargs,
             )
         except Exception as exc:
