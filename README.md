@@ -14,7 +14,7 @@ python run.py --client-id "<your client ID>" --client-secret "<your client secre
 Alternatively, you can run in Docker by editing `docker/docker-compose.yaml` and running:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 from the `docker` directory.
@@ -72,11 +72,11 @@ You will need to register an application to interact with `Microsoft Entra`.
 Do this as follows:
 
 - Create a new `App Registration` in your `Microsoft Entra`.
-    - Set the name to whatever you choose (in this example we will use `apricot`)
+    - Set the name to whatever you choose (e.g. `apricot`)
     - Set access to `Accounts in this organizational directory only`.
     - Set `Redirect URI` to `Public client/native (mobile & desktop)` with a value of `urn:ietf:wg:oauth:2.0:oob`
 - Under `Certificates & secrets` add a `New client secret`
-    - Set the description to `Apricot Authentication Secret`
+    - Set the description to whatever you choose (e.g. `Apricot Authentication Secret`)
     - Set the expiry time to whatever is relevant for your use-case
     - You **must** record the value of this secret at **creation time**, as it will not be visible later.
 - Under `API permissions`:
