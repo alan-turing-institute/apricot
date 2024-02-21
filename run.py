@@ -16,6 +16,7 @@ if __name__ == "__main__":
         parser.add_argument("-p", "--port", type=int, default=1389, help="Port to run on.")
         parser.add_argument("-i", "--client-id", type=str, help="OAuth client ID.")
         parser.add_argument("-s", "--client-secret", type=str, help="OAuth client secret.")
+        parser.add_argument("-u", "--uid-attribute", type=str, help="Which user attribute to use for UID.")
         # Options for Microsoft Entra backend
         group = parser.add_argument_group("Microsoft Entra")
         group.add_argument("-t", "--entra-tenant-id", type=str, help="Microsoft Entra tenant ID.", required=False)

@@ -24,11 +24,13 @@ class OAuthClient(ABC):
         redirect_uri: str,
         scopes: list[str],
         token_url: str,
+        uid_attribute: str,
     ) -> None:
         # Set attributes
         self.client_secret = client_secret
         self.domain = domain
         self.token_url = token_url
+        self.uid_attribute = uid_attribute
         # Allow token scope to not match requested scope. (Other auth libraries allow
         # this, but Requests-OAuthlib raises exception on scope mismatch by default.)
         os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"  # noqa: S105
