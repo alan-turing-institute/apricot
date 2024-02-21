@@ -46,10 +46,10 @@ packages = ["."]
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
-  "black>=24.2.0",
-  "mypy>=1.8.0",
-  "ruff>=0.2.0",
-  "types-oauthlib>=3.2.0",
+  "black~=24.2.0",
+  "mypy~=1.8.0",
+  "ruff~=0.2.0",
+  "types-oauthlib~=3.2.0",
 ]
 
 [tool.hatch.envs.lint.scripts]
@@ -94,7 +94,7 @@ select = [
   "PLW", # pylint warning
   "Q",   # flake8-quotes
   "RUF", # ruff rules
-  "S",   # flake8-bandits
+  "S",   # flake8-bandit
   "T",   # flake8-debugger and flake8-print
   "TID", # flake8-tidy-imports
   "UP",  # pyupgrade
