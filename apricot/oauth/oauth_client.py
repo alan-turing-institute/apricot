@@ -142,7 +142,7 @@ class OAuthClient(ABC):
                 # Ensure that all values are lists as required for LDAPAttributeDict
                 output.append(
                     {
-                        k: v if isinstance(v, list) else [v]
+                        k: v if isinstance(v, list) else [v]  # type: ignore[list-item]
                         for k, v in attributes.items()
                     }
                 )
@@ -182,7 +182,7 @@ class OAuthClient(ABC):
                 # Ensure that all values are lists as required for LDAPAttributeDict
                 output.append(
                     {
-                        k: v if isinstance(v, list) else [v]
+                        k: v if isinstance(v, list) else [v]  # type: ignore[list-item]
                         for k, v in attributes.items()
                     }
                 )

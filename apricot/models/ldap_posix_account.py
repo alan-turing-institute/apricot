@@ -16,7 +16,7 @@ class LdapPosixAccount(BaseModel):
     uid: str
     uidNumber: int  # noqa: N815
 
-    @validator("gidNumber")
+    @validator("gidNumber")  # type: ignore[misc]
     @classmethod
     def validate_gid_number(cls, gid_number: int) -> int:
         """Avoid conflicts with existing users"""
@@ -25,12 +25,12 @@ class LdapPosixAccount(BaseModel):
             raise ValueError(msg)
         return gid_number
 
-    @validator("homeDirectory")
+    @validator("homeDirectory")  # type: ignore[misc]
     @classmethod
     def validate_home_directory(cls, home_directory: str) -> str:
         return re.sub(r"\s+", "-", home_directory)
 
-    @validator("uidNumber")
+    @validator("uidNumber")  # type: ignore[misc]
     @classmethod
     def validate_uid_number(cls, uid_number: int) -> int:
         """Avoid conflicts with existing users"""

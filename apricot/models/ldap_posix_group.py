@@ -9,7 +9,7 @@ class LdapPosixGroup(BaseModel):
     gidNumber: int  # noqa: N815
     memberUid: list[str]  # noqa: N815
 
-    @validator("gidNumber")
+    @validator("gidNumber")  # type: ignore[misc]
     @classmethod
     def validate_gid_number(cls, gid_number: int) -> int:
         """Avoid conflicts with existing groups"""
