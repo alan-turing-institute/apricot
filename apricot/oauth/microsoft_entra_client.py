@@ -1,7 +1,7 @@
 from typing import Any, cast
 
 from .oauth_client import OAuthClient
-from .types import JSONDict, LDAPAttributeDict
+from .types import JSONDict
 
 
 class MicrosoftEntraClient(OAuthClient):
@@ -25,14 +25,31 @@ class MicrosoftEntraClient(OAuthClient):
     def extract_token(self, json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def groups(self) -> list[LDAPAttributeDict]:
+    def groups(self) -> list[dict[str, Any]]:
         output = []
         try:
             group_data = self.query("https://graph.microsoft.com/v1.0/groups/")
-            for group_dict in group_data["value"]:
-                attributes = {k: [v if v else ""] for k, v in dict(group_dict).items()}
-                attributes["objectclass"] = ["top", "group"]
-                attributes["name"] = [str(group_dict["displayName"]).split("@")[0]]
+            for group_dict in cast(list[dict[str, Any]], group_data["value"]):
+                attributes = {}
+                attributes["cn"] = group_dict.get("displayName", None)
+                attributes["description"] = group_dict.get("id", None)
+                # As we cannot manually set any attributes we take the last part of the securityIdentifier
+                attributes["gidNumber"] = str(
+                    group_dict.get("securityIdentifier", "")
+                ).split("-")[-1]
+                # Add membership attributes
+                members = self.query(
+                    f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
+                )
+                attributes["memberUid"] = [
+                    str(user["userPrincipalName"]).split("@")[0]
+                    for user in members["value"]
+                    if user["userPrincipalName"]
+                ]
+                attributes["member"] = [
+                    f"CN={uid},OU=users,{self.root_dn}"
+                    for uid in attributes["memberUid"]
+                ]
                 output.append(attributes)
         except KeyError:
             pass

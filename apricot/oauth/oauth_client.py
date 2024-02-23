@@ -11,7 +11,14 @@ from pydantic import ValidationError
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
-from apricot.models import LdapInetOrgPerson, LdapInetUser, LdapPerson, LdapPosixAccount
+from apricot.models import (
+    LdapGroupOfNames,
+    LdapInetOrgPerson,
+    LdapInetUser,
+    LdapPerson,
+    LdapPosixAccount,
+    LdapPosixGroup,
+)
 
 from .types import JSONDict, LDAPAttributeDict
 
@@ -78,7 +85,12 @@ class OAuthClient(ABC):
         pass
 
     @abstractmethod
-    def groups(self) -> list[LDAPAttributeDict]:
+    def groups(self) -> list[dict[str, Any]]:
+        """
+        Return a list of group data
+
+        Each return value should be a dict where 'None' is used to signify a missing value
+        """
         pass
 
     @abstractmethod
@@ -103,6 +115,31 @@ class OAuthClient(ABC):
             client_secret=self.client_secret,
         )
         return result.json()  # type: ignore
+
+    def validated_groups(self) -> list[LDAPAttributeDict]:
+        output = []
+        for group_dict in self.groups():
+            try:
+                attributes = {"objectclass": ["top"]}
+                # Add 'groupOfNames' attributes
+                group_of_names = LdapGroupOfNames(**group_dict)
+                attributes.update(group_of_names.model_dump())
+                attributes["objectclass"].append("groupOfNames")
+                # Add 'posixGroup' attributes
+                posix_group = LdapPosixGroup(**group_dict)
+                attributes.update(posix_group.model_dump())
+                attributes["objectclass"].append("posixGroup")
+                # Ensure that all values are lists as required for LDAPAttributeDict
+                output.append(
+                    {
+                        k: v if isinstance(v, list) else [v]
+                        for k, v in attributes.items()
+                    }
+                )
+            except ValidationError as exc:
+                name = group_dict["cn"] if "cn" in group_dict else "unknown"
+                log.msg(f"Validation failed for group '{name}'.\n{exc}")
+        return output
 
     def validated_users(self) -> list[LDAPAttributeDict]:
         output = []
@@ -133,8 +170,8 @@ class OAuthClient(ABC):
                     }
                 )
             except ValidationError as exc:
-                username = user_dict['cn'] if "cn" in user_dict else "unknown"
-                log.msg(f"Validation failed for user '{username}'.\n{exc}")
+                name = user_dict["cn"] if "cn" in user_dict else "unknown"
+                log.msg(f"Validation failed for user '{name}'.\n{exc}")
         return output
 
     def verify(self, username: str, password: str) -> bool:

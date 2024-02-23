@@ -3,8 +3,8 @@ import re
 from pydantic import BaseModel, StringConstraints, validator
 from typing_extensions import Annotated
 
-LINUX_ID_MIN = 2000
-LINUX_ID_MAX = 60000
+ID_MIN = 2000
+ID_MAX = 60000
 
 
 class LdapPosixAccount(BaseModel):
@@ -20,8 +20,8 @@ class LdapPosixAccount(BaseModel):
     @classmethod
     def validate_gid_number(cls, gid_number: int) -> int:
         """Avoid conflicts with existing users"""
-        if not LINUX_ID_MIN <= gid_number <= LINUX_ID_MAX:
-            msg = f"Must be in range {LINUX_ID_MIN} to {LINUX_ID_MAX}."
+        if not ID_MIN <= gid_number <= ID_MAX:
+            msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
         return gid_number
 
@@ -34,7 +34,7 @@ class LdapPosixAccount(BaseModel):
     @classmethod
     def validate_uid_number(cls, uid_number: int) -> int:
         """Avoid conflicts with existing users"""
-        if not LINUX_ID_MIN <= uid_number <= LINUX_ID_MAX:
-            msg = f"Must be in range {LINUX_ID_MIN} to {LINUX_ID_MAX}."
+        if not ID_MIN <= uid_number <= ID_MAX:
+            msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
         return uid_number

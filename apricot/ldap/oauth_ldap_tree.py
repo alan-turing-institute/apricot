@@ -31,8 +31,8 @@ class OAuthLDAPTree:
             "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
         )
         # Add groups to the groups OU
-        for group_attrs in self.oauth_client.groups():
-            groups_ou.add_child(f"CN={group_attrs['name'][0]}", group_attrs)
+        for group_attrs in self.oauth_client.validated_groups():
+            groups_ou.add_child(f"CN={group_attrs['cn'][0]}", group_attrs)
         # Add users to the users OU
         for user_attrs in self.oauth_client.validated_users():
             users_ou.add_child(f"CN={user_attrs['cn'][0]}", user_attrs)
