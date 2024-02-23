@@ -19,6 +19,8 @@ class ApricotServer:
         domain: str,
         port: int,
         uid_attribute: str,
+        redis_host: str,
+        redis_port: int,
         **kwargs: Any,
     ) -> None:
         # Log to stdout
@@ -31,6 +33,8 @@ class ApricotServer:
                 client_secret=client_secret,
                 domain=domain,
                 uid_attribute=uid_attribute,
+                redis_host=redis_host,
+                redis_port=redis_port,
                 **kwargs,
             )
         except Exception as exc:

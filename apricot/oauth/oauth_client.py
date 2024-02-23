@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
+from apricot.cache import UidCache
 from apricot.models import (
     LdapGroupOfNames,
     LdapInetOrgPerson,
@@ -32,6 +33,8 @@ class OAuthClient(ABC):
         client_secret: str,
         domain: str,
         redirect_uri: str,
+        redis_host: str,
+        redis_port: str,
         scopes: list[str],
         token_url: str,
         uid_attribute: str,
@@ -41,6 +44,7 @@ class OAuthClient(ABC):
         self.domain = domain
         self.token_url = token_url
         self.uid_attribute = uid_attribute
+        self.uid_cache = UidCache(redis_host=redis_host, redis_port=redis_port)
         # Allow token scope to not match requested scope. (Other auth libraries allow
         # this, but Requests-OAuthlib raises exception on scope mismatch by default.)
         os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"  # noqa: S105
