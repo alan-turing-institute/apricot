@@ -121,7 +121,14 @@ class OAuthClient(ABC):
         Validate output via pydantic and return a list of LDAPAttributeDict
         """
         output = []
-        for group_dict in self.groups():
+        # Add one self-titled group for each user
+        user_group_dicts = []
+        for user_dict in self.users():
+            user_dict["memberUid"] = [user_dict["uid"]]
+            user_dict["member"] = [f"CN={user_dict['uid']},OU=users,{self.root_dn}"]
+            user_group_dicts.append(user_dict)
+        # Iterate over groups and validate them
+        for group_dict in self.groups() + user_group_dicts:
             try:
                 attributes = {"objectclass": ["top"]}
                 # Add 'groupOfNames' attributes

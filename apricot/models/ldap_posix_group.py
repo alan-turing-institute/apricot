@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator
 
-ID_MIN = 3000
+ID_MIN = 2000
 ID_MAX = 4294967295
 
 
