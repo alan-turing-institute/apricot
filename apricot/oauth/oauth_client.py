@@ -7,8 +7,11 @@ from oauthlib.oauth2 import (
     InvalidGrantError,
     LegacyApplicationClient,
 )
+from pydantic import ValidationError
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
+
+from apricot.models import LdapInetOrgPerson, LdapInetUser, LdapPerson, LdapPosixAccount
 
 from .types import JSONDict, LDAPAttributeDict
 
@@ -79,7 +82,12 @@ class OAuthClient(ABC):
         pass
 
     @abstractmethod
-    def users(self) -> list[LDAPAttributeDict]:
+    def users(self) -> list[dict[str, Any]]:
+        """
+        Return a list of user data
+
+        Each return value should be a dict where 'None' is used to signify a missing value
+        """
         pass
 
     @property
@@ -95,6 +103,39 @@ class OAuthClient(ABC):
             client_secret=self.client_secret,
         )
         return result.json()  # type: ignore
+
+    def validated_users(self) -> list[LDAPAttributeDict]:
+        output = []
+        for user_dict in self.users():
+            try:
+                attributes = {"objectclass": ["top"]}
+                # Add 'inetOrgPerson' attributes
+                inetorg_person = LdapInetOrgPerson(**user_dict)
+                attributes.update(inetorg_person.model_dump())
+                attributes["objectclass"].append("inetOrgPerson")
+                # Add 'inetUser' attributes
+                inet_user = LdapInetUser(**user_dict)
+                attributes.update(inet_user.model_dump())
+                attributes["objectclass"].append("inetuser")
+                # Add 'person' attributes
+                person = LdapPerson(**user_dict)
+                attributes.update(person.model_dump())
+                attributes["objectclass"].append("person")
+                # Add 'posixAccount' attributes
+                posix_account = LdapPosixAccount(**user_dict)
+                attributes.update(posix_account.model_dump())
+                attributes["objectclass"].append("posixAccount")
+                # Ensure that all values are lists as required for LDAPAttributeDict
+                output.append(
+                    {
+                        k: v if isinstance(v, list) else [v]
+                        for k, v in attributes.items()
+                    }
+                )
+            except ValidationError as exc:
+                username = user_dict['cn'] if "cn" in user_dict else "unknown"
+                log.msg(f"Validation failed for user '{username}'.\n{exc}")
+        return output
 
     def verify(self, username: str, password: str) -> bool:
         try:
