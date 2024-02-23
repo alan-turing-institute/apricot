@@ -26,7 +26,7 @@ if __name__ == "__main__":
         # Create the Apricot server
         reactor = ApricotServer(**vars(args))
     except Exception as exc:
-        msg = f"Unable to initialise Apricot server from provided command line arguments.\n{str(exc)}"
+        msg = f"Unable to initialise Apricot server.\n{str(exc)}"
         print(msg)
         sys.exit(1)
 

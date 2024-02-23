@@ -5,11 +5,12 @@ WORKDIR /app
 RUN apk add --update --no-cache \
     gcc libc-dev libffi-dev
 
-# Upload and install Python package and dependencies
-COPY ./apricot apricot
+# Install Python dependencies
 COPY ./pyproject.toml .
-COPY ./README.md .
 RUN pip install --upgrade hatch pip
+# Copy code and README into the container
+COPY ./README.md .
+COPY ./apricot apricot
 # Initialise environment with hatch
 RUN hatch run true
 

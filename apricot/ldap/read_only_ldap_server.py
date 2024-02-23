@@ -18,7 +18,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         request: LDAPBindRequest,
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> LDAPSearchResultDone:
-        """Handle an LDAP Root RSE request"""
+        """
+        Handle an LDAP Root RSE request
+        """
         return super().getRootDSE(request, reply)
 
     def handle_LDAPAddRequest(  # noqa: N802
@@ -27,7 +29,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP add request"""
+        """
+        Refuse to handle an LDAP add request
+        """
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP add requests"
         raise LDAPProtocolError(msg)
@@ -38,7 +42,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP bind request"""
+        """
+        Handle an LDAP bind request
+        """
         return super().handle_LDAPBindRequest(request, controls, reply)
 
     def handle_LDAPCompareRequest(  # noqa: N802
@@ -47,7 +53,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP compare request"""
+        """
+        Handle an LDAP compare request
+        """
         return super().handle_LDAPCompareRequest(request, controls, reply)
 
     def handle_LDAPDelRequest(  # noqa: N802
@@ -56,7 +64,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP delete request"""
+        """
+        Refuse to handle an LDAP delete request
+        """
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP delete requests"
         raise LDAPProtocolError(msg)
@@ -67,7 +77,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP extended request"""
+        """
+        Handle an LDAP extended request
+        """
         return super().handle_LDAPExtendedRequest(request, controls, reply)
 
     def handle_LDAPModifyDNRequest(  # noqa: N802
@@ -76,7 +88,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP modify DN request"""
+        """
+        Refuse to handle an LDAP modify DN request
+        """
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP modify DN requests"
         raise LDAPProtocolError(msg)
@@ -87,7 +101,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP modify request"""
+        """
+        Refuse to handle an LDAP modify request
+        """
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP modify requests"
         raise LDAPProtocolError(msg)
@@ -98,7 +114,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[..., None] | None,
     ) -> None:
-        """Handle an LDAP unbind request"""
+        """
+        Handle an LDAP unbind request
+        """
         super().handle_LDAPUnbindRequest(request, controls, reply)
 
     def handle_LDAPSearchRequest(  # noqa: N802
@@ -107,5 +125,7 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: LDAPControl | None,
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP search request"""
+        """
+        Handle an LDAP search request
+        """
         return super().handle_LDAPSearchRequest(request, controls, reply)
