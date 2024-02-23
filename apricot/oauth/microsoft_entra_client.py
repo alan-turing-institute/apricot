@@ -34,11 +34,11 @@ class MicrosoftEntraClient(OAuthClient):
                 "id",
             ]
             group_data = self.query(
-                f"https://graph.microsoft.com/v1.0/groups/$select={','.join(queries)}"
+                f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
             )
             for group_dict in cast(
                 list[dict[str, Any]],
-                sorted(group_data["value"], key=lambda user: user["createdDateTime"]),
+                sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
             ):
                 group_uid = self.uid_cache.get_group_uid(group_dict["id"])
                 attributes = {}

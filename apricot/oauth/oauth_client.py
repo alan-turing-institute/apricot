@@ -37,13 +37,11 @@ class OAuthClient(ABC):
         redis_port: str,
         scopes: list[str],
         token_url: str,
-        uid_attribute: str,
     ) -> None:
         # Set attributes
         self.client_secret = client_secret
         self.domain = domain
         self.token_url = token_url
-        self.uid_attribute = uid_attribute
         self.uid_cache = UidCache(redis_host=redis_host, redis_port=redis_port)
         # Allow token scope to not match requested scope. (Other auth libraries allow
         # this, but Requests-OAuthlib raises exception on scope mismatch by default.)
@@ -111,6 +109,9 @@ class OAuthClient(ABC):
         return "DC=" + self.domain.replace(".", ",DC=")
 
     def query(self, url: str) -> dict[str, Any]:
+        """
+        Make a query against the Microsoft Entra directory
+        """
         result = self.session_application.request(
             method="GET",
             url=url,
