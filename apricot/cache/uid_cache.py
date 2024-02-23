@@ -71,5 +71,5 @@ class UidCache:
             keys = [k for k in self.keys if k.startswith(category)]
         else:
             keys = self.keys
-        values = [cast(int, v) for v in self.cache.mget(keys)] + [-999]
+        values = [int(cast(str, v)) for v in self.cache.mget(keys)] + [-999]
         return max(values)
