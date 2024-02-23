@@ -61,12 +61,6 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             raise TypeError(msg)
         return self.oauth_client_
 
-    @property
-    def username(self) -> str:
-        username = self.dn.split()[0].getText().split("CN=")[1]
-        domain = self.dn.getDomainName()
-        return f"{username}@{domain}"
-
     def add_child(
         self, rdn: RelativeDistinguishedName | str, attributes: LDAPAttributeDict
     ) -> "OAuthLDAPEntry":

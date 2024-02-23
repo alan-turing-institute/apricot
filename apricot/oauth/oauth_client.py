@@ -117,6 +117,9 @@ class OAuthClient(ABC):
         return result.json()  # type: ignore
 
     def validated_groups(self) -> list[LDAPAttributeDict]:
+        """
+        Validate output via pydantic and return a list of LDAPAttributeDict
+        """
         output = []
         for group_dict in self.groups():
             try:
@@ -138,10 +141,17 @@ class OAuthClient(ABC):
                 )
             except ValidationError as exc:
                 name = group_dict["cn"] if "cn" in group_dict else "unknown"
-                log.msg(f"Validation failed for group '{name}'.\n{exc}")
+                log.msg(f"Validation failed for group '{name}'.")
+                for error in exc.errors():
+                    log.msg(
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                    )
         return output
 
     def validated_users(self) -> list[LDAPAttributeDict]:
+        """
+        Validate output via pydantic and return a list of LDAPAttributeDict
+        """
         output = []
         for user_dict in self.users():
             try:
@@ -171,10 +181,15 @@ class OAuthClient(ABC):
                 )
             except ValidationError as exc:
                 name = user_dict["cn"] if "cn" in user_dict else "unknown"
-                log.msg(f"Validation failed for user '{name}'.\n{exc}")
+                log.msg(f"Validation failed for user '{name}'.")
+                for error in exc.errors():
+                    log.msg(
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                    )
         return output
 
     def verify(self, username: str, password: str) -> bool:
+        """Verify client connection details"""
         try:
             self.session_interactive.fetch_token(
                 token_url=self.token_url,

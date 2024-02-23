@@ -71,9 +71,7 @@ class MicrosoftEntraClient(OAuthClient):
             )
             for user_dict in cast(list[dict[str, Any]], user_data["value"]):
                 # Get user attributes
-                username, domain = str(user_dict.get("userPrincipalName", "@")).split(
-                    "@"
-                )
+                uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
                 attributes = {}
                 attributes["cn"] = user_dict.get("displayName", None)
                 attributes["description"] = user_dict.get("id", None)
@@ -81,9 +79,9 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["domain"] = domain
                 attributes["gidNumber"] = user_dict.get(self.uid_attribute, None)
                 attributes["givenName"] = user_dict.get("givenName", "")
-                attributes["homeDirectory"] = f"/home/{username}" if username else None
+                attributes["homeDirectory"] = f"/home/{uid}" if uid else None
                 attributes["sn"] = user_dict.get("surname", "")
-                attributes["uid"] = username if username else None
+                attributes["uid"] = uid if uid else None
                 attributes["uidNumber"] = user_dict.get(self.uid_attribute, None)
                 # Add group attributes
                 group_memberships = self.query(
