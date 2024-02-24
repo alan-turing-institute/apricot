@@ -12,10 +12,10 @@ if __name__ == "__main__":
         )
         # Common options needed for all backends
         parser.add_argument("-b", "--backend", type=OAuthBackend, help="Which OAuth backend to use.")
-        parser.add_argument("-d", "--domain", type=str, help="Which domain users belong to.")
-        parser.add_argument("-p", "--port", type=int, default=1389, help="Port to run on.")
         parser.add_argument("-i", "--client-id", type=str, help="OAuth client ID.")
         parser.add_argument("-s", "--client-secret", type=str, help="OAuth client secret.")
+        parser.add_argument("-d", "--domain", type=str, help="Which domain users belong to.")
+        parser.add_argument("-p", "--port", type=int, default=1389, help="Port to run on.")
         parser.add_argument("--redis-host", type=str, help="Host for Redis server.")
         parser.add_argument("--redis-port", type=int, help="Port for Redis server.")
         # Options for Microsoft Entra backend

@@ -47,10 +47,10 @@ fi
 
 # Run the server
 hatch run python run.py \
-    --backend "$BACKEND" \
-    --client-id "$CLIENT_ID" \
-    --client-secret "$CLIENT_SECRET"  \
-    --domain "$DOMAIN" \
+    --backend "${BACKEND}" \
+    --client-id "${CLIENT_ID}" \
+    --client-secret "${CLIENT_SECRET}"  \
+    --domain "${DOMAIN}" \
     --port "${PORT}" \
     --redis-host "${REDIS_HOST}" \
     --redis-port "${REDIS_PORT}" \
