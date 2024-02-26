@@ -22,5 +22,5 @@ services:
     ports:
       - "6379:6379"
     volumes:
-        - <local path>:/data
+      - <local path>:/data
     restart: always
