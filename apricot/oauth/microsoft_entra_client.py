@@ -28,15 +28,23 @@ class MicrosoftEntraClient(OAuthClient):
     def groups(self) -> list[dict[str, Any]]:
         output = []
         try:
-            group_data = self.query("https://graph.microsoft.com/v1.0/groups/")
-            for group_dict in cast(list[dict[str, Any]], group_data["value"]):
+            queries = [
+                "createdDateTime",
+                "displayName",
+                "id",
+            ]
+            group_data = self.query(
+                f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
+            )
+            for group_dict in cast(
+                list[dict[str, Any]],
+                sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
+            ):
+                group_uid = self.uid_cache.get_group_uid(group_dict["id"])
                 attributes = {}
                 attributes["cn"] = group_dict.get("displayName", None)
                 attributes["description"] = group_dict.get("id", None)
-                # As we cannot manually set any attributes we take the last part of the securityIdentifier
-                attributes["gidNumber"] = str(
-                    group_dict.get("securityIdentifier", "")
-                ).split("-")[-1]
+                attributes["gidNumber"] = group_uid
                 # Add membership attributes
                 members = self.query(
                     f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
@@ -59,30 +67,34 @@ class MicrosoftEntraClient(OAuthClient):
         output = []
         try:
             queries = [
+                "createdDateTime",
                 "displayName",
                 "givenName",
                 "id",
                 "surname",
                 "userPrincipalName",
-                self.uid_attribute,
             ]
             user_data = self.query(
                 f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}"
             )
-            for user_dict in cast(list[dict[str, Any]], user_data["value"]):
+            for user_dict in cast(
+                list[dict[str, Any]],
+                sorted(user_data["value"], key=lambda user: user["createdDateTime"]),
+            ):
                 # Get user attributes
                 uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
+                user_uid = self.uid_cache.get_user_uid(user_dict["id"])
                 attributes = {}
                 attributes["cn"] = user_dict.get("displayName", None)
                 attributes["description"] = user_dict.get("id", None)
                 attributes["displayName"] = attributes.get("cn", None)
                 attributes["domain"] = domain
-                attributes["gidNumber"] = user_dict.get(self.uid_attribute, None)
+                attributes["gidNumber"] = user_uid
                 attributes["givenName"] = user_dict.get("givenName", "")
                 attributes["homeDirectory"] = f"/home/{uid}" if uid else None
                 attributes["sn"] = user_dict.get("surname", "")
                 attributes["uid"] = uid if uid else None
-                attributes["uidNumber"] = user_dict.get(self.uid_attribute, None)
+                attributes["uidNumber"] = user_uid
                 # Add group attributes
                 group_memberships = self.query(
                     f"https://graph.microsoft.com/v1.0/users/{user_dict['id']}/memberOf"

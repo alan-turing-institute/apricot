@@ -4,7 +4,7 @@ from twisted.internet import defer
 from zope.interface import implementer
 
 from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
-from apricot.oauth import LDAPAttributeDict, OAuthClient
+from apricot.oauth import OAuthClient
 
 
 @implementer(IConnectedLDAPEntry)
@@ -17,41 +17,40 @@ class OAuthLDAPTree:
 
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
-        self.oauth_client = oauth_client
+        self.oauth_client: OAuthClient = oauth_client
+        self.root_: OAuthLDAPEntry | None = None
 
-        # Create a root node for the tree
-        self.root = self.build_root(
-            dn=self.oauth_client.root_dn, attributes={"objectClass": ["dcObject"]}
-        )
-        # Add OUs for users and groups
-        groups_ou = self.root.add_child(
-            "OU=groups", {"ou": ["groups"], "objectClass": ["organizationalUnit"]}
-        )
-        users_ou = self.root.add_child(
-            "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
-        )
-        # Add groups to the groups OU
-        for group_attrs in self.oauth_client.validated_groups():
-            groups_ou.add_child(f"CN={group_attrs['cn'][0]}", group_attrs)
-        # Add users to the users OU
-        for user_attrs in self.oauth_client.validated_users():
-            users_ou.add_child(f"CN={user_attrs['cn'][0]}", user_attrs)
+    @property
+    def root(self) -> OAuthLDAPEntry:
+        """
+        Lazy-load the LDAP tree on request
+
+        @return: An OAuthLDAPEntry for the tree
+        """
+        if not self.root_:
+            # Create a root node for the tree
+            self.root_ = OAuthLDAPEntry(
+                dn=self.oauth_client.root_dn,
+                attributes={"objectClass": ["dcObject"]},
+                oauth_client=self.oauth_client,
+            )
+            # Add OUs for users and groups
+            groups_ou = self.root_.add_child(
+                "OU=groups", {"ou": ["groups"], "objectClass": ["organizationalUnit"]}
+            )
+            users_ou = self.root_.add_child(
+                "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
+            )
+            # Add groups to the groups OU
+            for group_attrs in self.oauth_client.validated_groups():
+                groups_ou.add_child(f"CN={group_attrs['cn'][0]}", group_attrs)
+            # Add users to the users OU
+            for user_attrs in self.oauth_client.validated_users():
+                users_ou.add_child(f"CN={user_attrs['cn'][0]}", user_attrs)
+        return self.root_
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
-
-    def build_root(self, dn: str, attributes: LDAPAttributeDict) -> OAuthLDAPEntry:
-        """
-        Construct the root of the LDAP tree
-
-        @param dn: Distinguished Name of the object
-        @param attributes: Attributes of the object.
-
-        @return: An OAuthLDAPEntry
-        """
-        return OAuthLDAPEntry(
-            dn=dn, attributes=attributes, oauth_client=self.oauth_client
-        )
 
     def lookup(self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
         """

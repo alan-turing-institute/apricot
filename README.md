@@ -5,10 +5,12 @@ The name is a slightly tortured acronym for: LD**A**P **pr**oxy for Open**I**D *
 
 ## Usage
 
+**N.B.** As Apricot uses a Redis server to store generated `uidNumber` and `gidNumber` values.
+
 Start the `Apricot` server on port 1389 by running:
 
 ```bash
-python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 1389 --domain "<your domain name>"
+python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 1389 --domain "<your domain name>" --redis-host "<your Redis server>"
 ```
 
 Alternatively, you can run in Docker by editing `docker/docker-compose.yaml` and running:
@@ -40,10 +42,11 @@ Each user will have an entry like
 
 ```ldif
 dn: CN=<user name>,OU=users,DC=<your domain>
-objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: inetuser
 objectClass: person
+objectClass: posixAccount
 objectClass: top
-objectClass: user
 <user data fields here>
 ```
 
@@ -51,7 +54,8 @@ Each group will have an entry like
 
 ```ldif
 dn: CN=<group name>,OU=groups,DC=<your domain>
-objectClass: group
+objectClass: groupOfNames
+objectClass: posixGroup
 objectClass: top
 <group data fields here>
 ```

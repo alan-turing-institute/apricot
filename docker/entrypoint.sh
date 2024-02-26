@@ -23,8 +23,8 @@ if [ -z "${DOMAIN}" ]; then
     exit 1
 fi
 
-if [ -z "${UID_ATTRIBUTE}" ]; then
-    echo "UID_ATTRIBUTE environment variable is not set"
+if [ -z "${REDIS_HOST}" ]; then
+    echo "REDIS_HOST environment variable is not set"
     exit 1
 fi
 
@@ -32,6 +32,11 @@ fi
 if [ -z "${PORT}" ]; then
     echo "PORT environment variable is not set: using default of 1389"
     PORT="1389"
+fi
+
+if [ -z "${REDIS_PORT}" ]; then
+    echo "REDIS_PORT environment variable is not set: using default of 6379"
+    REDIS_PORT="6379"
 fi
 
 # Optional arguments
@@ -42,10 +47,11 @@ fi
 
 # Run the server
 hatch run python run.py \
-    --backend "$BACKEND" \
-    --client-id "$CLIENT_ID" \
-    --client-secret "$CLIENT_SECRET"  \
-    --domain "$DOMAIN" \
+    --backend "${BACKEND}" \
+    --client-id "${CLIENT_ID}" \
+    --client-secret "${CLIENT_SECRET}"  \
+    --domain "${DOMAIN}" \
     --port "${PORT}" \
-    --uid-attribute "${UID_ATTRIBUTE}" \
+    --redis-host "${REDIS_HOST}" \
+    --redis-port "${REDIS_PORT}" \
     $EXTRA_OPTS

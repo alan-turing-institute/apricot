@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
+from apricot.cache import UidCache
 from apricot.models import (
     LdapGroupOfNames,
     LdapInetOrgPerson,
@@ -32,15 +33,16 @@ class OAuthClient(ABC):
         client_secret: str,
         domain: str,
         redirect_uri: str,
+        redis_host: str,
+        redis_port: str,
         scopes: list[str],
         token_url: str,
-        uid_attribute: str,
     ) -> None:
         # Set attributes
         self.client_secret = client_secret
         self.domain = domain
         self.token_url = token_url
-        self.uid_attribute = uid_attribute
+        self.uid_cache = UidCache(redis_host=redis_host, redis_port=redis_port)
         # Allow token scope to not match requested scope. (Other auth libraries allow
         # this, but Requests-OAuthlib raises exception on scope mismatch by default.)
         os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"  # noqa: S105
@@ -107,6 +109,9 @@ class OAuthClient(ABC):
         return "DC=" + self.domain.replace(".", ",DC=")
 
     def query(self, url: str) -> dict[str, Any]:
+        """
+        Make a query against the Microsoft Entra directory
+        """
         result = self.session_application.request(
             method="GET",
             url=url,
@@ -163,6 +168,10 @@ class OAuthClient(ABC):
         for user_dict in self.users():
             try:
                 attributes = {"objectclass": ["top"]}
+                # Add user to self-titled group
+                user_dict["memberOf"].append(
+                    f"CN={user_dict['cn']},OU=groups,{self.root_dn}"
+                )
                 # Add 'inetOrgPerson' attributes
                 inetorg_person = LdapInetOrgPerson(**user_dict)
                 attributes.update(inetorg_person.model_dump())
