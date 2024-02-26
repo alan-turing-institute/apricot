@@ -11,6 +11,7 @@ services:
       CLIENT_SECRET: "<your OpenID client secret here>"
       DOMAIN: "<your domain here>"
       ENTRA_TENANT_ID: "<your Entra tenant ID here>"
+      REDIS_HOST: "redis"
     ports:
       - "1389:1389"
     restart: always
@@ -18,11 +19,8 @@ services:
   redis:
     container_name: redis
     image: redis:7.2
-    # command: redis-server --appendonly yes
-    environment:
-      REDIS_REPLICATION_MODE: master
     ports:
       - "6379:6379"
-    restart: always
     volumes:
         - <local path>:/data
+    restart: always
