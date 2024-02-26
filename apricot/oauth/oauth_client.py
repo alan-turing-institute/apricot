@@ -168,6 +168,10 @@ class OAuthClient(ABC):
         for user_dict in self.users():
             try:
                 attributes = {"objectclass": ["top"]}
+                # Add user to self-titled group
+                user_dict["memberOf"].append(
+                    f"CN={user_dict['cn']},OU=groups,{self.root_dn}"
+                )
                 # Add 'inetOrgPerson' attributes
                 inetorg_person = LdapInetOrgPerson(**user_dict)
                 attributes.update(inetorg_person.model_dump())
