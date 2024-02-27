@@ -2,10 +2,12 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any
 
+import requests
 from oauthlib.oauth2 import (
     BackendApplicationClient,
     InvalidGrantError,
     LegacyApplicationClient,
+    TokenExpiredError,
 )
 from pydantic import ValidationError
 from requests_oauthlib import OAuth2Session
@@ -39,6 +41,7 @@ class OAuthClient(ABC):
         token_url: str,
     ) -> None:
         # Set attributes
+        self.bearer_token_ = None
         self.client_secret = client_secret
         self.domain = domain
         self.token_url = token_url
@@ -70,14 +73,19 @@ class OAuthClient(ABC):
             msg = f"Failed to initialise delegated credential client.\n{exc!s}"
             raise RuntimeError(msg) from exc
 
+    @property
+    def bearer_token(self) -> str:
+        """Return a bearer token, requesting a new one if necessary"""
         try:
-            # Request a new bearer token
-            json_response = self.session_application.fetch_token(
-                token_url=self.token_url,
-                client_id=self.session_application._client.client_id,
-                client_secret=self.client_secret,
-            )
-            self.bearer_token = self.extract_token(json_response)
+            if not self.bearer_token_:
+                log.msg("Requesting a new authentication token from the OAuth backend.")
+                json_response = self.session_application.fetch_token(
+                    token_url=self.token_url,
+                    client_id=self.session_application._client.client_id,
+                    client_secret=self.client_secret,
+                )
+                self.bearer_token_ = self.extract_token(json_response)
+            return self.bearer_token_
         except Exception as exc:
             msg = f"Failed to fetch bearer token from OAuth endpoint.\n{exc!s}"
             raise RuntimeError(msg) from exc
@@ -110,15 +118,24 @@ class OAuthClient(ABC):
 
     def query(self, url: str) -> dict[str, Any]:
         """
-        Make a query against the Microsoft Entra directory
+        Make a query against the OAuth backend
         """
-        result = self.session_application.request(
-            method="GET",
-            url=url,
-            headers={"Authorization": f"Bearer {self.bearer_token}"},
-            client_id=self.session_application._client.client_id,
-            client_secret=self.client_secret,
-        )
+
+        def query_(url: str) -> requests.Response:
+            return self.session_application.get(
+                url=url,
+                headers={"Authorization": f"Bearer {self.bearer_token}"},
+                client_id=self.session_application._client.client_id,
+                client_secret=self.client_secret,
+            )
+
+        try:
+            result = query_(url)
+            result.raise_for_status()
+        except (TokenExpiredError, requests.exceptions.HTTPError):
+            log.msg("Authentication token has expired.")
+            self.bearer_token_ = None
+            result = query_(url)
         return result.json()  # type: ignore
 
     def validated_groups(self) -> list[LDAPAttributeDict]:
