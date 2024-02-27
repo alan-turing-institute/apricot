@@ -1,3 +1,5 @@
+import time
+
 from ldaptor.interfaces import IConnectedLDAPEntry, ILDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
 from twisted.internet import defer
@@ -11,13 +13,16 @@ from apricot.oauth import OAuthClient
 class OAuthLDAPTree:
     oauth_client: OAuthClient
 
-    def __init__(self, oauth_client: OAuthClient) -> None:
+    def __init__(self, oauth_client: OAuthClient, refresh_interval: int = 60) -> None:
         """
         Initialise an OAuthLDAPTree
 
         @param oauth_client: An OAuth client used to construct the LDAP tree
+        @param refresh_interval: Interval in seconds after which the tree must be refreshed
         """
+        self.last_update = time.monotonic()
         self.oauth_client: OAuthClient = oauth_client
+        self.refresh_interval = refresh_interval
         self.root_: OAuthLDAPEntry | None = None
 
     @property
@@ -27,7 +32,10 @@ class OAuthLDAPTree:
 
         @return: An OAuthLDAPEntry for the tree
         """
-        if not self.root_:
+        if (
+            not self.root_
+            or (time.monotonic() - self.last_update) > self.refresh_interval
+        ):
             # Create a root node for the tree
             self.root_ = OAuthLDAPEntry(
                 dn=self.oauth_client.root_dn,

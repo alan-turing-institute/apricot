@@ -4,39 +4,39 @@
 
 # Required arguments
 if [ -z "${BACKEND}" ]; then
-    echo "BACKEND environment variable is not set"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] BACKEND environment variable is not set"
     exit 1
 fi
 
 if [ -z "${CLIENT_ID}" ]; then
-    echo "CLIENT_ID environment variable is not set"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] CLIENT_ID environment variable is not set"
     exit 1
 fi
 
 if [ -z "${CLIENT_SECRET}" ]; then
-    echo "CLIENT_SECRET environment variable is not set"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] CLIENT_SECRET environment variable is not set"
     exit 1
 fi
 
 if [ -z "${DOMAIN}" ]; then
-    echo "DOMAIN environment variable is not set"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] DOMAIN environment variable is not set"
     exit 1
 fi
 
 if [ -z "${REDIS_HOST}" ]; then
-    echo "REDIS_HOST environment variable is not set"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_HOST environment variable is not set"
     exit 1
 fi
 
 # Arguments with defaults
 if [ -z "${PORT}" ]; then
-    echo "PORT environment variable is not set: using default of 1389"
     PORT="1389"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] PORT environment variable is not set: using default of '${PORT}'"
 fi
 
 if [ -z "${REDIS_PORT}" ]; then
-    echo "REDIS_PORT environment variable is not set: using default of 6379"
     REDIS_PORT="6379"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_PORT environment variable is not set: using default of '${REDIS_PORT}'"
 fi
 
 # Optional arguments
