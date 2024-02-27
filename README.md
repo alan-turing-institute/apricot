@@ -5,8 +5,6 @@ The name is a slightly tortured acronym for: LD**A**P **pr**oxy for Open**I**D *
 
 ## Usage
 
-**N.B.** As Apricot uses a Redis server to store generated `uidNumber` and `gidNumber` values.
-
 Start the `Apricot` server on port 1389 by running:
 
 ```bash
@@ -20,6 +18,11 @@ docker compose up
 ```
 
 from the `docker` directory.
+
+### Using Redis [Optional]
+
+You can use a Redis server to store generated `uidNumber` and `gidNumber` values in a more persistent way.
+To do this, you will need to provide the `--redis-host` and `--redis-port` arguments to `run.py`.
 
 ## Outputs
 

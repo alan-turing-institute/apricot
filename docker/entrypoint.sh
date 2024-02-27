@@ -23,26 +23,26 @@ if [ -z "${DOMAIN}" ]; then
     exit 1
 fi
 
-if [ -z "${REDIS_HOST}" ]; then
-    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_HOST environment variable is not set"
-    exit 1
-fi
-
 # Arguments with defaults
 if [ -z "${PORT}" ]; then
     PORT="1389"
     echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] PORT environment variable is not set: using default of '${PORT}'"
 fi
 
-if [ -z "${REDIS_PORT}" ]; then
-    REDIS_PORT="6379"
-    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_PORT environment variable is not set: using default of '${REDIS_PORT}'"
-fi
+
 
 # Optional arguments
 EXTRA_OPTS=""
 if [ -n "${ENTRA_TENANT_ID}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --entra-tenant-id $ENTRA_TENANT_ID"
+fi
+
+if [ -n "${REDIS_HOST}" ]; then
+    if [ -z "${REDIS_PORT}" ]; then
+        REDIS_PORT="6379"
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_PORT environment variable is not set: using default of '${REDIS_PORT}'"
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --redis-host $REDIS_HOST --redis-port $REDIS_PORT"
 fi
 
 # Run the server
@@ -52,6 +52,4 @@ hatch run python run.py \
     --client-secret "${CLIENT_SECRET}"  \
     --domain "${DOMAIN}" \
     --port "${PORT}" \
-    --redis-host "${REDIS_HOST}" \
-    --redis-port "${REDIS_PORT}" \
     $EXTRA_OPTS

@@ -16,11 +16,13 @@ if __name__ == "__main__":
         parser.add_argument("-s", "--client-secret", type=str, help="OAuth client secret.")
         parser.add_argument("-d", "--domain", type=str, help="Which domain users belong to.")
         parser.add_argument("-p", "--port", type=int, default=1389, help="Port to run on.")
-        parser.add_argument("--redis-host", type=str, help="Host for Redis server.")
-        parser.add_argument("--redis-port", type=int, help="Port for Redis server.")
         # Options for Microsoft Entra backend
-        group = parser.add_argument_group("Microsoft Entra")
-        group.add_argument("-t", "--entra-tenant-id", type=str, help="Microsoft Entra tenant ID.", required=False)
+        entra_group = parser.add_argument_group("Microsoft Entra")
+        entra_group.add_argument("-t", "--entra-tenant-id", type=str, help="Microsoft Entra tenant ID.", required=False)
+        # Options for Redis cache
+        redis_group = parser.add_argument_group("Redis")
+        redis_group.add_argument("--redis-host", type=str, help="Host for Redis server.")
+        redis_group.add_argument("--redis-port", type=int, help="Port for Redis server.")
         # Parse arguments
         args = parser.parse_args()
 
