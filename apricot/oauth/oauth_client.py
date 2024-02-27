@@ -41,7 +41,7 @@ class OAuthClient(ABC):
         token_url: str,
     ) -> None:
         # Set attributes
-        self.bearer_token_ = None
+        self.bearer_token_: str | None = None
         self.client_secret = client_secret
         self.domain = domain
         self.token_url = token_url
@@ -122,7 +122,7 @@ class OAuthClient(ABC):
         """
 
         def query_(url: str) -> requests.Response:
-            return self.session_application.get(
+            return self.session_application.get(  # type: ignore[no-any-return]
                 url=url,
                 headers={"Authorization": f"Bearer {self.bearer_token}"},
                 client_id=self.session_application._client.client_id,
