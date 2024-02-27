@@ -1,5 +1,5 @@
-from .uid_cache import UidCache
+from .redis_cache import RedisCache
 
 __all__ = [
-    "UidCache",
+    "RedisCache",
 ]

@@ -1,31 +1,38 @@
+from abc import ABC, abstractmethod
 from typing import cast
 
-import redis
 
-
-class UidCache:
-    def __init__(self, redis_host: str, redis_port: str) -> None:
-        self.redis_host = redis_host
-        self.redis_port = redis_port
+class UidCache(ABC):
+    def __init__(self) -> None:
         self.cache_ = None
 
-    @property
-    def cache(self) -> redis.Redis:  # type: ignore[type-arg]
+    @abstractmethod
+    def get(self, identifier: str) -> int | None:
         """
-        Lazy-load the cache on request
+        Get the UID for a given identifier, returning None if it does not exist
         """
-        if not self.cache_:
-            self.cache_ = redis.Redis(  # type: ignore[call-overload]
-                host=self.redis_host, port=self.redis_port, decode_responses=True
-            )
-        return self.cache_  # type: ignore[return-value]
+        pass
 
-    @property
+    @abstractmethod
     def keys(self) -> list[str]:
         """
-        Get list of keys from the cache
+        Get list of cached keys
         """
-        return [str(k) for k in self.cache.keys()]
+        pass
+
+    @abstractmethod
+    def set(self, identifier: str, uid_value: int) -> None:
+        """
+        Set the UID for a given identifier
+        """
+        pass
+
+    @abstractmethod
+    def values(self, keys: list[str]) -> list[int]:
+        """
+        Get list of cached values corresponding to requested keys
+        """
+        pass
 
     def get_group_uid(self, identifier: str) -> int:
         """
@@ -54,12 +61,12 @@ class UidCache:
         @param min_value: Minimum allowed value for the UID
         """
         identifier_ = f"{category}-{identifier}"
-        uid = self.cache.get(identifier_)
+        uid = self.get(identifier_)
         if not uid:
             min_value = min_value if min_value else 0
             next_uid = max(self._get_max_uid(category) + 1, min_value)
-            self.cache.set(identifier_, next_uid)
-        return cast(int, self.cache.get(identifier_))
+            self.set(identifier_, next_uid)
+        return cast(int, self.get(identifier_))
 
     def _get_max_uid(self, category: str | None) -> int:
         """
@@ -68,8 +75,8 @@ class UidCache:
         @param category: Category to check UIDs for
         """
         if category:
-            keys = [k for k in self.keys if k.startswith(category)]
+            keys = [k for k in self.keys() if k.startswith(category)]
         else:
-            keys = self.keys
-        values = [int(cast(str, v)) for v in self.cache.mget(keys)] + [-999]
+            keys = self.keys()
+        values = [*self.values(keys), -999]
         return max(values)
