@@ -6,7 +6,7 @@ from twisted.internet.endpoints import serverFromString
 from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 from twisted.python import log
 
-from apricot.cache import LocalCache, RedisCache
+from apricot.cache import LocalCache, RedisCache, UidCache
 from apricot.ldap import OAuthLDAPServerFactory
 from apricot.oauth import OAuthBackend, OAuthClientMap
 
@@ -27,6 +27,7 @@ class ApricotServer:
         log.startLogging(sys.stdout)
 
         # Initialise the UID cache
+        uid_cache: UidCache
         if redis_host and redis_port:
             log.msg(
                 f"Using a Redis user-id cache at host '{redis_host}' on port '{redis_port}'."

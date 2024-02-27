@@ -3,9 +3,6 @@ from typing import cast
 
 
 class UidCache(ABC):
-    def __init__(self) -> None:
-        self.cache_ = None
-
     @abstractmethod
     def get(self, identifier: str) -> int | None:
         """
