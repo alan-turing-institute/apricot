@@ -92,6 +92,9 @@ class OAuthClient(ABC):
 
     @abstractmethod
     def extract_token(self, json_response: JSONDict) -> str:
+        """
+        Extract the bearer token from an OAuth2Session JSON response
+        """
         pass
 
     @abstractmethod
