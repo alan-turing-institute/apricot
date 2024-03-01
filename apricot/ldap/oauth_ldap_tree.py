@@ -3,6 +3,7 @@ import time
 from ldaptor.interfaces import IConnectedLDAPEntry, ILDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
 from twisted.internet import defer
+from twisted.python import log
 from zope.interface import implementer
 
 from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
@@ -36,6 +37,7 @@ class OAuthLDAPTree:
             not self.root_
             or (time.monotonic() - self.last_update) > self.refresh_interval
         ):
+            log.msg("Rebuilding LDAP tree from OAuth data.")
             # Create a root node for the tree
             self.root_ = OAuthLDAPEntry(
                 dn=self.oauth_client.root_dn,
@@ -55,6 +57,9 @@ class OAuthLDAPTree:
             # Add users to the users OU
             for user_attrs in self.oauth_client.validated_users():
                 users_ou.add_child(f"CN={user_attrs['cn'][0]}", user_attrs)
+            # Set last updated time
+            log.msg("Finished building LDAP tree.")
+            self.last_update = time.monotonic()
         return self.root_
 
     def __repr__(self) -> str:
