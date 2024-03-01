@@ -87,11 +87,12 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes = {}
                 attributes["cn"] = user_dict.get("displayName", None)
                 attributes["description"] = user_dict.get("id", None)
-                attributes["displayName"] = attributes.get("cn", None)
+                attributes["displayName"] = user_dict.get("displayName", None)
                 attributes["domain"] = domain
                 attributes["gidNumber"] = user_uid
                 attributes["givenName"] = user_dict.get("givenName", "")
                 attributes["homeDirectory"] = f"/home/{uid}" if uid else None
+                attributes["oauth_username"] = user_dict.get("userPrincipalName", None)
                 attributes["sn"] = user_dict.get("surname", "")
                 attributes["uid"] = uid if uid else None
                 attributes["uidNumber"] = user_uid

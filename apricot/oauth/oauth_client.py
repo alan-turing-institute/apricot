@@ -18,6 +18,7 @@ from apricot.models import (
     LdapGroupOfNames,
     LdapInetOrgPerson,
     LdapInetUser,
+    LdapOAuthUser,
     LdapPerson,
     LdapPosixAccount,
     LdapPosixGroup,
@@ -207,6 +208,10 @@ class OAuthClient(ABC):
                 posix_account = LdapPosixAccount(**user_dict)
                 attributes.update(posix_account.model_dump())
                 attributes["objectclass"].append("posixAccount")
+                # Add 'OAuthUser' attributes
+                oauth_user = LdapOAuthUser(**user_dict)
+                attributes.update(oauth_user.model_dump())
+                attributes["objectclass"].append("oauthUser")
                 # Ensure that all values are lists as required for LDAPAttributeDict
                 output.append(
                     {
