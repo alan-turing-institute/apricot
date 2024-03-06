@@ -11,6 +11,8 @@ from ldaptor.protocols.pureldap import (
 )
 from twisted.internet import defer
 
+from apricot.oauth import LDAPControlTuple
+
 
 class ReadOnlyLDAPServer(LDAPServer):
     def getRootDSE(  # noqa: N802
@@ -26,7 +28,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPAddRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
@@ -39,7 +41,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPBindRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
@@ -50,7 +52,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPCompareRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
@@ -61,7 +63,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPDelRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
@@ -74,7 +76,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPExtendedRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
@@ -85,7 +87,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPModifyDNRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
@@ -98,7 +100,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPModifyRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
@@ -111,7 +113,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPUnbindRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> None:
         """
@@ -122,7 +124,7 @@ class ReadOnlyLDAPServer(LDAPServer):
     def handle_LDAPSearchRequest(  # noqa: N802
         self,
         request: LDAPBindRequest,
-        controls: LDAPControl | None,
+        controls: list[LDAPControlTuple] | None,
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """
