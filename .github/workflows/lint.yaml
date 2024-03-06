@@ -10,6 +10,7 @@ on:  # yamllint disable-line rule:truthy
 
 jobs:
   lint_markdown:
+    name: Lint Markdown files
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,6 +21,7 @@ jobs:
           config: .markdownlint.json
 
   lint_python:
+    name: Lint Python files
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -34,6 +36,7 @@ jobs:
         run: hatch run lint:all
 
   lint_yaml:
+    name: Lint YAML files
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

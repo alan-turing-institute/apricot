@@ -5,7 +5,6 @@ from ldaptor.protocols.ldap.ldaperrors import LDAPProtocolError
 from ldaptor.protocols.ldap.ldapserver import LDAPServer
 from ldaptor.protocols.pureldap import (
     LDAPBindRequest,
-    LDAPControl,
     LDAPSearchResultDone,
     LDAPSearchResultEntry,
 )
