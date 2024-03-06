@@ -90,4 +90,5 @@ Do this as follows:
     - Ensure that the following permissions are enabled
         - `Microsoft Graph` > `User.Read.All` (application)
         - `Microsoft Graph` > `GroupMember.Read.All` (application)
+        - `Microsoft Graph` > `User.Read.All` (delegated)
     - Select this and click the `Grant admin consent` button (otherwise manual consent is needed from each user)
