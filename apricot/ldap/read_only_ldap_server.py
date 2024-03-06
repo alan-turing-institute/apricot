@@ -15,6 +15,10 @@ from apricot.oauth import LDAPControlTuple
 
 
 class ReadOnlyLDAPServer(LDAPServer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.debug = True
+
     def getRootDSE(  # noqa: N802
         self,
         request: LDAPBindRequest,
