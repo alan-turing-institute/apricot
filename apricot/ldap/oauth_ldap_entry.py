@@ -75,10 +75,11 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
 
     def bind(self, password: bytes) -> defer.Deferred["OAuthLDAPEntry"]:
         def _bind(password: bytes) -> "OAuthLDAPEntry":
+            oauth_username = next(iter(self.get("oauth_username", "unknown")))
             s_password = password.decode("utf-8")
-            if self.oauth_client.verify(username=self.username, password=s_password):
+            if self.oauth_client.verify(username=oauth_username, password=s_password):
                 return self
-            msg = f"Invalid password for user '{self.username}'."
+            msg = f"Invalid password for user '{oauth_username}'."
             raise LDAPInvalidCredentials(msg)
 
         return defer.maybeDeferred(_bind, password)

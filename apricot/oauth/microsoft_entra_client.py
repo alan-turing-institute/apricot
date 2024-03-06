@@ -82,17 +82,20 @@ class MicrosoftEntraClient(OAuthClient):
                 sorted(user_data["value"], key=lambda user: user["createdDateTime"]),
             ):
                 # Get user attributes
+                given_name = user_dict.get("givenName", None)
+                surname = user_dict.get("surname", None)
                 uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
                 user_uid = self.uid_cache.get_user_uid(user_dict["id"])
                 attributes = {}
                 attributes["cn"] = user_dict.get("displayName", None)
                 attributes["description"] = user_dict.get("id", None)
-                attributes["displayName"] = attributes.get("cn", None)
+                attributes["displayName"] = user_dict.get("displayName", None)
                 attributes["domain"] = domain
                 attributes["gidNumber"] = user_uid
-                attributes["givenName"] = user_dict.get("givenName", "")
+                attributes["givenName"] = given_name if given_name else ""
                 attributes["homeDirectory"] = f"/home/{uid}" if uid else None
-                attributes["sn"] = user_dict.get("surname", "")
+                attributes["oauth_username"] = user_dict.get("userPrincipalName", None)
+                attributes["sn"] = surname if surname else ""
                 attributes["uid"] = uid if uid else None
                 attributes["uidNumber"] = user_uid
                 # Add group attributes
