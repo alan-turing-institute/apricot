@@ -24,7 +24,7 @@ from apricot.models import (
     LdapPosixGroup,
 )
 
-from .types import JSONDict, LDAPAttributeDict
+from apricot.types import JSONDict, LDAPAttributeDict
 
 
 class OAuthClient(ABC):
