@@ -16,13 +16,13 @@ from twisted.python import log
 from apricot.cache import UidCache
 from apricot.models import (
     LDAPAttributeAdaptor,
-    LdapGroupOfNames,
-    LdapInetOrgPerson,
-    LdapInetUser,
-    LdapOAuthUser,
-    LdapPerson,
-    LdapPosixAccount,
-    LdapPosixGroup,
+    LDAPGroupOfNames,
+    LDAPInetOrgPerson,
+    LDAPInetUser,
+    LDAPOAuthUser,
+    LDAPPerson,
+    LDAPPosixAccount,
+    LDAPPosixGroup,
 )
 from apricot.types import JSONDict
 
@@ -157,11 +157,11 @@ class OAuthClient(ABC):
             try:
                 attributes = {"objectclass": ["top"]}
                 # Add 'groupOfNames' attributes
-                group_of_names = LdapGroupOfNames(**group_dict)
+                group_of_names = LDAPGroupOfNames(**group_dict)
                 attributes.update(group_of_names.model_dump())
                 attributes["objectclass"].append("groupOfNames")
                 # Add 'posixGroup' attributes
-                posix_group = LdapPosixGroup(**group_dict)
+                posix_group = LDAPPosixGroup(**group_dict)
                 attributes.update(posix_group.model_dump())
                 attributes["objectclass"].append("posixGroup")
                 output.append(LDAPAttributeAdaptor(attributes))
@@ -187,23 +187,23 @@ class OAuthClient(ABC):
                     f"CN={user_dict['cn']},OU=groups,{self.root_dn}"
                 )
                 # Add 'inetOrgPerson' attributes
-                inetorg_person = LdapInetOrgPerson(**user_dict)
+                inetorg_person = LDAPInetOrgPerson(**user_dict)
                 attributes.update(inetorg_person.model_dump())
                 attributes["objectclass"].append("inetOrgPerson")
                 # Add 'inetUser' attributes
-                inet_user = LdapInetUser(**user_dict)
+                inet_user = LDAPInetUser(**user_dict)
                 attributes.update(inet_user.model_dump())
                 attributes["objectclass"].append("inetuser")
                 # Add 'person' attributes
-                person = LdapPerson(**user_dict)
+                person = LDAPPerson(**user_dict)
                 attributes.update(person.model_dump())
                 attributes["objectclass"].append("person")
                 # Add 'posixAccount' attributes
-                posix_account = LdapPosixAccount(**user_dict)
+                posix_account = LDAPPosixAccount(**user_dict)
                 attributes.update(posix_account.model_dump())
                 attributes["objectclass"].append("posixAccount")
                 # Add 'OAuthUser' attributes
-                oauth_user = LdapOAuthUser(**user_dict)
+                oauth_user = LDAPOAuthUser(**user_dict)
                 attributes.update(oauth_user.model_dump())
                 attributes["objectclass"].append("oauthUser")
                 output.append(LDAPAttributeAdaptor(attributes))

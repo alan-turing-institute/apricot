@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class LdapOAuthUser(BaseModel):
+class LDAPOAuthUser(BaseModel):
     oauth_username: str

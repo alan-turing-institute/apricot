@@ -4,7 +4,7 @@ ID_MIN = 2000
 ID_MAX = 4294967295
 
 
-class LdapPosixGroup(BaseModel):
+class LDAPPosixGroup(BaseModel):
     description: str
     gidNumber: int  # noqa: N815
     memberUid: list[str]  # noqa: N815

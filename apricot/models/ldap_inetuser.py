@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 
-class LdapInetUser(BaseModel):
+class LDAPInetUser(BaseModel):
     memberOf: list[str]  # noqa: N815
     uid: str

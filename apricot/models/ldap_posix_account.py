@@ -7,7 +7,7 @@ ID_MIN = 2000
 ID_MAX = 60000
 
 
-class LdapPosixAccount(BaseModel):
+class LDAPPosixAccount(BaseModel):
     cn: str
     gidNumber: int  # noqa: N815
     homeDirectory: Annotated[  # noqa: N815

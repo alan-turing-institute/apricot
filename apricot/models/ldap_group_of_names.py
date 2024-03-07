@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class LdapGroupOfNames(BaseModel):
+class LDAPGroupOfNames(BaseModel):
     cn: str
     description: str
     member: list[str]
