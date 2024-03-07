@@ -53,10 +53,10 @@ class OAuthLDAPTree:
             )
             # Add groups to the groups OU
             for group_attrs in self.oauth_client.validated_groups():
-                groups_ou.add_child(f"CN={group_attrs['cn'][0]}", group_attrs.to_dict())
+                groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
             # Add users to the users OU
             for user_attrs in self.oauth_client.validated_users():
-                users_ou.add_child(f"CN={user_attrs['cn'][0]}", user_attrs.to_dict())
+                users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
             # Set last updated time
             log.msg("Finished building LDAP tree.")
             self.last_update = time.monotonic()

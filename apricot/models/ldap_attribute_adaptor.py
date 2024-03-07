@@ -10,5 +10,11 @@ class LDAPAttributeAdaptor:
             for k, v in attributes.items()
         }
 
+    @property
+    def cn(self) -> str:
+        """Return CN for this set of LDAP attributes"""
+        return self.attributes["cn"][0]
+
     def to_dict(self) -> LDAPAttributeDict:
+        """Convert the attributes to an LDAPAttributeDict"""
         return self.attributes
