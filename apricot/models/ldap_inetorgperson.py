@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class LdapInetOrgPerson(BaseModel):
+class LDAPInetOrgPerson(BaseModel):
     cn: str
     description: str
     displayName: str  # noqa: N815

@@ -15,16 +15,16 @@ from twisted.python import log
 
 from apricot.cache import UidCache
 from apricot.models import (
-    LdapGroupOfNames,
-    LdapInetOrgPerson,
-    LdapInetUser,
-    LdapOAuthUser,
-    LdapPerson,
-    LdapPosixAccount,
-    LdapPosixGroup,
+    LDAPAttributeAdaptor,
+    LDAPGroupOfNames,
+    LDAPInetOrgPerson,
+    LDAPInetUser,
+    LDAPOAuthUser,
+    LDAPPerson,
+    LDAPPosixAccount,
+    LDAPPosixGroup,
 )
-
-from .types import JSONDict, LDAPAttributeDict
+from apricot.types import JSONDict
 
 
 class OAuthClient(ABC):
@@ -141,9 +141,9 @@ class OAuthClient(ABC):
             result = query_(url)
         return result.json()  # type: ignore
 
-    def validated_groups(self) -> list[LDAPAttributeDict]:
+    def validated_groups(self) -> list[LDAPAttributeAdaptor]:
         """
-        Validate output via pydantic and return a list of LDAPAttributeDict
+        Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """
         output = []
         # Add one self-titled group for each user
@@ -157,20 +157,14 @@ class OAuthClient(ABC):
             try:
                 attributes = {"objectclass": ["top"]}
                 # Add 'groupOfNames' attributes
-                group_of_names = LdapGroupOfNames(**group_dict)
+                group_of_names = LDAPGroupOfNames(**group_dict)
                 attributes.update(group_of_names.model_dump())
                 attributes["objectclass"].append("groupOfNames")
                 # Add 'posixGroup' attributes
-                posix_group = LdapPosixGroup(**group_dict)
+                posix_group = LDAPPosixGroup(**group_dict)
                 attributes.update(posix_group.model_dump())
                 attributes["objectclass"].append("posixGroup")
-                # Ensure that all values are lists as required for LDAPAttributeDict
-                output.append(
-                    {
-                        k: v if isinstance(v, list) else [v]  # type: ignore[list-item]
-                        for k, v in attributes.items()
-                    }
-                )
+                output.append(LDAPAttributeAdaptor(attributes))
             except ValidationError as exc:
                 name = group_dict["cn"] if "cn" in group_dict else "unknown"
                 log.msg(f"Validation failed for group '{name}'.")
@@ -180,9 +174,9 @@ class OAuthClient(ABC):
                     )
         return output
 
-    def validated_users(self) -> list[LDAPAttributeDict]:
+    def validated_users(self) -> list[LDAPAttributeAdaptor]:
         """
-        Validate output via pydantic and return a list of LDAPAttributeDict
+        Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """
         output = []
         for user_dict in self.users():
@@ -193,32 +187,26 @@ class OAuthClient(ABC):
                     f"CN={user_dict['cn']},OU=groups,{self.root_dn}"
                 )
                 # Add 'inetOrgPerson' attributes
-                inetorg_person = LdapInetOrgPerson(**user_dict)
+                inetorg_person = LDAPInetOrgPerson(**user_dict)
                 attributes.update(inetorg_person.model_dump())
                 attributes["objectclass"].append("inetOrgPerson")
                 # Add 'inetUser' attributes
-                inet_user = LdapInetUser(**user_dict)
+                inet_user = LDAPInetUser(**user_dict)
                 attributes.update(inet_user.model_dump())
                 attributes["objectclass"].append("inetuser")
                 # Add 'person' attributes
-                person = LdapPerson(**user_dict)
+                person = LDAPPerson(**user_dict)
                 attributes.update(person.model_dump())
                 attributes["objectclass"].append("person")
                 # Add 'posixAccount' attributes
-                posix_account = LdapPosixAccount(**user_dict)
+                posix_account = LDAPPosixAccount(**user_dict)
                 attributes.update(posix_account.model_dump())
                 attributes["objectclass"].append("posixAccount")
                 # Add 'OAuthUser' attributes
-                oauth_user = LdapOAuthUser(**user_dict)
+                oauth_user = LDAPOAuthUser(**user_dict)
                 attributes.update(oauth_user.model_dump())
                 attributes["objectclass"].append("oauthUser")
-                # Ensure that all values are lists as required for LDAPAttributeDict
-                output.append(
-                    {
-                        k: v if isinstance(v, list) else [v]  # type: ignore[list-item]
-                        for k, v in attributes.items()
-                    }
-                )
+                output.append(LDAPAttributeAdaptor(attributes))
             except ValidationError as exc:
                 name = user_dict["cn"] if "cn" in user_dict else "unknown"
                 log.msg(f"Validation failed for user '{name}'.")

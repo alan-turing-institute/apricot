@@ -1,7 +1,8 @@
 from typing import Any, cast
 
+from apricot.types import JSONDict
+
 from .oauth_client import OAuthClient
-from .types import JSONDict
 
 
 class MicrosoftEntraClient(OAuthClient):
