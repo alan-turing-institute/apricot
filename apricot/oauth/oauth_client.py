@@ -141,6 +141,14 @@ class OAuthClient(ABC):
             result = query_(url)
         return result.json()  # type: ignore
 
+    def to_ldap_attribute_dict(self, input: dict[Any, Any]) -> list[LDAPAttributeDict]:
+        """Convert attribute keys to strings and values to lists of strings as required by LDAPAttributeDict"""
+        return {
+            str(k): list(map(str, v)) if isinstance(v, list) else [str(v)]  # type: ignore[list-item]
+            for k, v in input.items()
+        }
+
+
     def validated_groups(self) -> list[LDAPAttributeDict]:
         """
         Validate output via pydantic and return a list of LDAPAttributeDict
@@ -164,13 +172,7 @@ class OAuthClient(ABC):
                 posix_group = LdapPosixGroup(**group_dict)
                 attributes.update(posix_group.model_dump())
                 attributes["objectclass"].append("posixGroup")
-                # Ensure that all values are lists as required for LDAPAttributeDict
-                output.append(
-                    {
-                        k: v if isinstance(v, list) else [v]  # type: ignore[list-item]
-                        for k, v in attributes.items()
-                    }
-                )
+                output.append(self.to_ldap_attribute_dict(attributes))
             except ValidationError as exc:
                 name = group_dict["cn"] if "cn" in group_dict else "unknown"
                 log.msg(f"Validation failed for group '{name}'.")
@@ -212,13 +214,7 @@ class OAuthClient(ABC):
                 oauth_user = LdapOAuthUser(**user_dict)
                 attributes.update(oauth_user.model_dump())
                 attributes["objectclass"].append("oauthUser")
-                # Ensure that all values are lists as required for LDAPAttributeDict
-                output.append(
-                    {
-                        k: v if isinstance(v, list) else [v]  # type: ignore[list-item]
-                        for k, v in attributes.items()
-                    }
-                )
+                output.append(self.to_ldap_attribute_dict(attributes))
             except ValidationError as exc:
                 name = user_dict["cn"] if "cn" in user_dict else "unknown"
                 log.msg(f"Validation failed for user '{name}'.")
