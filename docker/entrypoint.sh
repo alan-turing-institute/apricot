@@ -33,6 +33,10 @@ fi
 
 # Optional arguments
 EXTRA_OPTS=""
+if [ -n "${DEBUG}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --debug"
+fi
+
 if [ -n "${ENTRA_TENANT_ID}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --entra-tenant-id $ENTRA_TENANT_ID"
 fi

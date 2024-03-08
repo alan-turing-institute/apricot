@@ -19,10 +19,14 @@ class ApricotServer:
         client_secret: str,
         domain: str,
         port: int,
+        *,
+        debug: bool = False,
         redis_host: str | None = None,
         redis_port: int | None = None,
         **kwargs: Any,
     ) -> None:
+        self.debug = debug
+
         # Log to stdout
         log.startLogging(sys.stdout)
 
@@ -39,9 +43,12 @@ class ApricotServer:
 
         # Initialize the appropriate OAuth client
         try:
+            if self.debug:
+                log.msg(f"Creating an OAuthClient for {backend}.")
             oauth_client = OAuthClientMap[backend](
                 client_id=client_id,
                 client_secret=client_secret,
+                debug=debug,
                 domain=domain,
                 uid_cache=uid_cache,
                 **kwargs,
@@ -51,9 +58,13 @@ class ApricotServer:
             raise ValueError(msg) from exc
 
         # Create an LDAPServerFactory
+        if self.debug:
+            log.msg("Creating an LDAPServerFactory.")
         factory = OAuthLDAPServerFactory(oauth_client)
 
         # Attach a listening endpoint
+        if self.debug:
+            log.msg("Attaching a listening endpoint.")
         endpoint: IStreamServerEndpoint = serverFromString(reactor, f"tcp:{port}")
         endpoint.listen(factory)
 
@@ -62,4 +73,6 @@ class ApricotServer:
 
     def run(self) -> None:
         """Start the Twisted reactor"""
+        if self.debug:
+            log.msg("Starting the Twisted reactor.")
         self.reactor.run()

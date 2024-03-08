@@ -8,8 +8,6 @@ from .read_only_ldap_server import ReadOnlyLDAPServer
 
 
 class OAuthLDAPServerFactory(ServerFactory):
-    protocol = ReadOnlyLDAPServer
-
     def __init__(self, oauth_client: OAuthClient):
         """
         Initialise an LDAPServerFactory
@@ -31,6 +29,6 @@ class OAuthLDAPServerFactory(ServerFactory):
         @param addr: an object implementing L{IAddress}
         """
         id(addr)  # ignore unused arguments
-        proto = self.protocol()
+        proto = ReadOnlyLDAPServer(debug=self.adaptor.debug)
         proto.factory = self.adaptor
         return proto

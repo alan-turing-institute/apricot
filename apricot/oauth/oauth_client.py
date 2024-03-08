@@ -34,6 +34,7 @@ class OAuthClient(ABC):
         self,
         client_id: str,
         client_secret: str,
+        debug: bool,  # noqa: FBT001
         domain: str,
         redirect_uri: str,
         scopes: list[str],
@@ -43,6 +44,7 @@ class OAuthClient(ABC):
         # Set attributes
         self.bearer_token_: str | None = None
         self.client_secret = client_secret
+        self.debug = debug
         self.domain = domain
         self.token_url = token_url
         self.uid_cache = uid_cache
@@ -53,6 +55,8 @@ class OAuthClient(ABC):
 
         try:
             # OAuth client that uses application credentials
+            if self.debug:
+                log.msg("Initialising application credential client.")
             self.session_application = OAuth2Session(
                 client=BackendApplicationClient(
                     client_id=client_id, scope=scopes, redirect_uri=redirect_uri
@@ -64,6 +68,8 @@ class OAuthClient(ABC):
 
         try:
             # OAuth client that uses delegated credentials
+            if self.debug:
+                log.msg("Initialising delegated credential client.")
             self.session_interactive = OAuth2Session(
                 client=LegacyApplicationClient(
                     client_id=client_id, scope=scopes, redirect_uri=redirect_uri
@@ -145,6 +151,8 @@ class OAuthClient(ABC):
         """
         Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """
+        if self.debug:
+            log.msg("Constructing and validating list of groups")
         output = []
         # Add one self-titled group for each user
         user_group_dicts = []
@@ -180,6 +188,8 @@ class OAuthClient(ABC):
         """
         Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """
+        if self.debug:
+            log.msg("Constructing and validating list of users")
         output = []
         for user_dict in self.users():
             try:

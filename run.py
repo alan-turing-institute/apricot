@@ -12,10 +12,11 @@ if __name__ == "__main__":
         )
         # Common options needed for all backends
         parser.add_argument("-b", "--backend", type=OAuthBackend, help="Which OAuth backend to use.")
-        parser.add_argument("-i", "--client-id", type=str, help="OAuth client ID.")
-        parser.add_argument("-s", "--client-secret", type=str, help="OAuth client secret.")
         parser.add_argument("-d", "--domain", type=str, help="Which domain users belong to.")
+        parser.add_argument("-i", "--client-id", type=str, help="OAuth client ID.")
         parser.add_argument("-p", "--port", type=int, default=1389, help="Port to run on.")
+        parser.add_argument("-s", "--client-secret", type=str, help="OAuth client secret.")
+        parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
         # Options for Microsoft Entra backend
         entra_group = parser.add_argument_group("Microsoft Entra")
         entra_group.add_argument("-t", "--entra-tenant-id", type=str, help="Microsoft Entra tenant ID.", required=False)
