@@ -34,7 +34,7 @@ class OAuthClient(ABC):
         self,
         client_id: str,
         client_secret: str,
-        debug: bool,
+        debug: bool,  # noqa: FBT001
         domain: str,
         redirect_uri: str,
         scopes: list[str],
@@ -56,7 +56,7 @@ class OAuthClient(ABC):
         try:
             # OAuth client that uses application credentials
             if self.debug:
-                log.msg(f"Initialising application credential client.")
+                log.msg("Initialising application credential client.")
             self.session_application = OAuth2Session(
                 client=BackendApplicationClient(
                     client_id=client_id, scope=scopes, redirect_uri=redirect_uri
@@ -69,7 +69,7 @@ class OAuthClient(ABC):
         try:
             # OAuth client that uses delegated credentials
             if self.debug:
-                log.msg(f"Initialising delegated credential client.")
+                log.msg("Initialising delegated credential client.")
             self.session_interactive = OAuth2Session(
                 client=LegacyApplicationClient(
                     client_id=client_id, scope=scopes, redirect_uri=redirect_uri

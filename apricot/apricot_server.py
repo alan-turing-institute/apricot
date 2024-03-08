@@ -19,6 +19,7 @@ class ApricotServer:
         client_secret: str,
         domain: str,
         port: int,
+        *,
         debug: bool = False,
         redis_host: str | None = None,
         redis_port: int | None = None,
@@ -58,12 +59,12 @@ class ApricotServer:
 
         # Create an LDAPServerFactory
         if self.debug:
-            log.msg(f"Creating an LDAPServerFactory.")
+            log.msg("Creating an LDAPServerFactory.")
         factory = OAuthLDAPServerFactory(oauth_client)
 
         # Attach a listening endpoint
         if self.debug:
-            log.msg(f"Attaching a listening endpoint.")
+            log.msg("Attaching a listening endpoint.")
         endpoint: IStreamServerEndpoint = serverFromString(reactor, f"tcp:{port}")
         endpoint.listen(factory)
 
@@ -73,5 +74,5 @@ class ApricotServer:
     def run(self) -> None:
         """Start the Twisted reactor"""
         if self.debug:
-            log.msg(f"Starting the Twisted reactor.")
+            log.msg("Starting the Twisted reactor.")
         self.reactor.run()
