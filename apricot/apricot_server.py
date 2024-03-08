@@ -19,10 +19,13 @@ class ApricotServer:
         client_secret: str,
         domain: str,
         port: int,
+        debug: bool = False,
         redis_host: str | None = None,
         redis_port: int | None = None,
         **kwargs: Any,
     ) -> None:
+        self.debug = debug
+
         # Log to stdout
         log.startLogging(sys.stdout)
 
@@ -42,6 +45,7 @@ class ApricotServer:
             oauth_client = OAuthClientMap[backend](
                 client_id=client_id,
                 client_secret=client_secret,
+                debug=debug,
                 domain=domain,
                 uid_cache=uid_cache,
                 **kwargs,

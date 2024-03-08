@@ -21,6 +21,7 @@ class OAuthLDAPTree:
         @param oauth_client: An OAuth client used to construct the LDAP tree
         @param refresh_interval: Interval in seconds after which the tree must be refreshed
         """
+        self.debug = oauth_client.debug
         self.last_update = time.monotonic()
         self.oauth_client: OAuthClient = oauth_client
         self.refresh_interval = refresh_interval

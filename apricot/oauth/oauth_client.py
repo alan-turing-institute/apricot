@@ -34,6 +34,7 @@ class OAuthClient(ABC):
         self,
         client_id: str,
         client_secret: str,
+        debug: bool,
         domain: str,
         redirect_uri: str,
         scopes: list[str],
@@ -43,6 +44,7 @@ class OAuthClient(ABC):
         # Set attributes
         self.bearer_token_: str | None = None
         self.client_secret = client_secret
+        self.debug = debug
         self.domain = domain
         self.token_url = token_url
         self.uid_cache = uid_cache
