@@ -42,6 +42,8 @@ class ApricotServer:
 
         # Initialize the appropriate OAuth client
         try:
+            if self.debug:
+                log.msg(f"Creating an OAuthClient for {backend}.")
             oauth_client = OAuthClientMap[backend](
                 client_id=client_id,
                 client_secret=client_secret,
@@ -55,9 +57,13 @@ class ApricotServer:
             raise ValueError(msg) from exc
 
         # Create an LDAPServerFactory
+        if self.debug:
+            log.msg(f"Creating an LDAPServerFactory.")
         factory = OAuthLDAPServerFactory(oauth_client)
 
         # Attach a listening endpoint
+        if self.debug:
+            log.msg(f"Attaching a listening endpoint.")
         endpoint: IStreamServerEndpoint = serverFromString(reactor, f"tcp:{port}")
         endpoint.listen(factory)
 
@@ -66,4 +72,6 @@ class ApricotServer:
 
     def run(self) -> None:
         """Start the Twisted reactor"""
+        if self.debug:
+            log.msg(f"Starting the Twisted reactor.")
         self.reactor.run()

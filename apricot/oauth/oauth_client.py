@@ -55,6 +55,8 @@ class OAuthClient(ABC):
 
         try:
             # OAuth client that uses application credentials
+            if self.debug:
+                log.msg(f"Initialising application credential client.")
             self.session_application = OAuth2Session(
                 client=BackendApplicationClient(
                     client_id=client_id, scope=scopes, redirect_uri=redirect_uri
@@ -66,6 +68,8 @@ class OAuthClient(ABC):
 
         try:
             # OAuth client that uses delegated credentials
+            if self.debug:
+                log.msg(f"Initialising delegated credential client.")
             self.session_interactive = OAuth2Session(
                 client=LegacyApplicationClient(
                     client_id=client_id, scope=scopes, redirect_uri=redirect_uri
@@ -147,6 +151,8 @@ class OAuthClient(ABC):
         """
         Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """
+        if self.debug:
+            log.msg("Constructing and validating list of groups")
         output = []
         # Add one self-titled group for each user
         user_group_dicts = []
@@ -182,6 +188,8 @@ class OAuthClient(ABC):
         """
         Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """
+        if self.debug:
+            log.msg("Constructing and validating list of users")
         output = []
         for user_dict in self.users():
             try:

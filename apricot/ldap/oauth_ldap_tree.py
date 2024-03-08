@@ -53,9 +53,13 @@ class OAuthLDAPTree:
                 "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
             )
             # Add groups to the groups OU
+            if self.debug:
+                log.msg("Adding groups to the LDAP tree.")
             for group_attrs in self.oauth_client.validated_groups():
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
             # Add users to the users OU
+            if self.debug:
+                log.msg("Adding users to the LDAP tree.")
             for user_attrs in self.oauth_client.validated_users():
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
             # Set last updated time
@@ -76,4 +80,6 @@ class OAuthLDAPTree:
         """
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
+        if self.debug:
+            log.msg(f"Starting an LDAP lookup for {dn.getText()}.")
         return self.root.lookup(dn)
