@@ -150,7 +150,9 @@ class OAuthClient(ABC):
         user_group_dicts = []
         for user_dict in self.users():
             user_dict["memberUid"] = [user_dict["uid"]]
-            user_dict["member"] = [f"CN={user_dict['uid']},OU=users,{self.root_dn}"]
+            user_dict["member"] = [f"CN={user_dict['cn']},OU=users,{self.root_dn}"]
+            # Group name is taken from 'cn' which should match the username
+            user_dict["cn"] = user_dict["uid"]
             user_group_dicts.append(user_dict)
         # Iterate over groups and validate them
         for group_dict in self.groups() + user_group_dicts:
