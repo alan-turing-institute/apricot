@@ -51,7 +51,7 @@ detached = true
 dependencies = [
   "black~=24.2",
   "mypy~=1.8",
-  "ruff~=0.2",
+  "ruff~=0.3",
   "types-oauthlib~=3.2",
   "types-redis~=4.6",
   "types-requests~=2.31",
@@ -61,12 +61,12 @@ dependencies = [
 typing = "mypy {args:apricot}"
 
 style = [
-  "ruff {args:apricot}",
+  "ruff check {args:apricot}",
   "black --check --diff {args:apricot}",
 ]
 fmt = [
   "black {args:apricot}",
-  "ruff --fix {args:apricot}",
+  "ruff check --fix {args:apricot}",
   "style",
 ]
 all = [
