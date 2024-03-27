@@ -28,6 +28,10 @@ class OAuthLDAPTree:
         self.root_: OAuthLDAPEntry | None = None
 
     @property
+    def dn(self) -> DistinguishedName:
+        return self.root.dn
+
+    @property
     def root(self) -> OAuthLDAPEntry:
         """
         Lazy-load the LDAP tree on request
@@ -81,5 +85,5 @@ class OAuthLDAPTree:
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
         if self.debug:
-            log.msg(f"Starting an LDAP lookup for {dn.getText()}.")
+            log.msg(f"Starting an LDAP lookup for '{dn.getText()}'.")
         return self.root.lookup(dn)
