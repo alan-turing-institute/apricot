@@ -184,7 +184,7 @@ class ReadOnlyLDAPServer(LDAPServer):
         if self.debug:
             log.msg("Handling an LDAP unbind request.")
         try:
-            return super().handle_LDAPUnbindRequest(request, controls, reply)
+            super().handle_LDAPUnbindRequest(request, controls, reply)
         except Exception as exc:
             msg = f"LDAP unbind request failed. {exc}"
             raise LDAPProtocolError(msg) from exc
