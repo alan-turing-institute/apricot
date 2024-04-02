@@ -13,3 +13,6 @@ class LDAPPerson(BaseModel):
 
     cn: str
     sn: str
+
+    def names(self) -> list[str]:
+        return ["person"]

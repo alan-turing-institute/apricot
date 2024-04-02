@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from .ldap_person import LDAPPerson
 
 
-class LDAPOrganizationalPerson(BaseModel):
+class LDAPOrganizationalPerson(LDAPPerson):
     """
     A person belonging to an organisation
 
@@ -12,3 +12,6 @@ class LDAPOrganizationalPerson(BaseModel):
     """
 
     description: str
+
+    def names(self) -> list[str]:
+        return [*super().names(), "organizationalPerson"]

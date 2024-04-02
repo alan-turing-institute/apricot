@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 from twisted.python import log
 
 from apricot.models import (
@@ -9,7 +9,6 @@ from apricot.models import (
     LDAPGroupOfNames,
     LDAPInetOrgPerson,
     LDAPOAuthUser,
-    LDAPPerson,
     LDAPPosixAccount,
     LDAPPosixGroup,
 )
@@ -21,6 +20,12 @@ class OAuthClientAdaptor(OAuthClient):
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(self, **kwargs: Any):
+        self.ldap_group_classes: set[BaseModel] = {LDAPGroupOfNames, LDAPPosixGroup}
+        self.ldap_user_classes: set[BaseModel] = {
+            LDAPInetOrgPerson,
+            LDAPPosixAccount,
+            LDAPOAuthUser,
+        }
         super().__init__(**kwargs)
 
     @abstractmethod
@@ -74,14 +79,11 @@ class OAuthClientAdaptor(OAuthClient):
         for group_dict in self.unvalidated_groups() + user_primary_groups:
             try:
                 attributes = {"objectclass": ["top"]}
-                # Add 'groupOfNames' attributes
-                group_of_names = LDAPGroupOfNames(**group_dict)
-                attributes.update(group_of_names.model_dump())
-                attributes["objectclass"].append("groupOfNames")
-                # Add 'posixGroup' attributes
-                posix_group = LDAPPosixGroup(**group_dict)
-                attributes.update(posix_group.model_dump())
-                attributes["objectclass"].append("posixGroup")
+                # Add appropriate LDAP class attributes
+                for ldap_class in self.ldap_group_classes:
+                    model = ldap_class(**group_dict)
+                    attributes.update(model.model_dump())
+                    attributes["objectclass"] += model.names()
                 output.append(LDAPAttributeAdaptor(attributes))
             except ValidationError as exc:
                 name = group_dict["cn"] if "cn" in group_dict else "unknown"
@@ -104,22 +106,11 @@ class OAuthClientAdaptor(OAuthClient):
                 attributes = {"objectclass": ["top"]}
                 # Add user to self-titled group
                 user_dict["memberOf"].append(self.group_dn_from_cn(user_dict["cn"]))
-                # Add 'inetOrgPerson' attributes
-                inetorg_person = LDAPInetOrgPerson(**user_dict)
-                attributes.update(inetorg_person.model_dump())
-                attributes["objectclass"].append("inetOrgPerson")
-                # Add 'person' attributes
-                person = LDAPPerson(**user_dict)
-                attributes.update(person.model_dump())
-                attributes["objectclass"].append("person")
-                # Add 'posixAccount' attributes
-                posix_account = LDAPPosixAccount(**user_dict)
-                attributes.update(posix_account.model_dump())
-                attributes["objectclass"].append("posixAccount")
-                # Add 'OAuthUser' attributes
-                oauth_user = LDAPOAuthUser(**user_dict)
-                attributes.update(oauth_user.model_dump())
-                attributes["objectclass"].append("oauthUser")
+                # Add appropriate LDAP class attributes
+                for ldap_class in self.ldap_user_classes:
+                    model = ldap_class(**user_dict)
+                    attributes.update(model.model_dump())
+                    attributes["objectclass"] += model.names()
                 output.append(LDAPAttributeAdaptor(attributes))
             except ValidationError as exc:
                 name = user_dict["cn"] if "cn" in user_dict else "unknown"

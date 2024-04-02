@@ -47,3 +47,6 @@ class LDAPPosixAccount(BaseModel):
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
         return uid_number
+
+    def names(self) -> list[str]:
+        return ["posixAccount"]

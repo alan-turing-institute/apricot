@@ -14,3 +14,6 @@ class LDAPGroupOfNames(BaseModel):
     cn: str
     description: str
     member: list[str]
+
+    def names(self) -> list[str]:
+        return ["groupOfNames"]

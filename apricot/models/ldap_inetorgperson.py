@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from .ldap_organizational_person import LDAPOrganizationalPerson
 
 
-class LDAPInetOrgPerson(BaseModel):
+class LDAPInetOrgPerson(LDAPOrganizationalPerson):
     """
     A person belonging to an internet/intranet directory service
 
@@ -15,3 +15,6 @@ class LDAPInetOrgPerson(BaseModel):
     displayName: str  # noqa: N815
     givenName: str  # noqa: N815
     sn: str
+
+    def names(self) -> list[str]:
+        return [*super().names(), "inetOrgPerson"]

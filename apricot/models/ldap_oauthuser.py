@@ -12,3 +12,6 @@ class LDAPOAuthUser(BaseModel):
     """
 
     oauth_username: str
+
+    def names(self) -> list[str]:
+        return ["oauthUser"]
