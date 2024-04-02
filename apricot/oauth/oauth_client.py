@@ -9,21 +9,11 @@ from oauthlib.oauth2 import (
     LegacyApplicationClient,
     TokenExpiredError,
 )
-from pydantic import ValidationError
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
 from apricot.cache import UidCache
-from apricot.models import (
-    LDAPAttributeAdaptor,
-    LDAPGroupOfNames,
-    LDAPInetOrgPerson,
-    LDAPInetUser,
-    LDAPOAuthUser,
-    LDAPPerson,
-    LDAPPosixAccount,
-    LDAPPosixGroup,
-)
+from apricot.models import LDAPAttributeAdaptor
 from apricot.types import JSONDict
 
 
@@ -96,6 +86,10 @@ class OAuthClient(ABC):
             msg = f"Failed to fetch bearer token from OAuth endpoint.\n{exc!s}"
             raise RuntimeError(msg) from exc
 
+    @property
+    def root_dn(self) -> str:
+        return "DC=" + self.domain.replace(".", ",DC=")
+
     @abstractmethod
     def extract_token(self, json_response: JSONDict) -> str:
         """
@@ -104,26 +98,18 @@ class OAuthClient(ABC):
         pass
 
     @abstractmethod
-    def groups(self) -> list[dict[str, Any]]:
+    def groups(self) -> list[LDAPAttributeAdaptor]:
         """
-        Return a list of group data
-
-        Each return value should be a dict where 'None' is used to signify a missing value
+        Return a list of LDAPAttributeAdaptors representing group data
         """
         pass
 
     @abstractmethod
-    def users(self) -> list[dict[str, Any]]:
+    def users(self) -> list[LDAPAttributeAdaptor]:
         """
-        Return a list of user data
-
-        Each return value should be a dict where 'None' is used to signify a missing value
+        Return a list of LDAPAttributeAdaptors representing user data
         """
         pass
-
-    @property
-    def root_dn(self) -> str:
-        return "DC=" + self.domain.replace(".", ",DC=")
 
     def query(self, url: str) -> dict[str, Any]:
         """
@@ -146,87 +132,6 @@ class OAuthClient(ABC):
             self.bearer_token_ = None
             result = query_(url)
         return result.json()  # type: ignore
-
-    def validated_groups(self) -> list[LDAPAttributeAdaptor]:
-        """
-        Validate output via pydantic and return a list of LDAPAttributeAdaptor
-        """
-        if self.debug:
-            log.msg("Constructing and validating list of groups")
-        output = []
-        # Add one self-titled group for each user
-        user_group_dicts = []
-        for user_dict in self.users():
-            user_dict["memberUid"] = [user_dict["uid"]]
-            user_dict["member"] = [f"CN={user_dict['cn']},OU=users,{self.root_dn}"]
-            # Group name is taken from 'cn' which should match the username
-            user_dict["cn"] = user_dict["uid"]
-            user_group_dicts.append(user_dict)
-        # Iterate over groups and validate them
-        for group_dict in self.groups() + user_group_dicts:
-            try:
-                attributes = {"objectclass": ["top"]}
-                # Add 'groupOfNames' attributes
-                group_of_names = LDAPGroupOfNames(**group_dict)
-                attributes.update(group_of_names.model_dump())
-                attributes["objectclass"].append("groupOfNames")
-                # Add 'posixGroup' attributes
-                posix_group = LDAPPosixGroup(**group_dict)
-                attributes.update(posix_group.model_dump())
-                attributes["objectclass"].append("posixGroup")
-                output.append(LDAPAttributeAdaptor(attributes))
-            except ValidationError as exc:
-                name = group_dict["cn"] if "cn" in group_dict else "unknown"
-                log.msg(f"Validation failed for group '{name}'.")
-                for error in exc.errors():
-                    log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
-                    )
-        return output
-
-    def validated_users(self) -> list[LDAPAttributeAdaptor]:
-        """
-        Validate output via pydantic and return a list of LDAPAttributeAdaptor
-        """
-        if self.debug:
-            log.msg("Constructing and validating list of users")
-        output = []
-        for user_dict in self.users():
-            try:
-                attributes = {"objectclass": ["top"]}
-                # Add user to self-titled group
-                user_dict["memberOf"].append(
-                    f"CN={user_dict['cn']},OU=groups,{self.root_dn}"
-                )
-                # Add 'inetOrgPerson' attributes
-                inetorg_person = LDAPInetOrgPerson(**user_dict)
-                attributes.update(inetorg_person.model_dump())
-                attributes["objectclass"].append("inetOrgPerson")
-                # Add 'inetUser' attributes
-                inet_user = LDAPInetUser(**user_dict)
-                attributes.update(inet_user.model_dump())
-                attributes["objectclass"].append("inetuser")
-                # Add 'person' attributes
-                person = LDAPPerson(**user_dict)
-                attributes.update(person.model_dump())
-                attributes["objectclass"].append("person")
-                # Add 'posixAccount' attributes
-                posix_account = LDAPPosixAccount(**user_dict)
-                attributes.update(posix_account.model_dump())
-                attributes["objectclass"].append("posixAccount")
-                # Add 'OAuthUser' attributes
-                oauth_user = LDAPOAuthUser(**user_dict)
-                attributes.update(oauth_user.model_dump())
-                attributes["objectclass"].append("oauthUser")
-                output.append(LDAPAttributeAdaptor(attributes))
-            except ValidationError as exc:
-                name = user_dict["cn"] if "cn" in user_dict else "unknown"
-                log.msg(f"Validation failed for user '{name}'.")
-                for error in exc.errors():
-                    log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
-                    )
-        return output
 
     def verify(self, username: str, password: str) -> bool:
         """Verify client connection details"""
