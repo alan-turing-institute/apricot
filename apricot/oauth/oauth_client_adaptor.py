@@ -42,13 +42,10 @@ class OAuthClientAdaptor(OAuthClient):
         """
         pass
 
-    def groups(self) -> list[LDAPAttributeAdaptor]:
+    def construct_user_primary_groups(self) -> list[dict[str, Any]]:
         """
-        Validate output via pydantic and return a list of LDAPAttributeAdaptor
+        Each user needs a self-titled primary group
         """
-        if self.debug:
-            log.msg("Constructing and validating list of groups")
-        output = []
         # Add one self-titled group for each user
         user_group_dicts = []
         for user_dict in list(self.unvalidated_users()):
@@ -57,8 +54,19 @@ class OAuthClientAdaptor(OAuthClient):
             # Group name is taken from 'cn' which should match the username
             user_dict["cn"] = user_dict["uid"]
             user_group_dicts.append(user_dict)
+        return user_group_dicts
+
+    def groups(self) -> list[LDAPAttributeAdaptor]:
+        """
+        Validate output via pydantic and return a list of LDAPAttributeAdaptor
+        """
+        if self.debug:
+            log.msg("Constructing and validating list of groups")
+        output = []
+        # Add one self-titled group for each user
+        user_primary_groups = self.construct_user_primary_groups()
         # Iterate over groups and validate them
-        for group_dict in self.unvalidated_groups() + user_group_dicts:
+        for group_dict in self.unvalidated_groups() + user_primary_groups:
             try:
                 attributes = {"objectclass": ["top"]}
                 # Add 'groupOfNames' attributes
