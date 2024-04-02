@@ -5,6 +5,15 @@ ID_MAX = 4294967295
 
 
 class LDAPPosixGroup(BaseModel):
+    """
+    Abstraction of a group of accounts
+
+    OID: 1.3.6.1.1.1.2.2
+    Object class: Auxiliary
+    Parent: top
+    Schema: rfc2307bis
+    """
+
     description: str
     gidNumber: int  # noqa: N815
     memberUid: list[str]  # noqa: N815

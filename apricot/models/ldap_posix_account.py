@@ -8,6 +8,15 @@ ID_MAX = 60000
 
 
 class LDAPPosixAccount(BaseModel):
+    """
+    Abstraction of an account with POSIX attributes
+
+    OID: 1.3.6.1.1.1.2.0
+    Object class: Auxiliary
+    Parent: top
+    Schema: rfc2307bis
+    """
+
     cn: str
     gidNumber: int  # noqa: N815
     homeDirectory: Annotated[  # noqa: N815

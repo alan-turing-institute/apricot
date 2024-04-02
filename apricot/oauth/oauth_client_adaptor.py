@@ -8,7 +8,6 @@ from apricot.models import (
     LDAPAttributeAdaptor,
     LDAPGroupOfNames,
     LDAPInetOrgPerson,
-    LDAPInetUser,
     LDAPOAuthUser,
     LDAPPerson,
     LDAPPosixAccount,
@@ -105,10 +104,6 @@ class OAuthClientAdaptor(OAuthClient):
                 inetorg_person = LDAPInetOrgPerson(**user_dict)
                 attributes.update(inetorg_person.model_dump())
                 attributes["objectclass"].append("inetOrgPerson")
-                # Add 'inetUser' attributes
-                inet_user = LDAPInetUser(**user_dict)
-                attributes.update(inet_user.model_dump())
-                attributes["objectclass"].append("inetuser")
                 # Add 'person' attributes
                 person = LDAPPerson(**user_dict)
                 attributes.update(person.model_dump())
