@@ -56,8 +56,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                     if user["userPrincipalName"]
                 ]
                 attributes["member"] = [
-                    f"CN={uid},OU=users,{self.root_dn}"
-                    for uid in attributes["memberUid"]
+                    self.user_dn_from_cn(uid) for uid in attributes["memberUid"]
                 ]
                 output.append(attributes)
         except KeyError:
@@ -104,7 +103,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                     f"https://graph.microsoft.com/v1.0/users/{user_dict['id']}/memberOf"
                 )
                 attributes["memberOf"] = [
-                    f"CN={group['displayName']},OU=groups,{self.root_dn}"
+                    self.group_dn_from_cn(group["displayName"])
                     for group in group_memberships["value"]
                     if group["displayName"]
                 ]

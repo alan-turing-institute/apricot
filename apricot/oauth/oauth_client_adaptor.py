@@ -41,6 +41,12 @@ class OAuthClientAdaptor(OAuthClient):
         """
         pass
 
+    def group_dn_from_cn(self, group_cn: str) -> str:
+        return f"CN={group_cn},OU=groups,{self.root_dn}"
+
+    def user_dn_from_cn(self, user_cn: str) -> str:
+        return f"CN={user_cn},OU=users,{self.root_dn}"
+
     def construct_user_primary_groups(self) -> list[dict[str, Any]]:
         """
         Each user needs a self-titled primary group
@@ -49,7 +55,7 @@ class OAuthClientAdaptor(OAuthClient):
         user_group_dicts = []
         for user_dict in list(self.unvalidated_users()):
             user_dict["memberUid"] = [user_dict["uid"]]
-            user_dict["member"] = [f"CN={user_dict['cn']},OU=users,{self.root_dn}"]
+            user_dict["member"] = [self.user_dn_from_cn(user_dict["cn"])]
             # Group name is taken from 'cn' which should match the username
             user_dict["cn"] = user_dict["uid"]
             user_group_dicts.append(user_dict)
@@ -97,9 +103,7 @@ class OAuthClientAdaptor(OAuthClient):
             try:
                 attributes = {"objectclass": ["top"]}
                 # Add user to self-titled group
-                user_dict["memberOf"].append(
-                    f"CN={user_dict['cn']},OU=groups,{self.root_dn}"
-                )
+                user_dict["memberOf"].append(self.group_dn_from_cn(user_dict["cn"]))
                 # Add 'inetOrgPerson' attributes
                 inetorg_person = LDAPInetOrgPerson(**user_dict)
                 attributes.update(inetorg_person.model_dump())
