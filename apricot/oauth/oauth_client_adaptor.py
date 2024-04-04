@@ -43,6 +43,17 @@ class OAuthClientAdaptor(OAuthClient):
         """
         pass
 
+    def extract_attributes(
+        self, input_dict: dict[str, Any], ldap_classes: Sequence[type[BaseModel]]
+    ) -> LDAPAttributeAdaptor:
+        """Add appropriate LDAP class attributes"""
+        attributes = {"objectclass": ["top"]}
+        for ldap_class in ldap_classes:
+            model = ldap_class(**input_dict)
+            attributes.update(model.model_dump())
+            attributes["objectclass"] += model.names()
+        return LDAPAttributeAdaptor(attributes)
+
     def group_dn_from_cn(self, group_cn: str) -> str:
         return f"CN={group_cn},OU=groups,{self.root_dn}"
 
@@ -85,13 +96,11 @@ class OAuthClientAdaptor(OAuthClient):
         # Iterate over groups and validate them
         for group_dict in self.unvalidated_groups() + user_primary_groups:
             try:
-                attributes = {"objectclass": ["top"]}
-                # Add appropriate LDAP class attributes
-                for ldap_class in self.ldap_group_classes:
-                    model = ldap_class(**group_dict)
-                    attributes.update(model.model_dump())
-                    attributes["objectclass"] += model.names()
-                output.append(LDAPAttributeAdaptor(attributes))
+                output.append(
+                    self.extract_attributes(
+                        group_dict, {LDAPGroupOfNames, LDAPPosixGroup}
+                    )
+                )
             except ValidationError as exc:
                 name = group_dict["cn"] if "cn" in group_dict else "unknown"
                 log.msg(f"Validation failed for group '{name}'.")
@@ -110,15 +119,13 @@ class OAuthClientAdaptor(OAuthClient):
         output = []
         for user_dict in list(self.unvalidated_users()):
             try:
-                attributes = {"objectclass": ["top"]}
                 # Add user to self-titled group
                 user_dict["memberOf"].append(self.group_dn_from_cn(user_dict["cn"]))
-                # Add appropriate LDAP class attributes
-                for ldap_class in self.ldap_user_classes:
-                    model = ldap_class(**user_dict)
-                    attributes.update(model.model_dump())
-                    attributes["objectclass"] += model.names()
-                output.append(LDAPAttributeAdaptor(attributes))
+                output.append(
+                    self.extract_attributes(
+                        user_dict, {LDAPInetOrgPerson, LDAPPosixAccount, LDAPOAuthUser}
+                    )
+                )
             except ValidationError as exc:
                 name = user_dict["cn"] if "cn" in user_dict else "unknown"
                 log.msg(f"Validation failed for user '{name}'.")
