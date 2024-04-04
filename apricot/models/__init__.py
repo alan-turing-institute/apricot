@@ -4,6 +4,7 @@ from .ldap_inetorgperson import LDAPInetOrgPerson
 from .ldap_posix_account import LDAPPosixAccount
 from .ldap_posix_group import LDAPPosixGroup
 from .named_ldap_class import NamedLDAPClass
+from .overlay_memberof import OverlayMemberOf
 from .overlay_oauthentry import OverlayOAuthEntry
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "LDAPPosixAccount",
     "LDAPPosixGroup",
     "NamedLDAPClass",
+    "OverlayMemberOf",
     "OverlayOAuthEntry",
 ]

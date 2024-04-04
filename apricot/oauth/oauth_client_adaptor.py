@@ -12,6 +12,7 @@ from apricot.models import (
     LDAPPosixAccount,
     LDAPPosixGroup,
     NamedLDAPClass,
+    OverlayMemberOf,
     OverlayOAuthEntry,
 )
 from apricot.types import JSONDict
@@ -97,7 +98,7 @@ class OAuthClientAdaptor(OAuthClient):
                 output.append(
                     self.extract_attributes(
                         group_dict,
-                        {LDAPGroupOfNames, LDAPPosixGroup, OverlayOAuthEntry},
+                        {LDAPGroupOfNames, LDAPPosixGroup, OverlayMemberOf, OverlayOAuthEntry},
                     )
                 )
             except ValidationError as exc:
@@ -123,7 +124,7 @@ class OAuthClientAdaptor(OAuthClient):
                 output.append(
                     self.extract_attributes(
                         user_dict,
-                        {LDAPInetOrgPerson, LDAPPosixAccount, OverlayOAuthEntry},
+                        {LDAPInetOrgPerson, LDAPPosixAccount, OverlayMemberOf, OverlayOAuthEntry},
                     )
                 )
             except ValidationError as exc:

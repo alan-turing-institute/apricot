@@ -3,7 +3,7 @@ from .named_ldap_class import NamedLDAPClass
 
 class OverlayOAuthEntry(NamedLDAPClass):
     """
-    Abstraction of an OAuth entry
+    Abstraction for tracking an OAuth entry
 
     OID: n/a
     Object class: Auxiliary
@@ -11,5 +11,5 @@ class OverlayOAuthEntry(NamedLDAPClass):
     Schema: n/a
     """
 
-    oauth_username: str
+    oauth_username: str | None = None
     oauth_id: str
