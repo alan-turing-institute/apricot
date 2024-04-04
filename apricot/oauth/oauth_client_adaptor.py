@@ -83,26 +83,13 @@ class OAuthClientAdaptor(OAuthClient):
         return user_group_dicts
 
     def groups(self) -> list[LDAPAttributeAdaptor]:
-        return self.ldap_groups
-
-    def users(self) -> list[LDAPAttributeAdaptor]:
-        return self.ldap_users
-
-    def refresh(self) -> None:
-        self.ldap_groups = self.refresh_groups()
-        self.ldap_users = self.refresh_users()
-
-    def refresh_groups(self) -> list[LDAPAttributeAdaptor]:
         """
         Validate output with pydantic and return a list of LDAPAttributeAdaptor
         """
         if self.debug:
             log.msg("Constructing and validating list of groups")
         output = []
-        # Add one self-titled group for each user
-        user_primary_groups = self.construct_user_primary_groups()
-        # Iterate over groups and validate them
-        for group_dict in self.unvalidated_groups() + user_primary_groups:
+        for group_dict in self.group_dicts:
             try:
                 output.append(
                     self.extract_attributes(
@@ -120,14 +107,18 @@ class OAuthClientAdaptor(OAuthClient):
                     )
         return output
 
-    def refresh_users(self) -> list[LDAPAttributeAdaptor]:
+    def refresh(self) -> None:
+        self.group_dicts = self.unvalidated_groups() + self.construct_user_primary_groups()
+        self.user_dicts = self.unvalidated_users()
+
+    def users(self) -> list[LDAPAttributeAdaptor]:
         """
         Validate output with pydantic and return a list of LDAPAttributeAdaptor
         """
         if self.debug:
             log.msg("Constructing and validating list of users")
         output = []
-        for user_dict in list(self.unvalidated_users()):
+        for user_dict in self.user_dicts:
             try:
                 # Add user to self-titled group
                 user_dict["memberOf"].append(self.group_dn_from_cn(user_dict["cn"]))
