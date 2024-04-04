@@ -97,7 +97,7 @@ class OAuthClientAdaptor(OAuthClient):
 
     def refresh(self) -> None:
         """
-        Obtain lists of users and groups.
+        Obtain lists of users and groups, and construct necessary meta-entries.
         """
         # Get the unvalidated users and groups
         _groups = self.unvalidated_groups()
@@ -130,6 +130,26 @@ class OAuthClientAdaptor(OAuthClient):
             group_dict["memberUid"] = []
             groups_of_groups.append(group_dict)
 
+        # Ensure memberOf is set correctly for users
+        for child_dict in _users:
+            child_dn = self.user_dn_from_cn(child_dict["cn"])
+            child_dict["memberOf"] = []
+            for parent_dict in _groups + user_primary_groups:
+                if child_dn in parent_dict["member"]:
+                    child_dict["memberOf"].append(
+                        self.group_dn_from_cn(parent_dict["cn"])
+                    )
+
+        # Ensure memberOf is set correctly for groups
+        for child_dict in _groups + user_primary_groups + groups_of_groups:
+            child_dn = self.group_dn_from_cn(child_dict["cn"])
+            child_dict["memberOf"] = []
+            for parent_dict in _groups + user_primary_groups + groups_of_groups:
+                if child_dn in parent_dict["member"]:
+                    child_dict["memberOf"].append(
+                        self.group_dn_from_cn(parent_dict["cn"])
+                    )
+
         self.group_dicts = _groups + user_primary_groups + groups_of_groups
         self.user_dicts = _users
 
@@ -142,8 +162,6 @@ class OAuthClientAdaptor(OAuthClient):
         output = []
         for user_dict in self.user_dicts:
             try:
-                # Add user to self-titled group
-                user_dict["memberOf"].append(self.group_dn_from_cn(user_dict["cn"]))
                 output.append(
                     self.extract_attributes(
                         user_dict,
