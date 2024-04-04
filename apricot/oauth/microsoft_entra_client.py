@@ -51,13 +51,15 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 members = self.query(
                     f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
                 )
+                attributes["member"] = [
+                    self.user_dn_from_cn(user["displayName"])
+                    for user in members["value"]
+                    if user["displayName"]
+                ]
                 attributes["memberUid"] = [
                     str(user["userPrincipalName"]).split("@")[0]
                     for user in members["value"]
                     if user["userPrincipalName"]
-                ]
-                attributes["member"] = [
-                    self.user_dn_from_cn(uid) for uid in attributes["memberUid"]
                 ]
                 output.append(attributes)
         except KeyError:

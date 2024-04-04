@@ -55,12 +55,6 @@ class OAuthClientAdaptor(OAuthClient):
             attributes["objectclass"] += model.names()
         return LDAPAttributeAdaptor(attributes)
 
-    def group_dn_from_cn(self, group_cn: str) -> str:
-        return f"CN={group_cn},OU=groups,{self.root_dn}"
-
-    def user_dn_from_cn(self, user_cn: str) -> str:
-        return f"CN={user_cn},OU=users,{self.root_dn}"
-
     def construct_user_primary_groups(self) -> list[dict[str, Any]]:
         """
         Each user needs a self-titled primary group

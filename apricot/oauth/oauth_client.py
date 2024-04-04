@@ -35,7 +35,7 @@ class OAuthClient(ABC):
         self.bearer_token_: str | None = None
         self.client_secret = client_secret
         self.debug = debug
-        self.domain = domain
+        self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.token_url = token_url
         self.uid_cache = uid_cache
         # Allow token scope to not match requested scope. (Other auth libraries allow
@@ -86,10 +86,6 @@ class OAuthClient(ABC):
             msg = f"Failed to fetch bearer token from OAuth endpoint.\n{exc!s}"
             raise RuntimeError(msg) from exc
 
-    @property
-    def root_dn(self) -> str:
-        return "DC=" + self.domain.replace(".", ",DC=")
-
     @abstractmethod
     def extract_token(self, json_response: JSONDict) -> str:
         """
@@ -118,6 +114,9 @@ class OAuthClient(ABC):
         """
         pass
 
+    def group_dn_from_cn(self, group_cn: str) -> str:
+        return f"CN={group_cn},OU=groups,{self.root_dn}"
+
     def query(self, url: str) -> dict[str, Any]:
         """
         Make a query against the OAuth backend
@@ -139,6 +138,9 @@ class OAuthClient(ABC):
             self.bearer_token_ = None
             result = query_(url)
         return result.json()  # type: ignore
+
+    def user_dn_from_cn(self, user_cn: str) -> str:
+        return f"CN={user_cn},OU=users,{self.root_dn}"
 
     def verify(self, username: str, password: str) -> bool:
         """Verify client connection details"""
