@@ -49,14 +49,25 @@ class OAuthClientAdaptor(OAuthClient):
     def extract_attributes(
         self,
         input_dict: JSONDict,
-        ldap_classes: Sequence[type[NamedLDAPClass]],
+        required_classes: Sequence[type[NamedLDAPClass]],
+        optional_classes: Sequence[type[NamedLDAPClass]],
     ) -> LDAPAttributeAdaptor:
         """Add appropriate LDAP class attributes"""
         attributes = {"objectclass": ["top"]}
-        for ldap_class in ldap_classes:
+        # Add required attributes
+        for ldap_class in required_classes:
             model = ldap_class(**input_dict)
             attributes.update(model.model_dump())
             attributes["objectclass"] += model.names()
+        # Attempt to add optional attributes
+        try:
+            for ldap_class in optional_classes:
+                model = ldap_class(**input_dict)
+                attributes.update(model.model_dump())
+                attributes["objectclass"] += model.names()
+        except ValidationError:
+            if self.debug:
+                log.msg(f"Could not parse input as a valid '{ldap_class.__name__}'.")
         return LDAPAttributeAdaptor(attributes)
 
     def construct_user_primary_groups(self) -> list[dict[str, Any]]:
@@ -85,7 +96,7 @@ class OAuthClientAdaptor(OAuthClient):
 
     def refresh_groups(self) -> list[LDAPAttributeAdaptor]:
         """
-        Validate output via pydantic and return a list of LDAPAttributeAdaptor
+        Validate output with pydantic and return a list of LDAPAttributeAdaptor
         """
         if self.debug:
             log.msg("Constructing and validating list of groups")
@@ -98,7 +109,8 @@ class OAuthClientAdaptor(OAuthClient):
                 output.append(
                     self.extract_attributes(
                         group_dict,
-                        {LDAPGroupOfNames, LDAPPosixGroup, OverlayMemberOf, OverlayOAuthEntry},
+                        required_classes=[LDAPGroupOfNames, OverlayMemberOf],
+                        optional_classes=[LDAPPosixGroup, OverlayOAuthEntry],
                     )
                 )
             except ValidationError as exc:
@@ -112,7 +124,7 @@ class OAuthClientAdaptor(OAuthClient):
 
     def refresh_users(self) -> list[LDAPAttributeAdaptor]:
         """
-        Validate output via pydantic and return a list of LDAPAttributeAdaptor
+        Validate output with pydantic and return a list of LDAPAttributeAdaptor
         """
         if self.debug:
             log.msg("Constructing and validating list of users")
@@ -124,7 +136,13 @@ class OAuthClientAdaptor(OAuthClient):
                 output.append(
                     self.extract_attributes(
                         user_dict,
-                        {LDAPInetOrgPerson, LDAPPosixAccount, OverlayMemberOf, OverlayOAuthEntry},
+                        required_classes=[
+                            LDAPInetOrgPerson,
+                            LDAPPosixAccount,
+                            OverlayMemberOf,
+                            OverlayOAuthEntry,
+                        ],
+                        optional_classes=[],
                     )
                 )
             except ValidationError as exc:
