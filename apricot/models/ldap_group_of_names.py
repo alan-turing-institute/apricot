@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from .named_ldap_class import NamedLDAPClass
 
 
-class LDAPGroupOfNames(BaseModel):
+class LDAPGroupOfNames(NamedLDAPClass):
     """
     A group with named members
 

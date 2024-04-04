@@ -1,13 +1,15 @@
 import re
 
-from pydantic import BaseModel, StringConstraints, validator
+from pydantic import StringConstraints, validator
 from typing_extensions import Annotated
+
+from .named_ldap_class import NamedLDAPClass
 
 ID_MIN = 2000
 ID_MAX = 60000
 
 
-class LDAPPosixAccount(BaseModel):
+class LDAPPosixAccount(NamedLDAPClass):
     """
     Abstraction of an account with POSIX attributes
 

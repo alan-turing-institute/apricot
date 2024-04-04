@@ -2,7 +2,7 @@ from abc import abstractmethod
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from twisted.python import log
 
 from apricot.models import (
@@ -12,6 +12,7 @@ from apricot.models import (
     LDAPOAuthUser,
     LDAPPosixAccount,
     LDAPPosixGroup,
+    NamedLDAPClass,
 )
 
 from .oauth_client import OAuthClient
@@ -44,7 +45,7 @@ class OAuthClientAdaptor(OAuthClient):
         pass
 
     def extract_attributes(
-        self, input_dict: dict[str, Any], ldap_classes: Sequence[type[BaseModel]]
+        self, input_dict: dict[str, Any], ldap_classes: Sequence[type[NamedLDAPClass]]
     ) -> LDAPAttributeAdaptor:
         """Add appropriate LDAP class attributes"""
         attributes = {"objectclass": ["top"]}

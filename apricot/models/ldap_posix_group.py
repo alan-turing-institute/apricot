@@ -1,10 +1,12 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
+
+from .named_ldap_class import NamedLDAPClass
 
 ID_MIN = 2000
 ID_MAX = 4294967295
 
 
-class LDAPPosixGroup(BaseModel):
+class LDAPPosixGroup(NamedLDAPClass):
     """
     Abstraction of a group of accounts
 

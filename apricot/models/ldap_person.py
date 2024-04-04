@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from .named_ldap_class import NamedLDAPClass
 
 
-class LDAPPerson(BaseModel):
+class LDAPPerson(NamedLDAPClass):
     """
     A named person
 

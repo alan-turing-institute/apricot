@@ -4,6 +4,7 @@ from .ldap_inetorgperson import LDAPInetOrgPerson
 from .ldap_oauthuser import LDAPOAuthUser
 from .ldap_posix_account import LDAPPosixAccount
 from .ldap_posix_group import LDAPPosixGroup
+from .named_ldap_class import NamedLDAPClass
 
 __all__ = [
     "LDAPAttributeAdaptor",
@@ -12,4 +13,5 @@ __all__ = [
     "LDAPOAuthUser",
     "LDAPPosixAccount",
     "LDAPPosixGroup",
+    "NamedLDAPClass",
 ]
