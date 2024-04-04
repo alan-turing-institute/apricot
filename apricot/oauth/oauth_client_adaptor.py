@@ -70,18 +70,6 @@ class OAuthClientAdaptor(OAuthClient):
                 log.msg(f"Could not parse input as a valid '{ldap_class.__name__}'.")
         return LDAPAttributeAdaptor(attributes)
 
-    def construct_user_primary_groups(self) -> list[dict[str, Any]]:
-        """
-        Each user needs a self-titled primary group
-        """
-        # Add one self-titled group for each user
-        user_group_dicts = []
-        for user_dict in list(self.unvalidated_users()):
-            user_dict["memberUid"] = [user_dict["uid"]]
-            user_dict["member"] = [self.user_dn_from_cn(user_dict["cn"])]
-            user_group_dicts.append(user_dict)
-        return user_group_dicts
-
     def groups(self) -> list[LDAPAttributeAdaptor]:
         """
         Validate output with pydantic and return a list of LDAPAttributeAdaptor
@@ -108,8 +96,26 @@ class OAuthClientAdaptor(OAuthClient):
         return output
 
     def refresh(self) -> None:
-        self.group_dicts = self.unvalidated_groups() + self.construct_user_primary_groups()
-        self.user_dicts = self.unvalidated_users()
+        """
+        Obtain lists of users and groups.
+        """
+        # Get the unvalidated users and groups
+        _groups = self.unvalidated_groups()
+        _users = self.unvalidated_users()
+
+        # Add one self-titled group for each user
+        # Group name is taken from 'cn' which should match the username
+        user_primary_groups = []
+        for user in _users:
+            group_dict = {}
+            for attr in ("cn", "description", "gidNumber"):
+                group_dict[attr] = user[attr]
+            group_dict["member"] = [self.user_dn_from_cn(user["cn"])]
+            group_dict["memberUid"] = [user["uid"]]
+            user_primary_groups.append(group_dict)
+
+        self.group_dicts = _groups + user_primary_groups
+        self.user_dicts = _users
 
     def users(self) -> list[LDAPAttributeAdaptor]:
         """
