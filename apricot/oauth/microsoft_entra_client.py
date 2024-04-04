@@ -26,7 +26,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
     def extract_token(self, json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def unvalidated_groups(self) -> list[dict[str, Any]]:
+    def unvalidated_groups(self) -> list[JSONDict]:
         output = []
         try:
             queries = [
@@ -38,11 +38,11 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
             )
             for group_dict in cast(
-                list[dict[str, Any]],
+                list[JSONDict],
                 sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
             ):
                 group_uid = self.uid_cache.get_group_uid(group_dict["id"])
-                attributes = {}
+                attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("displayName", None)
                 attributes["description"] = group_dict.get("id", None)
                 attributes["gidNumber"] = group_uid
@@ -66,7 +66,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
             pass
         return output
 
-    def unvalidated_users(self) -> list[dict[str, Any]]:
+    def unvalidated_users(self) -> list[JSONDict]:
         output = []
         try:
             queries = [
@@ -81,7 +81,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}"
             )
             for user_dict in cast(
-                list[dict[str, Any]],
+                list[JSONDict],
                 sorted(user_data["value"], key=lambda user: user["createdDateTime"]),
             ):
                 # Get user attributes
@@ -89,7 +89,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 surname = user_dict.get("surname", None)
                 uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
                 user_uid = self.uid_cache.get_user_uid(user_dict["id"])
-                attributes = {}
+                attributes: JSONDict = {}
                 attributes["cn"] = user_dict.get("displayName", None)
                 attributes["description"] = user_dict.get("id", None)
                 attributes["displayName"] = user_dict.get("displayName", None)

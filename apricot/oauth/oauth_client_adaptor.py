@@ -14,6 +14,7 @@ from apricot.models import (
     NamedLDAPClass,
     OverlayOAuthEntry,
 )
+from apricot.types import JSONDict
 
 from .oauth_client import OAuthClient
 
@@ -22,12 +23,12 @@ class OAuthClientAdaptor(OAuthClient):
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(self, **kwargs: Any):
-        self.ldap_groups: list[LDAPAttributeAdaptor] = []
-        self.ldap_users: list[LDAPAttributeAdaptor] = []
+        self.group_dicts: list[JSONDict] = []
+        self.user_dicts: list[JSONDict] = []
         super().__init__(**kwargs)
 
     @abstractmethod
-    def unvalidated_groups(self) -> list[dict[str, Any]]:
+    def unvalidated_groups(self) -> list[JSONDict]:
         """
         Return a list of group data
 
@@ -36,7 +37,7 @@ class OAuthClientAdaptor(OAuthClient):
         pass
 
     @abstractmethod
-    def unvalidated_users(self) -> list[dict[str, Any]]:
+    def unvalidated_users(self) -> list[JSONDict]:
         """
         Return a list of user data
 
@@ -45,7 +46,9 @@ class OAuthClientAdaptor(OAuthClient):
         pass
 
     def extract_attributes(
-        self, input_dict: dict[str, Any], ldap_classes: Sequence[type[NamedLDAPClass]]
+        self,
+        input_dict: JSONDict,
+        ldap_classes: Sequence[type[NamedLDAPClass]],
     ) -> LDAPAttributeAdaptor:
         """Add appropriate LDAP class attributes"""
         attributes = {"objectclass": ["top"]}
