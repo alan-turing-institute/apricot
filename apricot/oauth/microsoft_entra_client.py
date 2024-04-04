@@ -46,6 +46,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 attributes["cn"] = group_dict.get("displayName", None)
                 attributes["description"] = group_dict.get("id", None)
                 attributes["gidNumber"] = group_uid
+                attributes["oauth_id"] = group_dict.get("id", None)
                 # Add membership attributes
                 members = self.query(
                     f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
@@ -94,6 +95,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 attributes["gidNumber"] = user_uid
                 attributes["givenName"] = given_name if given_name else ""
                 attributes["homeDirectory"] = f"/home/{uid}" if uid else None
+                attributes["oauth_id"] = user_dict.get("id", None)
                 attributes["oauth_username"] = user_dict.get("userPrincipalName", None)
                 attributes["sn"] = surname if surname else ""
                 attributes["uid"] = uid if uid else None

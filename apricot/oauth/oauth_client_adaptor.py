@@ -9,10 +9,10 @@ from apricot.models import (
     LDAPAttributeAdaptor,
     LDAPGroupOfNames,
     LDAPInetOrgPerson,
-    LDAPOAuthUser,
     LDAPPosixAccount,
     LDAPPosixGroup,
     NamedLDAPClass,
+    OverlayOAuthEntry,
 )
 
 from .oauth_client import OAuthClient
@@ -99,7 +99,8 @@ class OAuthClientAdaptor(OAuthClient):
             try:
                 output.append(
                     self.extract_attributes(
-                        group_dict, {LDAPGroupOfNames, LDAPPosixGroup}
+                        group_dict,
+                        {LDAPGroupOfNames, LDAPPosixGroup, OverlayOAuthEntry},
                     )
                 )
             except ValidationError as exc:
@@ -124,7 +125,8 @@ class OAuthClientAdaptor(OAuthClient):
                 user_dict["memberOf"].append(self.group_dn_from_cn(user_dict["cn"]))
                 output.append(
                     self.extract_attributes(
-                        user_dict, {LDAPInetOrgPerson, LDAPPosixAccount, LDAPOAuthUser}
+                        user_dict,
+                        {LDAPInetOrgPerson, LDAPPosixAccount, OverlayOAuthEntry},
                     )
                 )
             except ValidationError as exc:
