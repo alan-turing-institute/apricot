@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Sequence
 from typing import Any
 
 from pydantic import BaseModel, ValidationError
@@ -20,12 +21,8 @@ class OAuthClientAdaptor(OAuthClient):
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(self, **kwargs: Any):
-        self.ldap_group_classes: set[BaseModel] = {LDAPGroupOfNames, LDAPPosixGroup}
-        self.ldap_user_classes: set[BaseModel] = {
-            LDAPInetOrgPerson,
-            LDAPPosixAccount,
-            LDAPOAuthUser,
-        }
+        self.ldap_groups: list[LDAPAttributeAdaptor] = []
+        self.ldap_users: list[LDAPAttributeAdaptor] = []
         super().__init__(**kwargs)
 
     @abstractmethod
@@ -67,6 +64,16 @@ class OAuthClientAdaptor(OAuthClient):
         return user_group_dicts
 
     def groups(self) -> list[LDAPAttributeAdaptor]:
+        return self.ldap_groups
+
+    def users(self) -> list[LDAPAttributeAdaptor]:
+        return self.ldap_users
+
+    def refresh(self) -> None:
+        self.ldap_groups = self.refresh_groups()
+        self.ldap_users = self.refresh_users()
+
+    def refresh_groups(self) -> list[LDAPAttributeAdaptor]:
         """
         Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """
@@ -94,7 +101,7 @@ class OAuthClientAdaptor(OAuthClient):
                     )
         return output
 
-    def users(self) -> list[LDAPAttributeAdaptor]:
+    def refresh_users(self) -> list[LDAPAttributeAdaptor]:
         """
         Validate output via pydantic and return a list of LDAPAttributeAdaptor
         """

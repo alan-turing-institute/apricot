@@ -56,14 +56,19 @@ class OAuthLDAPTree:
             users_ou = self.root_.add_child(
                 "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
             )
+            self.oauth_client.refresh()
             # Add groups to the groups OU
             if self.debug:
-                log.msg("Adding groups to the LDAP tree.")
+                log.msg(
+                    f"Adding {len(self.oauth_client.groups())} groups to the LDAP tree."
+                )
             for group_attrs in self.oauth_client.groups():
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
             # Add users to the users OU
             if self.debug:
-                log.msg("Adding users to the LDAP tree.")
+                log.msg(
+                    f"Adding {len(self.oauth_client.users())} users to the LDAP tree."
+                )
             for user_attrs in self.oauth_client.users():
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
             # Set last updated time

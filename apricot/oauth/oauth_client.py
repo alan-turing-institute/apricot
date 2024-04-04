@@ -98,6 +98,13 @@ class OAuthClient(ABC):
         pass
 
     @abstractmethod
+    def refresh(self) -> None:
+        """
+        Refresh the list of users and groups
+        """
+        pass
+
+    @abstractmethod
     def groups(self) -> list[LDAPAttributeAdaptor]:
         """
         Return a list of LDAPAttributeAdaptors representing group data
