@@ -114,7 +114,23 @@ class OAuthClientAdaptor(OAuthClient):
             group_dict["memberUid"] = [user["uid"]]
             user_primary_groups.append(group_dict)
 
-        self.group_dicts = _groups + user_primary_groups
+        # Add one group of groups for each existing group.
+        # Its members are the primary user groups for each original group member.
+        groups_of_groups = []
+        for group in _groups:
+            group_dict = {}
+            group_dict["cn"] = f"User groups for {group['cn']}"
+            group_dict["description"] = f"User groups for '{group['cn']}'"
+            # Replace each member user with a member group
+            group_dict["member"] = [
+                str(member).replace("OU=users", "OU=groups")
+                for member in group["member"]
+            ]
+            # Groups do not have UIDs so memberUid must be empty
+            group_dict["memberUid"] = []
+            groups_of_groups.append(group_dict)
+
+        self.group_dicts = _groups + user_primary_groups + groups_of_groups
         self.user_dicts = _users
 
     def users(self) -> list[LDAPAttributeAdaptor]:
