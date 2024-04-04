@@ -79,8 +79,6 @@ class OAuthClientAdaptor(OAuthClient):
         for user_dict in list(self.unvalidated_users()):
             user_dict["memberUid"] = [user_dict["uid"]]
             user_dict["member"] = [self.user_dn_from_cn(user_dict["cn"])]
-            # Group name is taken from 'cn' which should match the username
-            user_dict["cn"] = user_dict["uid"]
             user_group_dicts.append(user_dict)
         return user_group_dicts
 

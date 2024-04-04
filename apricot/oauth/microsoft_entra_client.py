@@ -52,7 +52,7 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                     f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
                 )
                 attributes["member"] = [
-                    self.user_dn_from_cn(user["displayName"])
+                    self.user_dn_from_cn(str(user["userPrincipalName"]).split("@")[0])
                     for user in members["value"]
                     if user["displayName"]
                 ]
@@ -90,8 +90,8 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
                 user_uid = self.uid_cache.get_user_uid(user_dict["id"])
                 attributes: JSONDict = {}
-                attributes["cn"] = user_dict.get("displayName", None)
-                attributes["description"] = user_dict.get("id", None)
+                attributes["cn"] = uid if uid else None
+                attributes["description"] = user_dict.get("displayName", None)
                 attributes["displayName"] = user_dict.get("displayName", None)
                 attributes["domain"] = domain
                 attributes["gidNumber"] = user_uid
