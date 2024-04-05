@@ -25,8 +25,15 @@ class OAuthDataAdaptor:
         self.debug = oauth_client.debug
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
-        self.validated_groups: list[LDAPAttributeAdaptor] = []
-        self.validated_users: list[LDAPAttributeAdaptor] = []
+
+        # Retrieve and validate user and group information
+        annotated_groups, annotated_users = self._retrieve_entries()
+        self.validated_groups = self._validate_groups(annotated_groups)
+        self.validated_users = self._validate_users(annotated_users)
+        if self.debug:
+            log.msg(
+                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users."
+            )
 
     @property
     def groups(self) -> list[LDAPAttributeAdaptor]:
@@ -42,7 +49,31 @@ class OAuthDataAdaptor:
         """
         return self.validated_users
 
-    def refresh(self) -> None:
+    def _dn_from_group_cn(self, group_cn: str) -> str:
+        return f"CN={group_cn},OU=groups,{self.root_dn}"
+
+    def _dn_from_user_cn(self, user_cn: str) -> str:
+        return f"CN={user_cn},OU=users,{self.root_dn}"
+
+    def _extract_attributes(
+        self,
+        input_dict: JSONDict,
+        required_classes: Sequence[type[NamedLDAPClass]],
+    ) -> LDAPAttributeAdaptor:
+        """Add appropriate LDAP class attributes"""
+        attributes = {"objectclass": ["top"]}
+        for ldap_class in required_classes:
+            model = ldap_class(**input_dict)
+            attributes.update(model.model_dump())
+            attributes["objectclass"] += model.names()
+        return LDAPAttributeAdaptor(attributes)
+
+    def _retrieve_entries(
+        self,
+    ) -> tuple[
+        list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
+        list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
+    ]:
         """
         Obtain lists of users and groups, and construct necessary meta-entries.
         """
@@ -134,33 +165,7 @@ class OAuthDataAdaptor:
             )
             for user in oauth_users
         ]
-
-        # Validate user and group information
-        self.validated_groups = self._validate_groups(annotated_groups)
-        self.validated_users = self._validate_users(annotated_users)
-        if self.debug:
-            log.msg(
-                f"Generated {len(self.validated_groups)} groups and {len(self.validated_users)} users."
-            )
-
-    def _dn_from_group_cn(self, group_cn: str) -> str:
-        return f"CN={group_cn},OU=groups,{self.root_dn}"
-
-    def _dn_from_user_cn(self, user_cn: str) -> str:
-        return f"CN={user_cn},OU=users,{self.root_dn}"
-
-    def _extract_attributes(
-        self,
-        input_dict: JSONDict,
-        required_classes: Sequence[type[NamedLDAPClass]],
-    ) -> LDAPAttributeAdaptor:
-        """Add appropriate LDAP class attributes"""
-        attributes = {"objectclass": ["top"]}
-        for ldap_class in required_classes:
-            model = ldap_class(**input_dict)
-            attributes.update(model.model_dump())
-            attributes["objectclass"] += model.names()
-        return LDAPAttributeAdaptor(attributes)
+        return (annotated_groups, annotated_users)
 
     def _validate_groups(
         self, annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]]
