@@ -120,7 +120,9 @@ class OAuthClientAdaptor(OAuthClient):
         for group in _groups:
             group_dict = {}
             group_dict["cn"] = f"Primary user groups for {group['cn']}"
-            group_dict["description"] = f"Primary user groups for members of '{group['cn']}'"
+            group_dict["description"] = (
+                f"Primary user groups for members of '{group['cn']}'"
+            )
             # Replace each member user with a member group
             group_dict["member"] = [
                 str(member).replace("OU=users", "OU=groups")

@@ -42,13 +42,16 @@ class OAuthLDAPTree:
             not self.root_
             or (time.monotonic() - self.last_update) > self.refresh_interval
         ):
-            log.msg("Rebuilding LDAP tree from OAuth data.")
+            log.msg("Rebuilding LDAP tree.")
             # Create a root node for the tree
             self.root_ = OAuthLDAPEntry(
                 dn=self.oauth_client.root_dn,
                 attributes={"objectClass": ["dcObject"]},
                 oauth_client=self.oauth_client,
             )
+            # Update users and groups from the OAuth server
+            log.msg("Retrieving OAuth data.")
+            self.oauth_client.refresh()
             # Add OUs for users and groups
             groups_ou = self.root_.add_child(
                 "OU=groups", {"ou": ["groups"], "objectClass": ["organizationalUnit"]}
@@ -56,7 +59,6 @@ class OAuthLDAPTree:
             users_ou = self.root_.add_child(
                 "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
             )
-            self.oauth_client.refresh()
             # Add groups to the groups OU
             if self.debug:
                 log.msg(
