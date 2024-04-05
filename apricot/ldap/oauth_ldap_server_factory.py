@@ -8,14 +8,14 @@ from .read_only_ldap_server import ReadOnlyLDAPServer
 
 
 class OAuthLDAPServerFactory(ServerFactory):
-    def __init__(self, oauth_client: OAuthClient):
+    def __init__(self, domain: str, oauth_client: OAuthClient):
         """
         Initialise an LDAPServerFactory
 
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
         # Create an LDAP lookup tree
-        self.adaptor = OAuthLDAPTree(oauth_client)
+        self.adaptor = OAuthLDAPTree(domain, oauth_client)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} using adaptor {self.adaptor}"

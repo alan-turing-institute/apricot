@@ -13,7 +13,6 @@ from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
 from apricot.cache import UidCache
-from apricot.models import LDAPAttributeAdaptor
 from apricot.types import JSONDict
 
 
@@ -25,7 +24,6 @@ class OAuthClient(ABC):
         client_id: str,
         client_secret: str,
         debug: bool,  # noqa: FBT001
-        domain: str,
         redirect_uri: str,
         scopes: list[str],
         token_url: str,
@@ -35,7 +33,6 @@ class OAuthClient(ABC):
         self.bearer_token_: str | None = None
         self.client_secret = client_secret
         self.debug = debug
-        self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.token_url = token_url
         self.uid_cache = uid_cache
         # Allow token scope to not match requested scope. (Other auth libraries allow
@@ -71,7 +68,9 @@ class OAuthClient(ABC):
 
     @property
     def bearer_token(self) -> str:
-        """Return a bearer token, requesting a new one if necessary"""
+        """
+        Return a bearer token, requesting a new one if necessary
+        """
         try:
             if not self.bearer_token_:
                 log.msg("Requesting a new authentication token from the OAuth backend.")
@@ -94,28 +93,20 @@ class OAuthClient(ABC):
         pass
 
     @abstractmethod
-    def refresh(self) -> None:
+    def groups(self) -> list[JSONDict]:
         """
-        Refresh the list of users and groups
-        """
-        pass
-
-    @abstractmethod
-    def groups(self) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing group data
+        Return JSON data about groups from the OAuth backend.
+        This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
         pass
 
     @abstractmethod
-    def users(self) -> list[LDAPAttributeAdaptor]:
+    def users(self) -> list[JSONDict]:
         """
-        Return a list of LDAPAttributeAdaptors representing user data
+        Return JSON data about users from the OAuth backend.
+        This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
         pass
-
-    def group_dn_from_cn(self, group_cn: str) -> str:
-        return f"CN={group_cn},OU=groups,{self.root_dn}"
 
     def query(self, url: str) -> dict[str, Any]:
         """
@@ -139,11 +130,10 @@ class OAuthClient(ABC):
             result = query_(url)
         return result.json()  # type: ignore
 
-    def user_dn_from_cn(self, user_cn: str) -> str:
-        return f"CN={user_cn},OU=users,{self.root_dn}"
-
     def verify(self, username: str, password: str) -> bool:
-        """Verify client connection details"""
+        """
+        Verify username and password by attempting to authenticate against the OAuth backend.
+        """
         try:
             self.session_interactive.fetch_token(
                 token_url=self.token_url,

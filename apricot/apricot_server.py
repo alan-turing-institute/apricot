@@ -49,7 +49,6 @@ class ApricotServer:
                 client_id=client_id,
                 client_secret=client_secret,
                 debug=debug,
-                domain=domain,
                 uid_cache=uid_cache,
                 **kwargs,
             )
@@ -60,7 +59,7 @@ class ApricotServer:
         # Create an LDAPServerFactory
         if self.debug:
             log.msg("Creating an LDAPServerFactory.")
-        factory = OAuthLDAPServerFactory(oauth_client)
+        factory = OAuthLDAPServerFactory(domain, oauth_client)
 
         # Attach a listening endpoint
         if self.debug:

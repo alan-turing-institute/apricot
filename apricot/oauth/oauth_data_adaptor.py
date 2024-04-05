@@ -1,6 +1,4 @@
-from abc import abstractmethod
 from collections.abc import Sequence
-from typing import Any
 
 from pydantic import ValidationError
 from twisted.python import log
@@ -20,31 +18,21 @@ from apricot.types import JSONDict
 from .oauth_client import OAuthClient
 
 
-class OAuthDataAdaptor(OAuthClient):
+class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
-    def __init__(self, **kwargs: Any):
+    def __init__(self, domain: str, oauth_client: OAuthClient):
+        self.debug = oauth_client.debug
         self.group_dicts: list[JSONDict] = []
+        self.oauth_client = oauth_client
+        self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.user_dicts: list[JSONDict] = []
-        super().__init__(**kwargs)
 
-    @abstractmethod
-    def unvalidated_groups(self) -> list[JSONDict]:
-        """
-        Return a list of group data
+    def dn_from_group_cn(self, group_cn: str) -> str:
+        return f"CN={group_cn},OU=groups,{self.root_dn}"
 
-        Each return value should be a dict where 'None' is used to signify a missing value
-        """
-        pass
-
-    @abstractmethod
-    def unvalidated_users(self) -> list[JSONDict]:
-        """
-        Return a list of user data
-
-        Each return value should be a dict where 'None' is used to signify a missing value
-        """
-        pass
+    def dn_from_user_cn(self, user_cn: str) -> str:
+        return f"CN={user_cn},OU=users,{self.root_dn}"
 
     def extract_attributes(
         self,
@@ -72,7 +60,7 @@ class OAuthDataAdaptor(OAuthClient):
 
     def groups(self) -> list[LDAPAttributeAdaptor]:
         """
-        Validate output with pydantic and return a list of LDAPAttributeAdaptor
+        Return a list of LDAPAttributeAdaptors representing validated group data.
         """
         if self.debug:
             log.msg("Constructing and validating list of groups.")
@@ -99,14 +87,14 @@ class OAuthDataAdaptor(OAuthClient):
         """
         Obtain lists of users and groups, and construct necessary meta-entries.
         """
-        # Get the unvalidated users and groups
-        _groups = self.unvalidated_groups()
-        _users = self.unvalidated_users()
+        # Get the initial set of users and groups
+        _groups = self.oauth_client.groups()
+        _users = self.oauth_client.users()
 
         # Ensure member is set for groups
         for group_dict in _groups:
             group_dict["member"] = [
-                self.user_dn_from_cn(user["cn"]) for user in group_dict["memberUid"]
+                self.dn_from_user_cn(user_cn) for user_cn in group_dict["memberUid"]
             ]
 
         # Add one self-titled group for each user
@@ -116,7 +104,7 @@ class OAuthDataAdaptor(OAuthClient):
             group_dict = {}
             for attr in ("cn", "description", "gidNumber"):
                 group_dict[attr] = user[attr]
-            group_dict["member"] = [self.user_dn_from_cn(user["cn"])]
+            group_dict["member"] = [self.dn_from_user_cn(user["cn"])]
             group_dict["memberUid"] = [user["cn"]]
             user_primary_groups.append(group_dict)
 
@@ -144,25 +132,25 @@ class OAuthDataAdaptor(OAuthClient):
 
         # Ensure memberOf is set correctly for users
         for child_dict in _users:
-            child_dn = self.user_dn_from_cn(child_dict["cn"])
+            child_dn = self.dn_from_user_cn(child_dict["cn"])
             child_dict["memberOf"] = [
-                self.group_dn_from_cn(parent_dict["cn"])
+                self.dn_from_group_cn(parent_dict["cn"])
                 for parent_dict in self.group_dicts
                 if child_dn in parent_dict["member"]
             ]
 
         # Ensure memberOf is set correctly for groups
         for child_dict in self.group_dicts:
-            child_dn = self.group_dn_from_cn(child_dict["cn"])
+            child_dn = self.dn_from_group_cn(child_dict["cn"])
             child_dict["memberOf"] = [
-                self.group_dn_from_cn(parent_dict["cn"])
+                self.dn_from_group_cn(parent_dict["cn"])
                 for parent_dict in self.group_dicts
                 if child_dn in parent_dict["member"]
             ]
 
     def users(self) -> list[LDAPAttributeAdaptor]:
         """
-        Validate output with pydantic and return a list of LDAPAttributeAdaptor
+        Return a list of LDAPAttributeAdaptors representing validated user data.
         """
         if self.debug:
             log.msg("Constructing and validating list of users.")

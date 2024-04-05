@@ -2,10 +2,10 @@ from typing import Any, cast
 
 from apricot.types import JSONDict
 
-from .oauth_data_adaptor import OAuthDataAdaptor
+from .oauth_client import OAuthClient
 
 
-class MicrosoftEntraClient(OAuthDataAdaptor):
+class MicrosoftEntraClient(OAuthClient):
     """OAuth client for the Microsoft Entra backend."""
 
     def __init__(
@@ -26,7 +26,7 @@ class MicrosoftEntraClient(OAuthDataAdaptor):
     def extract_token(self, json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def unvalidated_groups(self) -> list[JSONDict]:
+    def groups(self) -> list[JSONDict]:
         output = []
         try:
             queries = [
@@ -61,7 +61,7 @@ class MicrosoftEntraClient(OAuthDataAdaptor):
             pass
         return output
 
-    def unvalidated_users(self) -> list[JSONDict]:
+    def users(self) -> list[JSONDict]:
         output = []
         try:
             queries = [
