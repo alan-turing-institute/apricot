@@ -2,10 +2,10 @@ from typing import Any, cast
 
 from apricot.types import JSONDict
 
-from .oauth_client_adaptor import OAuthClientAdaptor
+from .oauth_data_adaptor import OAuthDataAdaptor
 
 
-class MicrosoftEntraClient(OAuthClientAdaptor):
+class MicrosoftEntraClient(OAuthDataAdaptor):
     """OAuth client for the Microsoft Entra backend."""
 
     def __init__(

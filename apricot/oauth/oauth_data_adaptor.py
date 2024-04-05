@@ -20,7 +20,7 @@ from apricot.types import JSONDict
 from .oauth_client import OAuthClient
 
 
-class OAuthClientAdaptor(OAuthClient):
+class OAuthDataAdaptor(OAuthClient):
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(self, **kwargs: Any):
