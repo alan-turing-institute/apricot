@@ -1,13 +1,24 @@
 import re
 
-from pydantic import BaseModel, StringConstraints, validator
+from pydantic import StringConstraints, validator
 from typing_extensions import Annotated
+
+from .named_ldap_class import NamedLDAPClass
 
 ID_MIN = 2000
 ID_MAX = 60000
 
 
-class LDAPPosixAccount(BaseModel):
+class LDAPPosixAccount(NamedLDAPClass):
+    """
+    Abstraction of an account with POSIX attributes
+
+    OID: 1.3.6.1.1.1.2.0
+    Object class: Auxiliary
+    Parent: top
+    Schema: rfc2307bis
+    """
+
     cn: str
     gidNumber: int  # noqa: N815
     homeDirectory: Annotated[  # noqa: N815
@@ -38,3 +49,6 @@ class LDAPPosixAccount(BaseModel):
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
         return uid_number
+
+    def names(self) -> list[str]:
+        return ["posixAccount"]

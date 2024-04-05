@@ -26,7 +26,7 @@ class MicrosoftEntraClient(OAuthClient):
     def extract_token(self, json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def groups(self) -> list[dict[str, Any]]:
+    def groups(self) -> list[JSONDict]:
         output = []
         try:
             queries = [
@@ -38,14 +38,15 @@ class MicrosoftEntraClient(OAuthClient):
                 f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
             )
             for group_dict in cast(
-                list[dict[str, Any]],
+                list[JSONDict],
                 sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
             ):
                 group_uid = self.uid_cache.get_group_uid(group_dict["id"])
-                attributes = {}
+                attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("displayName", None)
                 attributes["description"] = group_dict.get("id", None)
                 attributes["gidNumber"] = group_uid
+                attributes["oauth_id"] = group_dict.get("id", None)
                 # Add membership attributes
                 members = self.query(
                     f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
@@ -55,16 +56,12 @@ class MicrosoftEntraClient(OAuthClient):
                     for user in members["value"]
                     if user["userPrincipalName"]
                 ]
-                attributes["member"] = [
-                    f"CN={uid},OU=users,{self.root_dn}"
-                    for uid in attributes["memberUid"]
-                ]
                 output.append(attributes)
         except KeyError:
             pass
         return output
 
-    def users(self) -> list[dict[str, Any]]:
+    def users(self) -> list[JSONDict]:
         output = []
         try:
             queries = [
@@ -79,7 +76,7 @@ class MicrosoftEntraClient(OAuthClient):
                 f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}"
             )
             for user_dict in cast(
-                list[dict[str, Any]],
+                list[JSONDict],
                 sorted(user_data["value"], key=lambda user: user["createdDateTime"]),
             ):
                 # Get user attributes
@@ -87,27 +84,19 @@ class MicrosoftEntraClient(OAuthClient):
                 surname = user_dict.get("surname", None)
                 uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
                 user_uid = self.uid_cache.get_user_uid(user_dict["id"])
-                attributes = {}
-                attributes["cn"] = user_dict.get("displayName", None)
-                attributes["description"] = user_dict.get("id", None)
+                attributes: JSONDict = {}
+                attributes["cn"] = uid if uid else None
+                attributes["description"] = user_dict.get("displayName", None)
                 attributes["displayName"] = user_dict.get("displayName", None)
                 attributes["domain"] = domain
                 attributes["gidNumber"] = user_uid
                 attributes["givenName"] = given_name if given_name else ""
                 attributes["homeDirectory"] = f"/home/{uid}" if uid else None
+                attributes["oauth_id"] = user_dict.get("id", None)
                 attributes["oauth_username"] = user_dict.get("userPrincipalName", None)
                 attributes["sn"] = surname if surname else ""
                 attributes["uid"] = uid if uid else None
                 attributes["uidNumber"] = user_uid
-                # Add group attributes
-                group_memberships = self.query(
-                    f"https://graph.microsoft.com/v1.0/users/{user_dict['id']}/memberOf"
-                )
-                attributes["memberOf"] = [
-                    f"CN={group['displayName']},OU=groups,{self.root_dn}"
-                    for group in group_memberships["value"]
-                    if group["displayName"]
-                ]
                 output.append(attributes)
         except KeyError:
             pass

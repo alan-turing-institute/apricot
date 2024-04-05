@@ -46,11 +46,12 @@ Each user will have an entry like
 ```ldif
 dn: CN=<user name>,OU=users,DC=<your domain>
 objectClass: inetOrgPerson
-objectClass: inetuser
+objectClass: organizationalPerson
 objectClass: person
 objectClass: posixAccount
 objectClass: top
 <user data fields here>
+memberOf: <DN for each group that this user belongs to>
 ```
 
 Each group will have an entry like
@@ -61,6 +62,64 @@ objectClass: groupOfNames
 objectClass: posixGroup
 objectClass: top
 <group data fields here>
+member: <DN for each user belonging to this group>
+```
+
+## Primary groups
+
+Note that each user will have an associated group to act as its POSIX user primary group
+
+For example:
+
+```ldif
+dn: CN=sherlock.holmes,OU=users,DC=<your domain>
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: posixAccount
+objectClass: top
+...
+memberOf: CN=sherlock.holmes,OU=groups,DC=<your domain>
+...
+```
+
+will have an associated group
+
+```ldif
+dn: CN=sherlock.holmes,OU=groups,DC=<your domain>
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=<your domain>
+...
+```
+
+## Mirrored groups
+
+Each group of users will have an associated group-of-groups where each user in the group will have its user primary group in the group-of-groups.
+Note that these groups-of-groups are **not** `posixGroup`s as POSIX does not allow nested groups.
+
+For example:
+
+```ldif
+dn:CN=Detectives,OU=groups,DC=<your domain>
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=<your domain>
+```
+
+will have an associated group-of-groups
+
+```ldif
+dn: CN=Primary user groups for Detectives,OU=groups,DC=<your domain>
+objectClass: groupOfNames
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=groups,DC=<your domain>
+...
 ```
 
 ## OpenID Connect
