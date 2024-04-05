@@ -28,6 +28,63 @@ class OAuthDataAdaptor:
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.user_dicts: list[JSONDict] = []
 
+    @property
+    def groups(self) -> list[LDAPAttributeAdaptor]:
+        """
+        Return a list of LDAPAttributeAdaptors representing validated group data.
+        """
+        if self.debug:
+            log.msg("Constructing and validating list of groups.")
+        output = []
+        for group_dict in self.group_dicts:
+            try:
+                output.append(
+                    self.extract_attributes(
+                        group_dict,
+                        required_classes=[LDAPGroupOfNames, OverlayMemberOf],
+                        optional_classes=[LDAPPosixGroup, OverlayOAuthEntry],
+                    )
+                )
+            except ValidationError as exc:
+                name = group_dict["cn"] if "cn" in group_dict else "unknown"
+                log.msg(f"Validation failed for group '{name}'.")
+                for error in exc.errors():
+                    log.msg(
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                    )
+        return output
+
+    @property
+    def users(self) -> list[LDAPAttributeAdaptor]:
+        """
+        Return a list of LDAPAttributeAdaptors representing validated user data.
+        """
+        if self.debug:
+            log.msg("Constructing and validating list of users.")
+        output = []
+        for user_dict in self.user_dicts:
+            try:
+                output.append(
+                    self.extract_attributes(
+                        user_dict,
+                        required_classes=[
+                            LDAPInetOrgPerson,
+                            LDAPPosixAccount,
+                            OverlayMemberOf,
+                            OverlayOAuthEntry,
+                        ],
+                        optional_classes=[],
+                    )
+                )
+            except ValidationError as exc:
+                name = user_dict["cn"] if "cn" in user_dict else "unknown"
+                log.msg(f"Validation failed for user '{name}'.")
+                for error in exc.errors():
+                    log.msg(
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                    )
+        return output
+
     def dn_from_group_cn(self, group_cn: str) -> str:
         return f"CN={group_cn},OU=groups,{self.root_dn}"
 
@@ -57,31 +114,6 @@ class OAuthDataAdaptor:
             if self.debug:
                 log.msg(f"Could not parse input as a valid '{ldap_class.__name__}'.")
         return LDAPAttributeAdaptor(attributes)
-
-    def groups(self) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated group data.
-        """
-        if self.debug:
-            log.msg("Constructing and validating list of groups.")
-        output = []
-        for group_dict in self.group_dicts:
-            try:
-                output.append(
-                    self.extract_attributes(
-                        group_dict,
-                        required_classes=[LDAPGroupOfNames, OverlayMemberOf],
-                        optional_classes=[LDAPPosixGroup, OverlayOAuthEntry],
-                    )
-                )
-            except ValidationError as exc:
-                name = group_dict["cn"] if "cn" in group_dict else "unknown"
-                log.msg(f"Validation failed for group '{name}'.")
-                for error in exc.errors():
-                    log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
-                    )
-        return output
 
     def refresh(self) -> None:
         """
@@ -147,33 +179,3 @@ class OAuthDataAdaptor:
                 for parent_dict in self.group_dicts
                 if child_dn in parent_dict["member"]
             ]
-
-    def users(self) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated user data.
-        """
-        if self.debug:
-            log.msg("Constructing and validating list of users.")
-        output = []
-        for user_dict in self.user_dicts:
-            try:
-                output.append(
-                    self.extract_attributes(
-                        user_dict,
-                        required_classes=[
-                            LDAPInetOrgPerson,
-                            LDAPPosixAccount,
-                            OverlayMemberOf,
-                            OverlayOAuthEntry,
-                        ],
-                        optional_classes=[],
-                    )
-                )
-            except ValidationError as exc:
-                name = user_dict["cn"] if "cn" in user_dict else "unknown"
-                log.msg(f"Validation failed for user '{name}'.")
-                for error in exc.errors():
-                    log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
-                    )
-        return output
