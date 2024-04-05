@@ -102,15 +102,6 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 attributes["sn"] = surname if surname else ""
                 attributes["uid"] = uid if uid else None
                 attributes["uidNumber"] = user_uid
-                # Add group attributes
-                group_memberships = self.query(
-                    f"https://graph.microsoft.com/v1.0/users/{user_dict['id']}/memberOf"
-                )
-                attributes["memberOf"] = [
-                    self.group_dn_from_cn(group["displayName"])
-                    for group in group_memberships["value"]
-                    if group["displayName"]
-                ]
                 output.append(attributes)
         except KeyError:
             pass

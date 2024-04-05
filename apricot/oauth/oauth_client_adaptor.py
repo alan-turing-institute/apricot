@@ -75,7 +75,7 @@ class OAuthClientAdaptor(OAuthClient):
         Validate output with pydantic and return a list of LDAPAttributeAdaptor
         """
         if self.debug:
-            log.msg("Constructing and validating list of groups")
+            log.msg("Constructing and validating list of groups.")
         output = []
         for group_dict in self.group_dicts:
             try:
@@ -119,8 +119,8 @@ class OAuthClientAdaptor(OAuthClient):
         groups_of_groups = []
         for group in _groups:
             group_dict = {}
-            group_dict["cn"] = f"User groups for {group['cn']}"
-            group_dict["description"] = f"User groups for '{group['cn']}'"
+            group_dict["cn"] = f"Primary user groups for {group['cn']}"
+            group_dict["description"] = f"Primary user groups for members of '{group['cn']}'"
             # Replace each member user with a member group
             group_dict["member"] = [
                 str(member).replace("OU=users", "OU=groups")
@@ -130,35 +130,34 @@ class OAuthClientAdaptor(OAuthClient):
             group_dict["memberUid"] = []
             groups_of_groups.append(group_dict)
 
+        # Set overall group and user dicts
+        self.group_dicts = _groups + user_primary_groups + groups_of_groups
+        self.user_dicts = _users
+
         # Ensure memberOf is set correctly for users
         for child_dict in _users:
             child_dn = self.user_dn_from_cn(child_dict["cn"])
-            child_dict["memberOf"] = []
-            for parent_dict in _groups + user_primary_groups:
-                if child_dn in parent_dict["member"]:
-                    child_dict["memberOf"].append(
-                        self.group_dn_from_cn(parent_dict["cn"])
-                    )
+            child_dict["memberOf"] = [
+                self.group_dn_from_cn(parent_dict["cn"])
+                for parent_dict in self.group_dicts
+                if child_dn in parent_dict["member"]
+            ]
 
         # Ensure memberOf is set correctly for groups
-        for child_dict in _groups + user_primary_groups + groups_of_groups:
+        for child_dict in self.group_dicts:
             child_dn = self.group_dn_from_cn(child_dict["cn"])
-            child_dict["memberOf"] = []
-            for parent_dict in _groups + user_primary_groups + groups_of_groups:
-                if child_dn in parent_dict["member"]:
-                    child_dict["memberOf"].append(
-                        self.group_dn_from_cn(parent_dict["cn"])
-                    )
-
-        self.group_dicts = _groups + user_primary_groups + groups_of_groups
-        self.user_dicts = _users
+            child_dict["memberOf"] = [
+                self.group_dn_from_cn(parent_dict["cn"])
+                for parent_dict in self.group_dicts
+                if child_dn in parent_dict["member"]
+            ]
 
     def users(self) -> list[LDAPAttributeAdaptor]:
         """
         Validate output with pydantic and return a list of LDAPAttributeAdaptor
         """
         if self.debug:
-            log.msg("Constructing and validating list of users")
+            log.msg("Constructing and validating list of users.")
         output = []
         for user_dict in self.user_dicts:
             try:
