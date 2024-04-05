@@ -22,11 +22,11 @@ class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(self, domain: str, oauth_client: OAuthClient):
+        self.annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]] = []
+        self.annotated_users: list[tuple[JSONDict, list[type[NamedLDAPClass]]]] = []
         self.debug = oauth_client.debug
-        self.group_dicts: list[JSONDict] = []
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
-        self.user_dicts: list[JSONDict] = []
 
     @property
     def groups(self) -> list[LDAPAttributeAdaptor]:
@@ -34,15 +34,14 @@ class OAuthDataAdaptor:
         Return a list of LDAPAttributeAdaptors representing validated group data.
         """
         if self.debug:
-            log.msg("Constructing and validating list of groups.")
+            log.msg(f"Attempting to validate {len(self.annotated_groups)} groups.")
         output = []
-        for group_dict in self.group_dicts:
+        for (group_dict, required_classes) in self.annotated_groups:
             try:
                 output.append(
                     self.extract_attributes(
                         group_dict,
-                        required_classes=[LDAPGroupOfNames, OverlayMemberOf],
-                        optional_classes=[LDAPPosixGroup, OverlayOAuthEntry],
+                        required_classes=required_classes,
                     )
                 )
             except ValidationError as exc:
@@ -60,20 +59,14 @@ class OAuthDataAdaptor:
         Return a list of LDAPAttributeAdaptors representing validated user data.
         """
         if self.debug:
-            log.msg("Constructing and validating list of users.")
+            log.msg(f"Attempting to validate {len(self.annotated_users)} users.")
         output = []
-        for user_dict in self.user_dicts:
+        for (user_dict, required_classes) in self.annotated_users:
             try:
                 output.append(
                     self.extract_attributes(
                         user_dict,
-                        required_classes=[
-                            LDAPInetOrgPerson,
-                            LDAPPosixAccount,
-                            OverlayMemberOf,
-                            OverlayOAuthEntry,
-                        ],
-                        optional_classes=[],
+                        required_classes=required_classes
                     )
                 )
             except ValidationError as exc:
@@ -95,24 +88,13 @@ class OAuthDataAdaptor:
         self,
         input_dict: JSONDict,
         required_classes: Sequence[type[NamedLDAPClass]],
-        optional_classes: Sequence[type[NamedLDAPClass]],
     ) -> LDAPAttributeAdaptor:
         """Add appropriate LDAP class attributes"""
         attributes = {"objectclass": ["top"]}
-        # Add required attributes
         for ldap_class in required_classes:
             model = ldap_class(**input_dict)
             attributes.update(model.model_dump())
             attributes["objectclass"] += model.names()
-        # Attempt to add optional attributes
-        try:
-            for ldap_class in optional_classes:
-                model = ldap_class(**input_dict)
-                attributes.update(model.model_dump())
-                attributes["objectclass"] += model.names()
-        except ValidationError:
-            if self.debug:
-                log.msg(f"Could not parse input as a valid '{ldap_class.__name__}'.")
         return LDAPAttributeAdaptor(attributes)
 
     def refresh(self) -> None:
@@ -122,6 +104,8 @@ class OAuthDataAdaptor:
         # Get the initial set of users and groups
         _groups = self.oauth_client.groups()
         _users = self.oauth_client.users()
+        if self.debug:
+            log.msg(f"Loaded {len(_groups)} groups and {len(_users)} users from OAuth client.")
 
         # Ensure member is set for groups
         for group_dict in _groups:
@@ -158,24 +142,28 @@ class OAuthDataAdaptor:
             group_dict["memberUid"] = []
             groups_of_groups.append(group_dict)
 
-        # Set overall group and user dicts
-        self.group_dicts = _groups + user_primary_groups + groups_of_groups
-        self.user_dicts = _users
-
         # Ensure memberOf is set correctly for users
         for child_dict in _users:
             child_dn = self.dn_from_user_cn(child_dict["cn"])
             child_dict["memberOf"] = [
                 self.dn_from_group_cn(parent_dict["cn"])
-                for parent_dict in self.group_dicts
+                for parent_dict in _groups + user_primary_groups + groups_of_groups
                 if child_dn in parent_dict["member"]
             ]
 
         # Ensure memberOf is set correctly for groups
-        for child_dict in self.group_dicts:
+        for child_dict in _groups + user_primary_groups + groups_of_groups:
             child_dn = self.dn_from_group_cn(child_dict["cn"])
             child_dict["memberOf"] = [
                 self.dn_from_group_cn(parent_dict["cn"])
-                for parent_dict in self.group_dicts
+                for parent_dict in _groups + user_primary_groups + groups_of_groups
                 if child_dn in parent_dict["member"]
             ]
+
+        # Set overall group and user dicts
+        self.annotated_groups = [(group, [LDAPGroupOfNames, LDAPPosixGroup, OverlayMemberOf, OverlayOAuthEntry]) for group in _groups]
+        self.annotated_groups += [(group, [LDAPGroupOfNames, LDAPPosixGroup, OverlayMemberOf]) for group in user_primary_groups]
+        self.annotated_groups += [(group, [LDAPGroupOfNames, OverlayMemberOf]) for group in groups_of_groups]
+        self.annotated_users = [(user, [LDAPInetOrgPerson, LDAPPosixAccount, OverlayMemberOf, OverlayOAuthEntry]) for user in _users]
+        if self.debug:
+            log.msg(f"Generated {len(self.annotated_groups)} groups and {len(self.annotated_users)} users.")
