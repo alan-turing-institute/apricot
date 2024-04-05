@@ -103,6 +103,12 @@ class OAuthClientAdaptor(OAuthClient):
         _groups = self.unvalidated_groups()
         _users = self.unvalidated_users()
 
+        # Ensure member is set for groups
+        for group_dict in _groups:
+            group_dict["member"] = [
+                self.user_dn_from_cn(user["cn"]) for user in group_dict["memberUid"]
+            ]
+
         # Add one self-titled group for each user
         # Group name is taken from 'cn' which should match the username
         user_primary_groups = []
@@ -111,7 +117,7 @@ class OAuthClientAdaptor(OAuthClient):
             for attr in ("cn", "description", "gidNumber"):
                 group_dict[attr] = user[attr]
             group_dict["member"] = [self.user_dn_from_cn(user["cn"])]
-            group_dict["memberUid"] = [user["uid"]]
+            group_dict["memberUid"] = [user["cn"]]
             user_primary_groups.append(group_dict)
 
         # Add one group of groups for each existing group.

@@ -51,11 +51,6 @@ class MicrosoftEntraClient(OAuthClientAdaptor):
                 members = self.query(
                     f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
                 )
-                attributes["member"] = [
-                    self.user_dn_from_cn(str(user["userPrincipalName"]).split("@")[0])
-                    for user in members["value"]
-                    if user["displayName"]
-                ]
                 attributes["memberUid"] = [
                     str(user["userPrincipalName"]).split("@")[0]
                     for user in members["value"]
