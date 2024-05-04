@@ -151,3 +151,28 @@ Do this as follows:
         - `Microsoft Graph` > `GroupMember.Read.All` (application)
         - `Microsoft Graph` > `User.Read.All` (delegated)
     - Select this and click the `Grant admin consent` button (otherwise manual consent is needed from each user)
+
+
+### Keycloak
+
+You will need to use the following command line arguments:
+
+```bash
+--backend Keycloak --keycloak-base-url "<your hostname>/<path to keycloak>" --keycloak-realm "<your realm>"
+```
+
+You will need to register an application to interact with `Keycloak`.
+Do this as follows:
+
+- Create a new `Client` in your `Keycloak` instance.
+    - Set the name to whatever you choose (e.g. `apricot`)
+    - Enable `Client authentication`
+    - Enable the following authentication flows and disable the rest:
+      - Direct access grants
+      - Service account roles
+- Under `Credentials` copy `client secret`
+- Under `Service account roles`:
+    - Ensure that the following role are assigned
+        - `realm-management` > `view-users`
+        - `realm-management` > `manage-users`
+        - `realm-management` > `query-groups`

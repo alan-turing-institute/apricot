@@ -1,3 +1,4 @@
+import inspect
 import sys
 from typing import Any, cast
 
@@ -19,6 +20,7 @@ class ApricotServer:
         client_secret: str,
         domain: str,
         port: int,
+        enable_group_of_groups: bool,
         *,
         debug: bool = False,
         redis_host: str | None = None,
@@ -45,12 +47,14 @@ class ApricotServer:
         try:
             if self.debug:
                 log.msg(f"Creating an OAuthClient for {backend}.")
-            oauth_client = OAuthClientMap[backend](
+            oauth_backend = OAuthClientMap[backend]
+            oauth_backend_args = inspect.getfullargspec(oauth_backend.__init__).args
+            oauth_client = oauth_backend(
                 client_id=client_id,
                 client_secret=client_secret,
                 debug=debug,
                 uid_cache=uid_cache,
-                **kwargs,
+                **{k: v for k, v in kwargs.items() if k in oauth_backend_args},
             )
         except Exception as exc:
             msg = f"Could not construct an OAuth client for the '{backend}' backend.\n{exc!s}"
@@ -59,7 +63,7 @@ class ApricotServer:
         # Create an LDAPServerFactory
         if self.debug:
             log.msg("Creating an LDAPServerFactory.")
-        factory = OAuthLDAPServerFactory(domain, oauth_client)
+        factory = OAuthLDAPServerFactory(domain, oauth_client, enable_group_of_groups)
 
         # Attach a listening endpoint
         if self.debug:

@@ -21,10 +21,11 @@ from .oauth_client import OAuthClient
 class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
-    def __init__(self, domain: str, oauth_client: OAuthClient):
+    def __init__(self, domain: str, oauth_client: OAuthClient, enable_group_of_groups: bool):
         self.debug = oauth_client.debug
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
+        self.enable_group_of_groups = enable_group_of_groups
 
         # Retrieve and validate user and group information
         annotated_groups, annotated_users = self._retrieve_entries()
@@ -105,20 +106,21 @@ class OAuthDataAdaptor:
         # Add one group of groups for each existing group.
         # Its members are the primary user groups for each original group member.
         groups_of_groups = []
-        for group in oauth_groups:
-            group_dict = {}
-            group_dict["cn"] = f"Primary user groups for {group['cn']}"
-            group_dict["description"] = (
-                f"Primary user groups for members of '{group['cn']}'"
-            )
-            # Replace each member user with a member group
-            group_dict["member"] = [
-                str(member).replace("OU=users", "OU=groups")
-                for member in group["member"]
-            ]
-            # Groups do not have UIDs so memberUid must be empty
-            group_dict["memberUid"] = []
-            groups_of_groups.append(group_dict)
+        if self.enable_group_of_groups:
+            for group in oauth_groups:
+                group_dict = {}
+                group_dict["cn"] = f"Primary user groups for {group['cn']}"
+                group_dict["description"] = (
+                    f"Primary user groups for members of '{group['cn']}'"
+                )
+                # Replace each member user with a member group
+                group_dict["member"] = [
+                    str(member).replace("OU=users", "OU=groups")
+                    for member in group["member"]
+                ]
+                # Groups do not have UIDs so memberUid must be empty
+                group_dict["memberUid"] = []
+                groups_of_groups.append(group_dict)
 
         # Ensure memberOf is set correctly for users
         for child_dict in oauth_users:

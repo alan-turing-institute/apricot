@@ -37,6 +37,10 @@ if [ -n "${DEBUG}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --debug"
 fi
 
+if [ -n "${DISABLE_GROUP_OF_GROUPS}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --disable-group-of-groups"
+fi
+
 if [ -n "${ENTRA_TENANT_ID}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --entra-tenant-id $ENTRA_TENANT_ID"
 fi
@@ -47,6 +51,14 @@ if [ -n "${REDIS_HOST}" ]; then
         echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_PORT environment variable is not set: using default of '${REDIS_PORT}'"
     fi
     EXTRA_OPTS="${EXTRA_OPTS} --redis-host $REDIS_HOST --redis-port $REDIS_PORT"
+fi
+
+if [ -n "${KEYCLOAK_BASE_URL}" ]; then
+    if [ -z "${KEYCLOAK_REALM}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] KEYCLOAK_REALM environment variable is not set"
+        exit 1
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --keycloak-base-url $KEYCLOAK_BASE_URL --keycloak-realm $KEYCLOAK_REALM"
 fi
 
 # Run the server

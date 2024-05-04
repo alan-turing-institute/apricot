@@ -16,10 +16,18 @@ if __name__ == "__main__":
         parser.add_argument("-i", "--client-id", type=str, help="OAuth client ID.")
         parser.add_argument("-p", "--port", type=int, default=1389, help="Port to run on.")
         parser.add_argument("-s", "--client-secret", type=str, help="OAuth client secret.")
+        parser.add_argument("--disable-group-of-groups", action="store_false",
+                             dest="enable_group_of_groups", default=True,
+                             help="Disable creation of group-of-groups.")
         parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
         # Options for Microsoft Entra backend
         entra_group = parser.add_argument_group("Microsoft Entra")
         entra_group.add_argument("-t", "--entra-tenant-id", type=str, help="Microsoft Entra tenant ID.", required=False)
+
+        # Options for Keycloak backend
+        keycloak_group = parser.add_argument_group("Keycloak")
+        keycloak_group.add_argument("--keycloak-base-url", type=str, help="Keycloak base URL.", required=False)
+        keycloak_group.add_argument("--keycloak-realm", type=str, help="Keycloak Realm.", required=False)
         # Options for Redis cache
         redis_group = parser.add_argument_group("Redis")
         redis_group.add_argument("--redis-host", type=str, help="Host for Redis server.")

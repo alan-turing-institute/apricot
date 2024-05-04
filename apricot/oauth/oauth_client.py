@@ -1,5 +1,6 @@
 import os
 from abc import ABC, abstractmethod
+from http import HTTPStatus
 from typing import Any
 
 import requests
@@ -116,9 +117,7 @@ class OAuthClient(ABC):
         def query_(url: str) -> requests.Response:
             return self.session_application.get(  # type: ignore[no-any-return]
                 url=url,
-                headers={"Authorization": f"Bearer {self.bearer_token}"},
-                client_id=self.session_application._client.client_id,
-                client_secret=self.client_secret,
+                headers={"Authorization": f"Bearer {self.bearer_token}"}
             )
 
         try:
@@ -129,6 +128,28 @@ class OAuthClient(ABC):
             self.bearer_token_ = None
             result = query_(url)
         return result.json()  # type: ignore
+
+    def request(self, *args, method="GET", **kwargs) -> dict[str, Any]:
+        """
+        Make a query against the OAuth backend
+        """
+
+        def query_(*args, **kwargs) -> requests.Response:
+            return self.session_application.request( # type: ignore[no-any-return]
+                method,
+                *args, **kwargs,
+                headers={"Authorization": f"Bearer {self.bearer_token}"}
+            )
+
+        try:
+            result = query_(*args, **kwargs)
+            result.raise_for_status()
+        except (TokenExpiredError, requests.exceptions.HTTPError):
+            log.msg("Authentication token has expired.")
+            self.bearer_token_ = None
+            result = query_( *args, **kwargs)
+        if result.status_code != HTTPStatus.NO_CONTENT:
+            return result.json()  # type: ignore
 
     def verify(self, username: str, password: str) -> bool:
         """
