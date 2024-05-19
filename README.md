@@ -24,6 +24,18 @@ from the `docker` directory.
 You can use a Redis server to store generated `uidNumber` and `gidNumber` values in a more persistent way.
 To do this, you will need to provide the `--redis-host` and `--redis-port` arguments to `run.py`.
 
+### Configure background refresh [Optional]
+
+By default Apricot will refresh on demand when the data is older than 60 seconds.
+If it takes a long time to fetch all users and groups, or you want to ensure that each request prompty gets a respose, you may want to configure background refresh to have it periodically be refreshed in the background.
+
+This is enabled with the `--background-refresh` flag, which uses the `--refresh-interval=60` parameter as the interval to refresh the ldap database. 
+
+### Using TLS [Optional]
+
+You can set up a TLS listener to communicate with encryption enabled over the configured port.
+To enable it you need to configure the tls port ex. `--tls-port=1636`, and provide a path to the pem files for the certificate `--tls-certificate=<path>` and the private key `--tls-private-key=<path>`.
+
 ## Outputs
 
 This will create an LDAP tree that looks like this:

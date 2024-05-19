@@ -41,8 +41,30 @@ if [ -n "${DISABLE_MIRRORED_GROUPS}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --disable-mirrored-groups"
 fi
 
+if [ -n "${BACKGROUND_REFRESH}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --background-refresh"
+fi
+
+if [ -n "${REFRESH_INTERVAL}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --refresh-interval $REFRESH_INTERVAL"
+fi
+
 if [ -n "${ENTRA_TENANT_ID}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --entra-tenant-id $ENTRA_TENANT_ID"
+fi
+
+
+
+if [ -n "${TLS_PORT}" ]; then
+    if [ -z "${TLS_CERTIFICATE}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] TLS_CERTIFICATE environment variable is not set"
+        exit 1
+    fi
+    if [ -z "${TLS_PRIVATE_KEY}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] TLS_PRIVATE_KEY environment variable is not set"
+        exit 1
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --tls-port $TLS_PORT --tls-certificate $TLS_CERTIFICATE --tls-private-key $TLS_PRIVATE_KEY"
 fi
 
 if [ -n "${REDIS_HOST}" ]; then

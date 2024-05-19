@@ -18,8 +18,9 @@ class OAuthLDAPTree:
         domain: str,
         oauth_client: OAuthClient,
         *,
+        background_refresh: bool,
         enable_mirrored_groups: bool,
-        refresh_interval: int = 60,
+        refresh_interval,
     ) -> None:
         """
         Initialise an OAuthLDAPTree
@@ -28,13 +29,14 @@ class OAuthLDAPTree:
         @param oauth_client: An OAuth client used to construct the LDAP tree
         @param refresh_interval: Interval in seconds after which the tree must be refreshed
         """
+        self.background_refresh = background_refresh
         self.debug = oauth_client.debug
         self.domain = domain
+        self.enable_mirrored_groups = enable_mirrored_groups
         self.last_update = time.monotonic()
         self.oauth_client = oauth_client
         self.refresh_interval = refresh_interval
         self.root_: OAuthLDAPEntry | None = None
-        self.enable_mirrored_groups = enable_mirrored_groups
 
     @property
     def dn(self) -> DistinguishedName:
@@ -47,9 +49,14 @@ class OAuthLDAPTree:
 
         @return: An OAuthLDAPEntry for the tree
         """
+        if not self.background_refresh:
+            self.refresh()
+        return self.root_
+
+    def refresh(self):
         if (
-            not self.root_
-            or (time.monotonic() - self.last_update) > self.refresh_interval
+                not self.root_
+                or (time.monotonic() - self.last_update) > self.refresh_interval
         ):
             # Update users and groups from the OAuth server
             log.msg("Retrieving OAuth data.")
@@ -104,7 +111,6 @@ class OAuthLDAPTree:
             # Set last updated time
             log.msg("Finished building LDAP tree.")
             self.last_update = time.monotonic()
-        return self.root_
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
