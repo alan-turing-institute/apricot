@@ -83,3 +83,6 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             raise LDAPInvalidCredentials(msg)
 
         return defer.maybeDeferred(_bind, password)
+
+    def list_children(self) -> "list[OAuthLDAPEntry]":
+        return [cast(OAuthLDAPEntry, entry) for entry in self._children.values()]
