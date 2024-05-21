@@ -77,15 +77,29 @@ class OAuthLDAPTree:
 
             # Add groups to the groups OU
             if self.debug:
-                log.msg(f"Adding {len(oauth_adaptor.groups)} groups to the LDAP tree.")
+                log.msg(
+                    f"Attempting to add {len(oauth_adaptor.groups)} groups to the LDAP tree."
+                )
             for group_attrs in oauth_adaptor.groups:
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
+            if self.debug:
+                children = groups_ou.list_children()
+                for child in children:
+                    log.msg(f"... {child.dn.getText()}")
+                log.msg(f"There are {len(children)} groups in the LDAP tree.")
 
             # Add users to the users OU
             if self.debug:
-                log.msg(f"Adding {len(oauth_adaptor.users)} users to the LDAP tree.")
+                log.msg(
+                    f"Attempting to add {len(oauth_adaptor.users)} users to the LDAP tree."
+                )
             for user_attrs in oauth_adaptor.users:
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
+            if self.debug:
+                children = users_ou.list_children()
+                for child in children:
+                    log.msg(f"... {child.dn.getText()}")
+                log.msg(f"There are {len(children)} users in the LDAP tree.")
 
             # Set last updated time
             log.msg("Finished building LDAP tree.")
