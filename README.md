@@ -152,7 +152,6 @@ Do this as follows:
         - `Microsoft Graph` > `User.Read.All` (delegated)
     - Select this and click the `Grant admin consent` button (otherwise manual consent is needed from each user)
 
-
 ### Keycloak
 
 You will need to use the following command line arguments:
@@ -168,8 +167,8 @@ Do this as follows:
     - Set the name to whatever you choose (e.g. `apricot`)
     - Enable `Client authentication`
     - Enable the following authentication flows and disable the rest:
-      - Direct access grants
-      - Service account roles
+        - Direct access grants
+        - Service account roles
 - Under `Credentials` copy `client secret`
 - Under `Service account roles`:
     - Ensure that the following role are assigned
