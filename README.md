@@ -11,7 +11,7 @@ Start the `Apricot` server on port 1389 by running:
 python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 1389 --domain "<your domain name>" --redis-host "<your Redis server>"
 ```
 
-Alternatively, you can run in Docker by editing `docker/docker-compose.yaml` and running:
+If you prefer to use Docker, you can edit `docker/docker-compose.yaml` and run:
 
 ```bash
 docker compose up
@@ -146,12 +146,11 @@ Do this as follows:
     - Set the expiry time to whatever is relevant for your use-case
     - You **must** record the value of this secret at **creation time**, as it will not be visible later.
 - Under `API permissions`:
-    - Ensure that the following permissions are enabled
+    - Enable the following permissions:
         - `Microsoft Graph` > `User.Read.All` (application)
         - `Microsoft Graph` > `GroupMember.Read.All` (application)
         - `Microsoft Graph` > `User.Read.All` (delegated)
-    - Select this and click the `Grant admin consent` button (otherwise manual consent is needed from each user)
-
+    - Select this and click the `Grant admin consent` button (otherwise each user will need to manually consent)
 
 ### Keycloak
 
@@ -168,11 +167,13 @@ Do this as follows:
     - Set the name to whatever you choose (e.g. `apricot`)
     - Enable `Client authentication`
     - Enable the following authentication flows and disable the rest:
-      - Direct access grants
-      - Service account roles
+        - Direct access grants
+        - Service account roles
 - Under `Credentials` copy `client secret`
 - Under `Service account roles`:
-    - Ensure that the following role are assigned
+    - Click on `Assign role` then `Filter by clients`
+    - Assign the following roles:
         - `realm-management` > `view-users`
         - `realm-management` > `manage-users`
         - `realm-management` > `query-groups`
+        - `realm-management` > `query-users`
