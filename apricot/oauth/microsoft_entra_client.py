@@ -1,5 +1,7 @@
 from typing import Any, cast
 
+from twisted.python import log
+
 from apricot.types import JSONDict
 
 from .oauth_client import OAuthClient
@@ -28,19 +30,19 @@ class MicrosoftEntraClient(OAuthClient):
 
     def groups(self) -> list[JSONDict]:
         output = []
-        try:
-            queries = [
-                "createdDateTime",
-                "displayName",
-                "id",
-            ]
-            group_data = self.query(
-                f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
-            )
-            for group_dict in cast(
-                list[JSONDict],
-                sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
-            ):
+        queries = [
+            "createdDateTime",
+            "displayName",
+            "id",
+        ]
+        group_data = self.query(
+            f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
+        )
+        for group_dict in cast(
+            list[JSONDict],
+            sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
+        ):
+            try:
                 group_uid = self.uid_cache.get_group_uid(group_dict["id"])
                 attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("displayName", None)
@@ -57,8 +59,11 @@ class MicrosoftEntraClient(OAuthClient):
                     if user["userPrincipalName"]
                 ]
                 output.append(attributes)
-        except KeyError:
-            pass
+            except KeyError as exc:
+                msg = (
+                    f"Failed to process group {group_dict} due to a missing key {exc}."
+                )
+                log.msg(msg)
         return output
 
     def users(self) -> list[JSONDict]:
