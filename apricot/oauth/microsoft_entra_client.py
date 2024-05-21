@@ -56,7 +56,7 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["memberUid"] = [
                     str(user["userPrincipalName"]).split("@")[0]
                     for user in members["value"]
-                    if user["userPrincipalName"]
+                    if user.get("userPrincipalName")
                 ]
                 output.append(attributes)
             except KeyError as exc:
