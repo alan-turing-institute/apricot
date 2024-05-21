@@ -128,6 +128,11 @@ class OAuthDataAdaptor:
                 for parent_dict in oauth_groups + user_primary_groups + groups_of_groups
                 if child_dn in parent_dict["member"]
             ]
+            if self.debug:
+                for group_name in child_dict["memberOf"]:
+                    log.msg(
+                        f"... user '{child_dict['cn']}' is a member of '{group_name}'"
+                    )
 
         # Ensure memberOf is set correctly for groups
         for child_dict in oauth_groups + user_primary_groups + groups_of_groups:
@@ -137,6 +142,11 @@ class OAuthDataAdaptor:
                 for parent_dict in oauth_groups + user_primary_groups + groups_of_groups
                 if child_dn in parent_dict["member"]
             ]
+            if self.debug:
+                for group_name in child_dict["memberOf"]:
+                    log.msg(
+                        f"... group '{child_dict['cn']}' is a member of '{group_name}'"
+                    )
 
         # Annotate group and user dicts with the appropriate LDAP classes
         annotated_groups = [
