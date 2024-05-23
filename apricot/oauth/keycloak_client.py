@@ -36,12 +36,13 @@ class KeycloakClient(OAuthClient):
 
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         scopes = []  # this is the default scope
-        token_url = (
-            f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/token"
-        )
+        token_url = f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/token"
 
         super().__init__(
-            redirect_uri=redirect_uri, scopes=scopes, token_url=token_url, **kwargs,
+            redirect_uri=redirect_uri,
+            scopes=scopes,
+            token_url=token_url,
+            **kwargs,
         )
 
     def extract_token(self, json_response: JSONDict) -> str:
@@ -58,21 +59,35 @@ class KeycloakClient(OAuthClient):
                 if len(data) != self.max_rows:
                     break
 
-            group_data = sorted(group_data, key=lambda g: int(get_single_value_attribute(g, "attributes.gid", default="9999999999"), 10))
+            group_data = sorted(
+                group_data,
+                key=lambda g: int(
+                    get_single_value_attribute(
+                        g, "attributes.gid", default="9999999999"
+                    ),
+                    10,
+                ),
+            )
 
             next_gid = max(
                 *(
-                    int(get_single_value_attribute(g, "attributes.gid", default="-1"), 10)+1
+                    int(
+                        get_single_value_attribute(g, "attributes.gid", default="-1"),
+                        10,
+                    )
+                    + 1
                     for g in group_data
                 ),
-                3000
+                3000,
             )
 
             for group_dict in cast(
                 list[JSONDict],
                 group_data,
             ):
-                group_gid = get_single_value_attribute(group_dict, "attributes.gid", default=None)
+                group_gid = get_single_value_attribute(
+                    group_dict, "attributes.gid", default=None
+                )
                 if group_gid:
                     group_gid = int(group_gid, 10)
                 if not group_gid:
@@ -83,7 +98,7 @@ class KeycloakClient(OAuthClient):
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/groups/{group_dict['id']}",
                         method="PUT",
-                        json=group_dict
+                        json=group_dict,
                     )
                 attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("name", None)
@@ -95,8 +110,7 @@ class KeycloakClient(OAuthClient):
                     f"{self.base_url}/admin/realms/{self.realm}/groups/{group_dict['id']}/members"
                 )
                 attributes["memberUid"] = [
-                    user["username"]
-                    for user in cast(list[JSONDict], members)
+                    user["username"] for user in cast(list[JSONDict], members)
                 ]
                 output.append(attributes)
         except KeyError:
@@ -114,21 +128,35 @@ class KeycloakClient(OAuthClient):
                 if len(data) != self.max_rows:
                     break
 
-            user_data = sorted(user_data, key=lambda u: int(get_single_value_attribute(u, "attributes.uid", default="9999999999"), 10))
+            user_data = sorted(
+                user_data,
+                key=lambda u: int(
+                    get_single_value_attribute(
+                        u, "attributes.uid", default="9999999999"
+                    ),
+                    10,
+                ),
+            )
 
             next_uid = max(
                 *(
-                    int(get_single_value_attribute(g, "attributes.uid", default="-1"), 10)+1
+                    int(
+                        get_single_value_attribute(g, "attributes.uid", default="-1"),
+                        10,
+                    )
+                    + 1
                     for g in user_data
                 ),
-                3000
+                3000,
             )
 
             for user_dict in cast(
                 list[JSONDict],
                 sorted(user_data, key=lambda user: user["createdTimestamp"]),
             ):
-                user_uid = get_single_value_attribute(user_dict, "attributes.uid", default=None)
+                user_uid = get_single_value_attribute(
+                    user_dict, "attributes.uid", default=None
+                )
                 if user_uid:
                     user_uid = int(user_uid, 10)
                 if not user_uid:
@@ -140,12 +168,14 @@ class KeycloakClient(OAuthClient):
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/users/{user_dict['id']}",
                         method="PUT",
-                        json=user_dict
+                        json=user_dict,
                     )
                 # Get user attributes
                 first_name = user_dict.get("firstName", None)
                 last_name = user_dict.get("lastName", None)
-                full_name = " ".join(filter(lambda x: x, [first_name, last_name])) or None
+                full_name = (
+                    " ".join(filter(lambda x: x, [first_name, last_name])) or None
+                )
                 username = user_dict.get("username")
                 attributes: JSONDict = {}
                 attributes["cn"] = username

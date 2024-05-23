@@ -21,7 +21,9 @@ from .oauth_client import OAuthClient
 class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
-    def __init__(self, domain: str, oauth_client: OAuthClient, enable_group_of_groups: bool):
+    def __init__(
+        self, domain: str, oauth_client: OAuthClient, *, enable_group_of_groups: bool
+    ):
         self.debug = oauth_client.debug
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")

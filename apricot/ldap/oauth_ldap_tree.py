@@ -14,7 +14,12 @@ from apricot.oauth import OAuthClient, OAuthDataAdaptor
 class OAuthLDAPTree:
 
     def __init__(
-        self, domain: str, oauth_client: OAuthClient, enable_group_of_groups: bool, refresh_interval: int = 60
+        self,
+        domain: str,
+        oauth_client: OAuthClient,
+        *,
+        enable_group_of_groups: bool,
+        refresh_interval: int = 60,
     ) -> None:
         """
         Initialise an OAuthLDAPTree
@@ -48,7 +53,11 @@ class OAuthLDAPTree:
         ):
             # Update users and groups from the OAuth server
             log.msg("Retrieving OAuth data.")
-            oauth_adaptor = OAuthDataAdaptor(self.domain, self.oauth_client, self.enable_group_of_groups)
+            oauth_adaptor = OAuthDataAdaptor(
+                self.domain,
+                self.oauth_client,
+                enable_group_of_groups=self.enable_group_of_groups,
+            )
 
             # Create a root node for the tree
             log.msg("Rebuilding LDAP tree.")

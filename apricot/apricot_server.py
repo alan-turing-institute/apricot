@@ -20,9 +20,9 @@ class ApricotServer:
         client_secret: str,
         domain: str,
         port: int,
-        enable_group_of_groups: bool,
         *,
         debug: bool = False,
+        enable_group_of_groups: bool,
         redis_host: str | None = None,
         redis_port: int | None = None,
         **kwargs: Any,
@@ -63,7 +63,9 @@ class ApricotServer:
         # Create an LDAPServerFactory
         if self.debug:
             log.msg("Creating an LDAPServerFactory.")
-        factory = OAuthLDAPServerFactory(domain, oauth_client, enable_group_of_groups)
+        factory = OAuthLDAPServerFactory(
+            domain, oauth_client, enable_group_of_groups=enable_group_of_groups
+        )
 
         # Attach a listening endpoint
         if self.debug:

@@ -116,8 +116,7 @@ class OAuthClient(ABC):
 
         def query_(url: str) -> requests.Response:
             return self.session_application.get(  # type: ignore[no-any-return]
-                url=url,
-                headers={"Authorization": f"Bearer {self.bearer_token}"}
+                url=url, headers={"Authorization": f"Bearer {self.bearer_token}"}
             )
 
         try:
@@ -135,10 +134,11 @@ class OAuthClient(ABC):
         """
 
         def query_(*args, **kwargs) -> requests.Response:
-            return self.session_application.request( # type: ignore[no-any-return]
+            return self.session_application.request(  # type: ignore[no-any-return]
                 method,
-                *args, **kwargs,
-                headers={"Authorization": f"Bearer {self.bearer_token}"}
+                *args,
+                **kwargs,
+                headers={"Authorization": f"Bearer {self.bearer_token}"},
             )
 
         try:
@@ -147,7 +147,7 @@ class OAuthClient(ABC):
         except (TokenExpiredError, requests.exceptions.HTTPError):
             log.msg("Authentication token has expired.")
             self.bearer_token_ = None
-            result = query_( *args, **kwargs)
+            result = query_(*args, **kwargs)
         if result.status_code != HTTPStatus.NO_CONTENT:
             return result.json()  # type: ignore
 

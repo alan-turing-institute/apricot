@@ -8,7 +8,9 @@ from .read_only_ldap_server import ReadOnlyLDAPServer
 
 
 class OAuthLDAPServerFactory(ServerFactory):
-    def __init__(self, domain: str, oauth_client: OAuthClient, enable_group_of_groups: bool):
+    def __init__(
+        self, domain: str, oauth_client: OAuthClient, *, enable_group_of_groups: bool
+    ):
         """
         Initialise an LDAPServerFactory
 
