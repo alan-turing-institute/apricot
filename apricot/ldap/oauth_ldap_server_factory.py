@@ -17,7 +17,9 @@ class OAuthLDAPServerFactory(ServerFactory):
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
         # Create an LDAP lookup tree
-        self.adaptor = OAuthLDAPTree(domain, oauth_client, enable_mirrored_groups)
+        self.adaptor = OAuthLDAPTree(
+            domain, oauth_client, enable_mirrored_groups=enable_mirrored_groups
+        )
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} using adaptor {self.adaptor}"

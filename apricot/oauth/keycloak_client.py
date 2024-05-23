@@ -5,9 +5,11 @@ from apricot.types import JSONDict
 from .oauth_client import OAuthClient
 
 
-def get_single_value_attribute(obj: JSONDict, key: str, default=None) -> Any:
+def get_single_value_attribute(
+    obj: JSONDict, key: str, default: str | None = None
+) -> Any:
     for part in key.split("."):
-        obj = obj.get(part)
+        obj = obj.get(part)  # type: ignore
         if obj is None:
             return default
     if isinstance(obj, list):
@@ -35,7 +37,7 @@ class KeycloakClient(OAuthClient):
         self.realm = keycloak_realm
 
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
-        scopes = []  # this is the default scope
+        scopes: list[str] = []  # this is the default scope
         token_url = f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/token"
 
         super().__init__(
@@ -51,41 +53,40 @@ class KeycloakClient(OAuthClient):
     def groups(self) -> list[JSONDict]:
         output = []
         try:
-            group_data = []
+            group_data: list[JSONDict] = []
             while data := self.query(
                 f"{self.base_url}/admin/realms/{self.realm}/groups?first={len(group_data)}&max={self.max_rows}&briefRepresentation=false",
                 use_client_secret=False,
             ):
-                group_data.extend(data)
+                group_data.extend(cast(list[JSONDict], data))
                 if len(data) != self.max_rows:
                     break
 
             group_data = sorted(
                 group_data,
-                key=lambda g: int(
+                key=lambda group: int(
                     get_single_value_attribute(
-                        g, "attributes.gid", default="9999999999"
+                        group, "attributes.gid", default="9999999999"
                     ),
-                    10,
+                    base=10,
                 ),
             )
 
             next_gid = max(
                 *(
                     int(
-                        get_single_value_attribute(g, "attributes.gid", default="-1"),
-                        10,
+                        get_single_value_attribute(
+                            group, "attributes.gid", default="-1"
+                        ),
+                        base=10,
                     )
                     + 1
-                    for g in group_data
+                    for group in group_data
                 ),
                 3000,
             )
 
-            for group_dict in cast(
-                list[JSONDict],
-                group_data,
-            ):
+            for group_dict in group_data:
                 group_gid = get_single_value_attribute(
                     group_dict, "attributes.gid", default=None
                 )
@@ -122,46 +123,47 @@ class KeycloakClient(OAuthClient):
     def users(self) -> list[JSONDict]:
         output = []
         try:
-            user_data = []
+            user_data: list[JSONDict] = []
             while data := self.query(
                 f"{self.base_url}/admin/realms/{self.realm}/users?first={len(user_data)}&max={self.max_rows}&briefRepresentation=false",
                 use_client_secret=False,
             ):
-                user_data.extend(data)
+                user_data.extend(cast(list[JSONDict], data))
                 if len(data) != self.max_rows:
                     break
 
             user_data = sorted(
                 user_data,
-                key=lambda u: int(
+                key=lambda user: int(
                     get_single_value_attribute(
-                        u, "attributes.uid", default="9999999999"
+                        user, "attributes.uid", default="9999999999"
                     ),
-                    10,
+                    base=10,
                 ),
             )
 
             next_uid = max(
                 *(
                     int(
-                        get_single_value_attribute(g, "attributes.uid", default="-1"),
-                        10,
+                        get_single_value_attribute(
+                            user, "attributes.uid", default="-1"
+                        ),
+                        base=10,
                     )
                     + 1
-                    for g in user_data
+                    for user in user_data
                 ),
                 3000,
             )
 
-            for user_dict in cast(
-                list[JSONDict],
-                sorted(user_data, key=lambda user: user["createdTimestamp"]),
+            for user_dict in sorted(
+                user_data, key=lambda user: user["createdTimestamp"]
             ):
                 user_uid = get_single_value_attribute(
                     user_dict, "attributes.uid", default=None
                 )
                 if user_uid:
-                    user_uid = int(user_uid, 10)
+                    user_uid = int(user_uid, base=10)
                 if not user_uid:
                     user_uid = next_uid
                     next_uid += 1

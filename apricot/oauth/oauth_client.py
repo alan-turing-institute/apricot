@@ -109,7 +109,7 @@ class OAuthClient(ABC):
         """
         pass
 
-    def query(self, url: str, *, use_client_secret=True) -> dict[str, Any]:
+    def query(self, url: str, *, use_client_secret: bool = True) -> dict[str, Any]:
         """
         Make a query against the OAuth backend
         """
@@ -127,12 +127,12 @@ class OAuthClient(ABC):
             **kwargs,
         )
 
-    def request(self, *args, method="GET", **kwargs) -> dict[str, Any]:
+    def request(self, *args: Any, method: str = "GET", **kwargs: Any) -> dict[str, Any]:
         """
         Make a request to the OAuth backend
         """
 
-        def query_(*args, **kwargs) -> requests.Response:
+        def query_(*args: Any, **kwargs: Any) -> requests.Response:
             return self.session_application.request(  # type: ignore[no-any-return]
                 method,
                 *args,
@@ -147,8 +147,9 @@ class OAuthClient(ABC):
             log.msg("Authentication token has expired.")
             self.bearer_token_ = None
             result = query_(*args, **kwargs)
-        if result.status_code != HTTPStatus.NO_CONTENT:
-            return result.json()  # type: ignore
+        if result.status_code == HTTPStatus.NO_CONTENT:
+            return {}
+        return result.json()  # type: ignore
 
     def verify(self, username: str, password: str) -> bool:
         """

@@ -48,7 +48,9 @@ class ApricotServer:
             if self.debug:
                 log.msg(f"Creating an OAuthClient for {backend}.")
             oauth_backend = OAuthClientMap[backend]
-            oauth_backend_args = inspect.getfullargspec(oauth_backend.__init__).args
+            oauth_backend_args = inspect.getfullargspec(
+                oauth_backend.__init__  # type: ignore
+            ).args
             oauth_client = oauth_backend(
                 client_id=client_id,
                 client_secret=client_secret,
