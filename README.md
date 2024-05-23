@@ -97,6 +97,8 @@ member: CN=sherlock.holmes,OU=users,DC=<your domain>
 
 ## Mirrored groups
 
+:exclamation: You can disable the creation of mirrored groups with the `--disable-mirrored-groups` command line option :exclamation:
+
 Each group of users will have an associated group-of-groups where each user in the group will have its user primary group in the group-of-groups.
 Note that these groups-of-groups are **not** `posixGroup`s as POSIX does not allow nested groups.
 
@@ -109,6 +111,7 @@ objectClass: posixGroup
 objectClass: top
 ...
 member: CN=sherlock.holmes,OU=users,DC=<your domain>
+...
 ```
 
 will have an associated group-of-groups
@@ -119,6 +122,32 @@ objectClass: groupOfNames
 objectClass: top
 ...
 member: CN=sherlock.holmes,OU=groups,DC=<your domain>
+...
+```
+
+This allows a user to make a request for "all primary user groups needed by members of group X" without getting a large number of primary user groups for unrelated users. To do this, you will need an LDAP request that looks like:
+
+```ldap
+(&(objectClass=posixGroup)(|(CN=Detectives)(memberOf=Primary user groups for Detectives)))
+```
+
+which will return:
+
+```
+dn:CN=Detectives,OU=groups,DC=<your domain>
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=<your domain>
+...
+
+dn: CN=sherlock.holmes,OU=groups,DC=<your domain>
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=<your domain>
 ...
 ```
 
