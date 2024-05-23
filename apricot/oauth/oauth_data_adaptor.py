@@ -22,12 +22,12 @@ class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(
-        self, domain: str, oauth_client: OAuthClient, *, enable_group_of_groups: bool
+        self, domain: str, oauth_client: OAuthClient, *, enable_mirrored_groups: bool
     ):
         self.debug = oauth_client.debug
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
-        self.enable_group_of_groups = enable_group_of_groups
+        self.enable_mirrored_groups = enable_mirrored_groups
 
         # Retrieve and validate user and group information
         annotated_groups, annotated_users = self._retrieve_entries()
@@ -108,7 +108,7 @@ class OAuthDataAdaptor:
         # Add one group of groups for each existing group.
         # Its members are the primary user groups for each original group member.
         groups_of_groups = []
-        if self.enable_group_of_groups:
+        if self.enable_mirrored_groups:
             for group in oauth_groups:
                 group_dict = {}
                 group_dict["cn"] = f"Primary user groups for {group['cn']}"

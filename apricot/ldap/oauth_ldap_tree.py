@@ -18,7 +18,7 @@ class OAuthLDAPTree:
         domain: str,
         oauth_client: OAuthClient,
         *,
-        enable_group_of_groups: bool,
+        enable_mirrored_groups: bool,
         refresh_interval: int = 60,
     ) -> None:
         """
@@ -34,7 +34,7 @@ class OAuthLDAPTree:
         self.oauth_client = oauth_client
         self.refresh_interval = refresh_interval
         self.root_: OAuthLDAPEntry | None = None
-        self.enable_group_of_groups = enable_group_of_groups
+        self.enable_mirrored_groups = enable_mirrored_groups
 
     @property
     def dn(self) -> DistinguishedName:
@@ -56,7 +56,7 @@ class OAuthLDAPTree:
             oauth_adaptor = OAuthDataAdaptor(
                 self.domain,
                 self.oauth_client,
-                enable_group_of_groups=self.enable_group_of_groups,
+                enable_mirrored_groups=self.enable_mirrored_groups,
             )
 
             # Create a root node for the tree

@@ -37,8 +37,8 @@ if [ -n "${DEBUG}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --debug"
 fi
 
-if [ -n "${DISABLE_GROUP_OF_GROUPS}" ]; then
-    EXTRA_OPTS="${EXTRA_OPTS} --disable-group-of-groups"
+if [ -n "${DISABLE_MIRRORED_GROUPS}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --disable-mirrored-groups"
 fi
 
 if [ -n "${ENTRA_TENANT_ID}" ]; then

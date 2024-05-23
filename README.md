@@ -67,7 +67,9 @@ member: <DN for each user belonging to this group>
 
 ## Primary groups
 
-Note that each user will have an associated group to act as its POSIX user primary group
+:exclamation: You can disable the creation of mirrored groups with the `--disable-primary-groups` command line option :exclamation:
+
+Apricot creates an associated group for each user, which acts as its POSIX user primary group.
 
 For example:
 

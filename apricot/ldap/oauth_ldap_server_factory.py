@@ -9,7 +9,7 @@ from .read_only_ldap_server import ReadOnlyLDAPServer
 
 class OAuthLDAPServerFactory(ServerFactory):
     def __init__(
-        self, domain: str, oauth_client: OAuthClient, *, enable_group_of_groups: bool
+        self, domain: str, oauth_client: OAuthClient, *, enable_mirrored_groups: bool
     ):
         """
         Initialise an LDAPServerFactory
@@ -17,7 +17,7 @@ class OAuthLDAPServerFactory(ServerFactory):
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
         # Create an LDAP lookup tree
-        self.adaptor = OAuthLDAPTree(domain, oauth_client, enable_group_of_groups)
+        self.adaptor = OAuthLDAPTree(domain, oauth_client, enable_mirrored_groups)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} using adaptor {self.adaptor}"

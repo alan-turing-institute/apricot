@@ -22,7 +22,7 @@ class ApricotServer:
         port: int,
         *,
         debug: bool = False,
-        enable_group_of_groups: bool,
+        enable_mirrored_groups: bool,
         redis_host: str | None = None,
         redis_port: int | None = None,
         **kwargs: Any,
@@ -64,7 +64,7 @@ class ApricotServer:
         if self.debug:
             log.msg("Creating an LDAPServerFactory.")
         factory = OAuthLDAPServerFactory(
-            domain, oauth_client, enable_group_of_groups=enable_group_of_groups
+            domain, oauth_client, enable_mirrored_groups=enable_mirrored_groups
         )
 
         # Attach a listening endpoint

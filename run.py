@@ -16,9 +16,9 @@ if __name__ == "__main__":
         parser.add_argument("-i", "--client-id", type=str, help="OAuth client ID.")
         parser.add_argument("-p", "--port", type=int, default=1389, help="Port to run on.")
         parser.add_argument("-s", "--client-secret", type=str, help="OAuth client secret.")
-        parser.add_argument("--disable-group-of-groups", action="store_false",
-                             dest="enable_group_of_groups", default=True,
-                             help="Disable creation of group-of-groups.")
+        parser.add_argument("--disable-mirrored-groups", action="store_false",
+                             dest="enable_mirrored", default=True,
+                             help="Disable creation of mirrored groups.")
         parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
         # Options for Microsoft Entra backend
         entra_group = parser.add_argument_group("Microsoft Entra")
