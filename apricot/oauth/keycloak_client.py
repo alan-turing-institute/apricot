@@ -53,7 +53,8 @@ class KeycloakClient(OAuthClient):
         try:
             group_data = []
             while data := self.query(
-                f"{self.base_url}/admin/realms/{self.realm}/groups?first={len(group_data)}&max={self.max_rows}&briefRepresentation=false"
+                f"{self.base_url}/admin/realms/{self.realm}/groups?first={len(group_data)}&max={self.max_rows}&briefRepresentation=false",
+                use_client_secret=False,
             ):
                 group_data.extend(data)
                 if len(data) != self.max_rows:
@@ -107,7 +108,8 @@ class KeycloakClient(OAuthClient):
                 attributes["oauth_id"] = group_dict.get("id", None)
                 # Add membership attributes
                 members = self.query(
-                    f"{self.base_url}/admin/realms/{self.realm}/groups/{group_dict['id']}/members"
+                    f"{self.base_url}/admin/realms/{self.realm}/groups/{group_dict['id']}/members",
+                    use_client_secret=False,
                 )
                 attributes["memberUid"] = [
                     user["username"] for user in cast(list[JSONDict], members)
@@ -122,7 +124,8 @@ class KeycloakClient(OAuthClient):
         try:
             user_data = []
             while data := self.query(
-                f"{self.base_url}/admin/realms/{self.realm}/users?first={len(user_data)}&max={self.max_rows}&briefRepresentation=false"
+                f"{self.base_url}/admin/realms/{self.realm}/users?first={len(user_data)}&max={self.max_rows}&briefRepresentation=false",
+                use_client_secret=False,
             ):
                 user_data.extend(data)
                 if len(data) != self.max_rows:
