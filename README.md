@@ -129,13 +129,13 @@ member: CN=sherlock.holmes,OU=groups,DC=<your domain>
 
 This allows a user to make a request for "all primary user groups needed by members of group X" without getting a large number of primary user groups for unrelated users. To do this, you will need an LDAP request that looks like:
 
-```ldap
+```ldif
 (&(objectClass=posixGroup)(|(CN=Detectives)(memberOf=Primary user groups for Detectives)))
 ```
 
 which will return:
 
-```
+```ldif
 dn:CN=Detectives,OU=groups,DC=<your domain>
 objectClass: groupOfNames
 objectClass: posixGroup
