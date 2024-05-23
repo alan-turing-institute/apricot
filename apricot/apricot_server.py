@@ -22,7 +22,7 @@ class ApricotServer:
         port: int,
         *,
         debug: bool = False,
-        enable_mirrored_groups: bool,
+        enable_mirrored_groups: bool = True,
         redis_host: str | None = None,
         redis_port: int | None = None,
         **kwargs: Any,

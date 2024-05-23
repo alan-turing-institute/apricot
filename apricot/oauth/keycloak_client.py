@@ -5,23 +5,6 @@ from apricot.types import JSONDict
 from .oauth_client import OAuthClient
 
 
-def get_single_value_attribute(
-    obj: JSONDict, key: str, default: str | None = None
-) -> Any:
-    for part in key.split("."):
-        obj = obj.get(part)  # type: ignore
-        if obj is None:
-            return default
-    if isinstance(obj, list):
-        try:
-            return next(iter(obj))
-        except StopIteration:
-            pass
-    else:
-        return obj
-    return default
-
-
 class KeycloakClient(OAuthClient):
     """OAuth client for the Keycloak backend."""
 
@@ -62,41 +45,25 @@ class KeycloakClient(OAuthClient):
                 if len(data) != self.max_rows:
                     break
 
-            group_data = sorted(
-                group_data,
-                key=lambda group: int(
-                    get_single_value_attribute(
-                        group, "attributes.gid", default="9999999999"
-                    ),
-                    base=10,
-                ),
-            )
-
-            next_gid = max(
-                *(
-                    int(
-                        get_single_value_attribute(
-                            group, "attributes.gid", default="-1"
-                        ),
-                        base=10,
-                    )
-                    + 1
-                    for group in group_data
-                ),
-                3000,
-            )
-
+            # Ensure that gid attribute exists for all groups
             for group_dict in group_data:
-                group_gid = get_single_value_attribute(
-                    group_dict, "attributes.gid", default=None
-                )
-                if group_gid:
-                    group_gid = int(group_gid, 10)
-                if not group_gid:
-                    group_gid = next_gid
-                    next_gid += 1
-                    group_dict["attributes"] = group_dict.get("attributes", {})
-                    group_dict["attributes"]["gid"] = [str(group_gid)]
+                group_dict["attributes"] = group_dict.get("attributes", {})
+                if "gid" not in group_dict["attributes"]:
+                    group_dict["attributes"]["gid"] = None
+                # If group_gid exists then set the cache to the same value
+                # This ensures that any groups without a `gid` attribute will receive a
+                # UID that does not overlap with existing groups
+                if group_gid := group_dict["attributes"]["gid"]:
+                    self.uid_cache.overwrite_group_uid(
+                        group_dict["id"], int(group_gid, 10)
+                    )
+
+            # Read group attributes
+            for group_dict in group_data:
+                if not group_dict["attributes"]["gid"]:
+                    group_dict["attributes"]["gid"] = [
+                        str(self.uid_cache.get_group_uid(group_dict["id"]))
+                    ]
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/groups/{group_dict['id']}",
                         method="PUT",
@@ -105,7 +72,7 @@ class KeycloakClient(OAuthClient):
                 attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("name", None)
                 attributes["description"] = group_dict.get("id", None)
-                attributes["gidNumber"] = group_gid
+                attributes["gidNumber"] = group_dict["attributes"]["gid"]
                 attributes["oauth_id"] = group_dict.get("id", None)
                 # Add membership attributes
                 members = self.query(
@@ -132,44 +99,27 @@ class KeycloakClient(OAuthClient):
                 if len(data) != self.max_rows:
                     break
 
-            user_data = sorted(
-                user_data,
-                key=lambda user: int(
-                    get_single_value_attribute(
-                        user, "attributes.uid", default="9999999999"
-                    ),
-                    base=10,
-                ),
-            )
-
-            next_uid = max(
-                *(
-                    int(
-                        get_single_value_attribute(
-                            user, "attributes.uid", default="-1"
-                        ),
-                        base=10,
+            # Ensure that uid attribute exists for all users
+            for user_dict in user_data:
+                user_dict["attributes"] = user_dict.get("attributes", {})
+                if "uid" not in user_dict["attributes"]:
+                    user_dict["attributes"]["uid"] = None
+                # If user_uid exists then set the cache to the same value.
+                # This ensures that any groups without a `gid` attribute will receive a
+                # UID that does not overlap with existing groups
+                if user_uid := user_dict["attributes"]["uid"]:
+                    self.uid_cache.overwrite_user_uid(
+                        user_dict["id"], int(user_uid, 10)
                     )
-                    + 1
-                    for user in user_data
-                ),
-                3000,
-            )
 
+            # Read user attributes
             for user_dict in sorted(
                 user_data, key=lambda user: user["createdTimestamp"]
             ):
-                user_uid = get_single_value_attribute(
-                    user_dict, "attributes.uid", default=None
-                )
-                if user_uid:
-                    user_uid = int(user_uid, base=10)
-                if not user_uid:
-                    user_uid = next_uid
-                    next_uid += 1
-
-                    user_dict["attributes"] = user_dict.get("attributes", {})
-                    user_dict["attributes"]["uid"] = [str(user_uid)]
+                if not user_dict["attributes"]["uid"]:
+                    user_dict["attributes"]["uid"] = [
+                        str(self.uid_cache.get_user_uid(user_dict["id"]))
+                    ]
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/users/{user_dict['id']}",
                         method="PUT",
@@ -189,12 +139,12 @@ class KeycloakClient(OAuthClient):
                 attributes["displayName"] = full_name
                 attributes["mail"] = user_dict.get("email")
                 attributes["description"] = ""
-                attributes["gidNumber"] = user_uid
+                attributes["gidNumber"] = user_dict["attributes"]["uid"]
                 attributes["givenName"] = first_name if first_name else ""
                 attributes["homeDirectory"] = f"/home/{username}" if username else None
                 attributes["oauth_id"] = user_dict.get("id", None)
                 attributes["sn"] = last_name if last_name else ""
-                attributes["uidNumber"] = user_uid
+                attributes["uidNumber"] = user_dict["attributes"]["uid"]
                 output.append(attributes)
         except KeyError:
             pass
