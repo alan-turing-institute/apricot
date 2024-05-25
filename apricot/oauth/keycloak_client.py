@@ -53,9 +53,11 @@ class KeycloakClient(OAuthClient):
                 # If group_gid exists then set the cache to the same value
                 # This ensures that any groups without a `gid` attribute will receive a
                 # UID that does not overlap with existing groups
-                if group_gid := group_dict["attributes"]["gid"]:
+                if (group_gid := group_dict["attributes"]["gid"]) and len(
+                    group_dict["attributes"]["gid"]
+                ) == 1:
                     self.uid_cache.overwrite_group_uid(
-                        group_dict["id"], int(group_gid, 10)
+                        group_dict["id"], int(group_gid[0], 10)
                     )
 
             # Read group attributes
@@ -72,7 +74,7 @@ class KeycloakClient(OAuthClient):
                 attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("name", None)
                 attributes["description"] = group_dict.get("id", None)
-                attributes["gidNumber"] = group_dict["attributes"]["gid"]
+                attributes["gidNumber"] = group_dict["attributes"]["gid"][0]
                 attributes["oauth_id"] = group_dict.get("id", None)
                 # Add membership attributes
                 members = self.query(
@@ -107,9 +109,11 @@ class KeycloakClient(OAuthClient):
                 # If user_uid exists then set the cache to the same value.
                 # This ensures that any groups without a `gid` attribute will receive a
                 # UID that does not overlap with existing groups
-                if user_uid := user_dict["attributes"]["uid"]:
+                if (user_uid := user_dict["attributes"]["uid"]) and len(
+                    user_dict["attributes"]["uid"]
+                ) == 1:
                     self.uid_cache.overwrite_user_uid(
-                        user_dict["id"], int(user_uid, 10)
+                        user_dict["id"], int(user_uid[0], 10)
                     )
 
             # Read user attributes
@@ -139,12 +143,12 @@ class KeycloakClient(OAuthClient):
                 attributes["displayName"] = full_name
                 attributes["mail"] = user_dict.get("email")
                 attributes["description"] = ""
-                attributes["gidNumber"] = user_dict["attributes"]["uid"]
+                attributes["gidNumber"] = user_dict["attributes"]["uid"][0]
                 attributes["givenName"] = first_name if first_name else ""
                 attributes["homeDirectory"] = f"/home/{username}" if username else None
                 attributes["oauth_id"] = user_dict.get("id", None)
                 attributes["sn"] = last_name if last_name else ""
-                attributes["uidNumber"] = user_dict["attributes"]["uid"]
+                attributes["uidNumber"] = user_dict["attributes"]["uid"][0]
                 output.append(attributes)
         except KeyError:
             pass
