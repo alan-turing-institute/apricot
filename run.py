@@ -12,17 +12,30 @@ if __name__ == "__main__":
         )
         # Common options needed for all backends
         parser.add_argument(
-            "-b", "--backend", type=OAuthBackend, help="Which OAuth backend to use."
+            "-b",
+            "--backend",
+            type=OAuthBackend,
+            help="Which OAuth backend to use.",
         )
         parser.add_argument(
-            "-d", "--domain", type=str, help="Which domain users belong to."
+            "-d",
+            "--domain",
+            type=str,
+            help="Which domain users belong to.",
         )
         parser.add_argument("-i", "--client-id", type=str, help="OAuth client ID.")
         parser.add_argument(
-            "-p", "--port", type=int, default=1389, help="Port to run on."
+            "-p",
+            "--port",
+            type=int,
+            default=1389,
+            help="Port to run on.",
         )
         parser.add_argument(
-            "-s", "--client-secret", type=str, help="OAuth client secret."
+            "-s",
+            "--client-secret",
+            type=str,
+            help="OAuth client secret.",
         )
         parser.add_argument(
             "--background-refresh",
@@ -31,7 +44,9 @@ if __name__ == "__main__":
             help="Refresh in the background instead of as needed per request",
         )
         parser.add_argument(
-            "--debug", action="store_true", help="Enable debug logging."
+            "--debug",
+            action="store_true",
+            help="Enable debug logging.",
         )
         parser.add_argument(
             "--disable-mirrored-groups",
@@ -50,50 +65,67 @@ if __name__ == "__main__":
         # Options for Microsoft Entra backend
         entra_group = parser.add_argument_group("Microsoft Entra")
         entra_group.add_argument(
-            "--entra-tenant-id", type=str, help="Microsoft Entra tenant ID."
+            "--entra-tenant-id",
+            type=str,
+            help="Microsoft Entra tenant ID.",
         )
 
         # Options for Keycloak backend
         keycloak_group = parser.add_argument_group("Keycloak")
         keycloak_group.add_argument(
-            "--keycloak-base-url", type=str, help="Keycloak base URL."
+            "--keycloak-base-url",
+            type=str,
+            help="Keycloak base URL.",
         )
         keycloak_group.add_argument(
-            "--keycloak-realm", type=str, help="Keycloak Realm."
+            "--keycloak-realm",
+            type=str,
+            help="Keycloak Realm.",
         )
         # Options for Redis cache
         redis_group = parser.add_argument_group("Redis")
         redis_group.add_argument(
-            "--redis-host", type=str, help="Host for Redis server."
+            "--redis-host",
+            type=str,
+            help="Host for Redis server.",
         )
         redis_group.add_argument(
-            "--redis-port", type=int, help="Port for Redis server."
+            "--redis-port",
+            type=int,
+            help="Port for Redis server.",
         )
         # Options for TLS
         tls_group = parser.add_argument_group("TLS")
         tls_group.add_argument(
-            "--tls-certificate", type=str, help="Location of TLS certificate (pem)."
+            "--tls-certificate",
+            type=str,
+            help="Location of TLS certificate (pem).",
         )
         tls_group.add_argument(
-            "--tls-port", type=int, default=1636, help="Port to run on with encryption."
+            "--tls-port",
+            type=int,
+            default=1636,
+            help="Port to run on with encryption.",
         )
         tls_group.add_argument(
-            "--tls-private-key", type=str, help="Location of TLS private key (pem)."
+            "--tls-private-key",
+            type=str,
+            help="Location of TLS private key (pem).",
         )
         # Parse arguments
         args = parser.parse_args()
 
         # Create the Apricot server
         reactor = ApricotServer(**vars(args))
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         msg = f"Unable to initialise Apricot server.\n{exc}"
-        print(msg)
+        print(msg)  # noqa: T201
         sys.exit(1)
 
     # Run the Apricot server
     try:
         reactor.run()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         msg = f"Apricot server encountered a runtime problem.\n{exc}"
-        print(msg)
+        print(msg)  # noqa: T201
         sys.exit(1)

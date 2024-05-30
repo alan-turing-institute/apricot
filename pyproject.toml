@@ -58,15 +58,15 @@ dependencies = [
 ]
 
 [tool.hatch.envs.lint.scripts]
-typing = "mypy {args:apricot}"
+typing = "mypy {args:apricot} run.py"
 
 style = [
-  "ruff check {args:apricot}",
-  "black --check --diff {args:apricot}",
+  "ruff check {args:apricot} run.py",
+  "black --check --diff {args:apricot} run.py",
 ]
 fmt = [
-  "black {args:apricot}",
-  "ruff check --fix {args:apricot}",
+  "black {args:apricot} run.py",
+  "ruff check --fix {args:apricot} run.py",
   "style",
 ]
 all = [
