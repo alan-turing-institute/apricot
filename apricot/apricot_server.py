@@ -1,6 +1,6 @@
 import inspect
 import sys
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from twisted.internet import reactor, task
 from twisted.internet.endpoints import quoteStringArgument, serverFromString
@@ -27,9 +27,9 @@ class ApricotServer:
         redis_host: str | None = None,
         redis_port: int | None = None,
         refresh_interval: int = 60,
-        tls_port: Optional[int] = None,
-        tls_certificate: Optional[str] = None,
-        tls_private_key: Optional[str] = None,
+        tls_port: int | None = None,
+        tls_certificate: str | None = None,
+        tls_private_key: str | None = None,
         **kwargs: Any,
     ) -> None:
         self.debug = debug
