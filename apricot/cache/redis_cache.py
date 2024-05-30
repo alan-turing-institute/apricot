@@ -9,7 +9,7 @@ class RedisCache(UidCache):
     def __init__(self, redis_host: str, redis_port: int) -> None:
         self.redis_host = redis_host
         self.redis_port = redis_port
-        self.cache_: "redis.Redis[str]" | None = None
+        self.cache_: "redis.Redis[str]" | None = None  # noqa: UP037
 
     @property
     def cache(self) -> "redis.Redis[str]":

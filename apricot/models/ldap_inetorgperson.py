@@ -12,9 +12,12 @@ class LDAPInetOrgPerson(LDAPOrganizationalPerson):
     """
 
     cn: str
-    displayName: str  # noqa: N815
-    givenName: str  # noqa: N815
+    displayName: str | None = None  # noqa: N815
+    employeeNumber: str | None = None  # noqa: N815
+    givenName: str | None = None  # noqa: N815
     sn: str
+    mail: str | None = None
+    telephoneNumber: str | None = None  # noqa: N815
 
     def names(self) -> list[str]:
         return [*super().names(), "inetOrgPerson"]

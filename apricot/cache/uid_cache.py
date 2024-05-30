@@ -77,3 +77,31 @@ class UidCache(ABC):
             keys = self.keys()
         values = [*self.values(keys), -999]
         return max(values)
+
+    def overwrite_group_uid(self, identifier: str, uid: int) -> None:
+        """
+        Set UID for a group, overwriting the existing value if there is one
+
+        @param identifier: Identifier for group
+        @param uid: Desired UID
+        """
+        return self.overwrite_uid(identifier, category="group", uid=uid)
+
+    def overwrite_user_uid(self, identifier: str, uid: int) -> None:
+        """
+        Get UID for a user, constructing one if necessary
+
+        @param identifier: Identifier for user
+        @param uid: Desired UID
+        """
+        return self.overwrite_uid(identifier, category="user", uid=uid)
+
+    def overwrite_uid(self, identifier: str, category: str, uid: int) -> None:
+        """
+        Set UID, overwriting the existing one if necessary.
+
+        @param identifier: Identifier for object
+        @param category: Category the object belongs to
+        @param uid: Desired UID
+        """
+        self.set(f"{category}-{identifier}", uid)

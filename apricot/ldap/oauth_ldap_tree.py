@@ -14,7 +14,12 @@ from apricot.oauth import OAuthClient, OAuthDataAdaptor
 class OAuthLDAPTree:
 
     def __init__(
-        self, domain: str, oauth_client: OAuthClient, refresh_interval: int = 60
+        self,
+        domain: str,
+        oauth_client: OAuthClient,
+        *,
+        enable_mirrored_groups: bool,
+        refresh_interval: int = 60,
     ) -> None:
         """
         Initialise an OAuthLDAPTree
@@ -29,6 +34,7 @@ class OAuthLDAPTree:
         self.oauth_client = oauth_client
         self.refresh_interval = refresh_interval
         self.root_: OAuthLDAPEntry | None = None
+        self.enable_mirrored_groups = enable_mirrored_groups
 
     @property
     def dn(self) -> DistinguishedName:
@@ -47,7 +53,11 @@ class OAuthLDAPTree:
         ):
             # Update users and groups from the OAuth server
             log.msg("Retrieving OAuth data.")
-            oauth_adaptor = OAuthDataAdaptor(self.domain, self.oauth_client)
+            oauth_adaptor = OAuthDataAdaptor(
+                self.domain,
+                self.oauth_client,
+                enable_mirrored_groups=self.enable_mirrored_groups,
+            )
 
             # Create a root node for the tree
             log.msg("Rebuilding LDAP tree.")

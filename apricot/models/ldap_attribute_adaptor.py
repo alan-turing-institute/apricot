@@ -8,6 +8,7 @@ class LDAPAttributeAdaptor:
         self.attributes = {
             str(k): list(map(str, v)) if isinstance(v, list) else [str(v)]
             for k, v in attributes.items()
+            if v is not None
         }
 
     @property

@@ -1,5 +1,6 @@
 import os
 from abc import ABC, abstractmethod
+from http import HTTPStatus
 from typing import Any
 
 import requests
@@ -108,26 +109,46 @@ class OAuthClient(ABC):
         """
         pass
 
-    def query(self, url: str) -> dict[str, Any]:
+    def query(self, url: str, *, use_client_secret: bool = True) -> dict[str, Any]:
         """
         Make a query against the OAuth backend
         """
+        kwargs = (
+            {
+                "client_id": self.session_application._client.client_id,
+                "client_secret": self.client_secret,
+            }
+            if use_client_secret
+            else {}
+        )
+        return self.request(
+            url=url,
+            method="GET",
+            **kwargs,
+        )
 
-        def query_(url: str) -> requests.Response:
-            return self.session_application.get(  # type: ignore[no-any-return]
-                url=url,
+    def request(self, *args: Any, method: str = "GET", **kwargs: Any) -> dict[str, Any]:
+        """
+        Make a request to the OAuth backend
+        """
+
+        def query_(*args: Any, **kwargs: Any) -> requests.Response:
+            return self.session_application.request(  # type: ignore[no-any-return]
+                method,
+                *args,
+                **kwargs,
                 headers={"Authorization": f"Bearer {self.bearer_token}"},
-                client_id=self.session_application._client.client_id,
-                client_secret=self.client_secret,
             )
 
         try:
-            result = query_(url)
+            result = query_(*args, **kwargs)
             result.raise_for_status()
         except (TokenExpiredError, requests.exceptions.HTTPError):
             log.msg("Authentication token has expired.")
             self.bearer_token_ = None
-            result = query_(url)
+            result = query_(*args, **kwargs)
+        if result.status_code == HTTPStatus.NO_CONTENT:
+            return {}
         return result.json()  # type: ignore
 
     def verify(self, username: str, password: str) -> bool:
