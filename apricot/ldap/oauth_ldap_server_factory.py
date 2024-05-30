@@ -9,7 +9,13 @@ from .read_only_ldap_server import ReadOnlyLDAPServer
 
 class OAuthLDAPServerFactory(ServerFactory):
     def __init__(
-        self, domain: str, oauth_client: OAuthClient, *, background_refresh: bool, enable_mirrored_groups: bool, refresh_interval: int,
+        self,
+        domain: str,
+        oauth_client: OAuthClient,
+        *,
+        background_refresh: bool,
+        enable_mirrored_groups: bool,
+        refresh_interval: int,
     ):
         """
         Initialise an OAuthLDAPServerFactory
@@ -22,7 +28,11 @@ class OAuthLDAPServerFactory(ServerFactory):
         """
         # Create an LDAP lookup tree
         self.adaptor = OAuthLDAPTree(
-            domain, oauth_client, background_refresh=background_refresh, enable_mirrored_groups=enable_mirrored_groups, refresh_interval=refresh_interval
+            domain,
+            oauth_client,
+            background_refresh=background_refresh,
+            enable_mirrored_groups=enable_mirrored_groups,
+            refresh_interval=refresh_interval,
         )
 
     def __repr__(self) -> str:

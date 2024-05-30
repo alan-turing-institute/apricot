@@ -20,7 +20,7 @@ class OAuthLDAPTree:
         *,
         background_refresh: bool,
         enable_mirrored_groups: bool,
-        refresh_interval,
+        refresh_interval: int,
     ) -> None:
         """
         Initialise an OAuthLDAPTree
@@ -50,15 +50,20 @@ class OAuthLDAPTree:
         Lazy-load the LDAP tree on request
 
         @return: An OAuthLDAPEntry for the tree
+
+        @raises: ValueError.
         """
         if not self.background_refresh:
             self.refresh()
+        if not self.root_:
+            msg = "LDAP tree could not be loaded"
+            raise ValueError(msg)
         return self.root_
 
-    def refresh(self):
+    def refresh(self) -> None:
         if (
-                not self.root_
-                or (time.monotonic() - self.last_update) > self.refresh_interval
+            not self.root_
+            or (time.monotonic() - self.last_update) > self.refresh_interval
         ):
             # Update users and groups from the OAuth server
             log.msg("Retrieving OAuth data.")
