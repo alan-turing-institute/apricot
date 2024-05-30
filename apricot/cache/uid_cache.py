@@ -8,28 +8,24 @@ class UidCache(ABC):
         """
         Get the UID for a given identifier, returning None if it does not exist
         """
-        pass
 
     @abstractmethod
     def keys(self) -> list[str]:
         """
         Get list of cached keys
         """
-        pass
 
     @abstractmethod
     def set(self, identifier: str, uid_value: int) -> None:
         """
         Set the UID for a given identifier
         """
-        pass
 
     @abstractmethod
     def values(self, keys: list[str]) -> list[int]:
         """
         Get list of cached values corresponding to requested keys
         """
-        pass
 
     def get_group_uid(self, identifier: str) -> int:
         """
@@ -48,7 +44,10 @@ class UidCache(ABC):
         return self.get_uid(identifier, category="user", min_value=2000)
 
     def get_uid(
-        self, identifier: str, category: str, min_value: int | None = None
+        self,
+        identifier: str,
+        category: str,
+        min_value: int | None = None,
     ) -> int:
         """
         Get UID, constructing one if necessary.

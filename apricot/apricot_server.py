@@ -41,7 +41,7 @@ class ApricotServer:
         uid_cache: UidCache
         if redis_host and redis_port:
             log.msg(
-                f"Using a Redis user-id cache at host '{redis_host}' on port '{redis_port}'."
+                f"Using a Redis user-id cache at host '{redis_host}' on port '{redis_port}'.",
             )
             uid_cache = RedisCache(redis_host=redis_host, redis_port=redis_port)
         else:
@@ -54,7 +54,7 @@ class ApricotServer:
                 log.msg(f"Creating an OAuthClient for {backend}.")
             oauth_backend = OAuthClientMap[backend]
             oauth_backend_args = inspect.getfullargspec(
-                oauth_backend.__init__  # type: ignore
+                oauth_backend.__init__,  # type: ignore
             ).args
             oauth_client = oauth_backend(
                 client_id=client_id,
@@ -81,7 +81,7 @@ class ApricotServer:
         if background_refresh:
             if self.debug:
                 log.msg(
-                    f"Starting background refresh (interval={factory.adaptor.refresh_interval})"
+                    f"Starting background refresh (interval={factory.adaptor.refresh_interval})",
                 )
             loop = task.LoopingCall(factory.adaptor.refresh)
             loop.start(factory.adaptor.refresh_interval)

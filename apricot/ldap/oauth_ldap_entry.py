@@ -62,7 +62,9 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return self.oauth_client_
 
     def add_child(
-        self, rdn: RelativeDistinguishedName | str, attributes: LDAPAttributeDict
+        self,
+        rdn: RelativeDistinguishedName | str,
+        attributes: LDAPAttributeDict,
     ) -> "OAuthLDAPEntry":
         if isinstance(rdn, str):
             rdn = RelativeDistinguishedName(stringValue=rdn)

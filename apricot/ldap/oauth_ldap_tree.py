@@ -83,16 +83,18 @@ class OAuthLDAPTree:
 
             # Add OUs for users and groups
             groups_ou = self.root_.add_child(
-                "OU=groups", {"ou": ["groups"], "objectClass": ["organizationalUnit"]}
+                "OU=groups",
+                {"ou": ["groups"], "objectClass": ["organizationalUnit"]},
             )
             users_ou = self.root_.add_child(
-                "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
+                "OU=users",
+                {"ou": ["users"], "objectClass": ["organizationalUnit"]},
             )
 
             # Add groups to the groups OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(oauth_adaptor.groups)} groups to the LDAP tree."
+                    f"Attempting to add {len(oauth_adaptor.groups)} groups to the LDAP tree.",
                 )
             for group_attrs in oauth_adaptor.groups:
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
@@ -105,7 +107,7 @@ class OAuthLDAPTree:
             # Add users to the users OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(oauth_adaptor.users)} users to the LDAP tree."
+                    f"Attempting to add {len(oauth_adaptor.users)} users to the LDAP tree.",
                 )
             for user_attrs in oauth_adaptor.users:
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())

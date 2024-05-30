@@ -22,7 +22,8 @@ class LDAPPosixAccount(NamedLDAPClass):
     cn: str
     gidNumber: int  # noqa: N815
     homeDirectory: Annotated[  # noqa: N815
-        str, StringConstraints(strip_whitespace=True, to_lower=True)
+        str,
+        StringConstraints(strip_whitespace=True, to_lower=True),
     ]
     uid: str
     uidNumber: int  # noqa: N815

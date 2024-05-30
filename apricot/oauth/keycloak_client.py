@@ -54,17 +54,18 @@ class KeycloakClient(OAuthClient):
                 # This ensures that any groups without a `gid` attribute will receive a
                 # UID that does not overlap with existing groups
                 if (group_gid := group_dict["attributes"]["gid"]) and len(
-                    group_dict["attributes"]["gid"]
+                    group_dict["attributes"]["gid"],
                 ) == 1:
                     self.uid_cache.overwrite_group_uid(
-                        group_dict["id"], int(group_gid[0], 10)
+                        group_dict["id"],
+                        int(group_gid[0], 10),
                     )
 
             # Read group attributes
             for group_dict in group_data:
                 if not group_dict["attributes"]["gid"]:
                     group_dict["attributes"]["gid"] = [
-                        str(self.uid_cache.get_group_uid(group_dict["id"]))
+                        str(self.uid_cache.get_group_uid(group_dict["id"])),
                     ]
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/groups/{group_dict['id']}",
@@ -110,19 +111,21 @@ class KeycloakClient(OAuthClient):
                 # This ensures that any groups without a `gid` attribute will receive a
                 # UID that does not overlap with existing groups
                 if (user_uid := user_dict["attributes"]["uid"]) and len(
-                    user_dict["attributes"]["uid"]
+                    user_dict["attributes"]["uid"],
                 ) == 1:
                     self.uid_cache.overwrite_user_uid(
-                        user_dict["id"], int(user_uid[0], 10)
+                        user_dict["id"],
+                        int(user_uid[0], 10),
                     )
 
             # Read user attributes
             for user_dict in sorted(
-                user_data, key=lambda user: user["createdTimestamp"]
+                user_data,
+                key=lambda user: user["createdTimestamp"],
             ):
                 if not user_dict["attributes"]["uid"]:
                     user_dict["attributes"]["uid"] = [
-                        str(self.uid_cache.get_user_uid(user_dict["id"]))
+                        str(self.uid_cache.get_user_uid(user_dict["id"])),
                     ]
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/users/{user_dict['id']}",

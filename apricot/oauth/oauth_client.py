@@ -47,8 +47,10 @@ class OAuthClient(ABC):
                 log.msg("Initialising application credential client.")
             self.session_application = OAuth2Session(
                 client=BackendApplicationClient(
-                    client_id=client_id, scope=scopes, redirect_uri=redirect_uri
-                )
+                    client_id=client_id,
+                    scope=scopes,
+                    redirect_uri=redirect_uri,
+                ),
             )
         except Exception as exc:
             msg = f"Failed to initialise application credential client.\n{exc!s}"
@@ -60,8 +62,10 @@ class OAuthClient(ABC):
                 log.msg("Initialising delegated credential client.")
             self.session_interactive = OAuth2Session(
                 client=LegacyApplicationClient(
-                    client_id=client_id, scope=scopes, redirect_uri=redirect_uri
-                )
+                    client_id=client_id,
+                    scope=scopes,
+                    redirect_uri=redirect_uri,
+                ),
             )
         except Exception as exc:
             msg = f"Failed to initialise delegated credential client.\n{exc!s}"
@@ -91,7 +95,6 @@ class OAuthClient(ABC):
         """
         Extract the bearer token from an OAuth2Session JSON response
         """
-        pass
 
     @abstractmethod
     def groups(self) -> list[JSONDict]:
@@ -99,7 +102,6 @@ class OAuthClient(ABC):
         Return JSON data about groups from the OAuth backend.
         This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
-        pass
 
     @abstractmethod
     def users(self) -> list[JSONDict]:
@@ -107,7 +109,6 @@ class OAuthClient(ABC):
         Return JSON data about users from the OAuth backend.
         This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
-        pass
 
     def query(self, url: str, *, use_client_secret: bool = True) -> dict[str, Any]:
         """

@@ -22,7 +22,11 @@ class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(
-        self, domain: str, oauth_client: OAuthClient, *, enable_mirrored_groups: bool
+        self,
+        domain: str,
+        oauth_client: OAuthClient,
+        *,
+        enable_mirrored_groups: bool,
     ):
         """
         Initialise an OAuthDataAdaptor
@@ -42,7 +46,7 @@ class OAuthDataAdaptor:
         self.validated_users = self._validate_users(annotated_users)
         if self.debug:
             log.msg(
-                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users."
+                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users.",
             )
 
     @property
@@ -92,7 +96,7 @@ class OAuthDataAdaptor:
         oauth_users = self.oauth_client.users()
         if self.debug:
             log.msg(
-                f"Loaded {len(oauth_groups)} groups and {len(oauth_users)} users from OAuth client."
+                f"Loaded {len(oauth_groups)} groups and {len(oauth_users)} users from OAuth client.",
             )
 
         # Ensure member is set for groups
@@ -142,7 +146,7 @@ class OAuthDataAdaptor:
             if self.debug:
                 for group_name in child_dict["memberOf"]:
                     log.msg(
-                        f"... user '{child_dict['cn']}' is a member of '{group_name}'"
+                        f"... user '{child_dict['cn']}' is a member of '{group_name}'",
                     )
 
         # Ensure memberOf is set correctly for groups
@@ -156,7 +160,7 @@ class OAuthDataAdaptor:
             if self.debug:
                 for group_name in child_dict["memberOf"]:
                     log.msg(
-                        f"... group '{child_dict['cn']}' is a member of '{group_name}'"
+                        f"... group '{child_dict['cn']}' is a member of '{group_name}'",
                     )
 
         # Annotate group and user dicts with the appropriate LDAP classes
@@ -189,7 +193,8 @@ class OAuthDataAdaptor:
         return (annotated_groups, annotated_users)
 
     def _validate_groups(
-        self, annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]]
+        self,
+        annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """
         Return a list of LDAPAttributeAdaptors representing validated group data.
@@ -203,19 +208,20 @@ class OAuthDataAdaptor:
                     self._extract_attributes(
                         group_dict,
                         required_classes=required_classes,
-                    )
+                    ),
                 )
             except ValidationError as exc:
                 name = group_dict["cn"] if "cn" in group_dict else "unknown"
                 log.msg(f"Validation failed for group '{name}'.")
                 for error in exc.errors():
                     log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output
 
     def _validate_users(
-        self, annotated_users: list[tuple[JSONDict, list[type[NamedLDAPClass]]]]
+        self,
+        annotated_users: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """
         Return a list of LDAPAttributeAdaptors representing validated user data.
@@ -227,14 +233,15 @@ class OAuthDataAdaptor:
             try:
                 output.append(
                     self._extract_attributes(
-                        user_dict, required_classes=required_classes
-                    )
+                        user_dict,
+                        required_classes=required_classes,
+                    ),
                 )
             except ValidationError as exc:
                 name = user_dict["cn"] if "cn" in user_dict else "unknown"
                 log.msg(f"Validation failed for user '{name}'.")
                 for error in exc.errors():
                     log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output

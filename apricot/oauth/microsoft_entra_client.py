@@ -22,7 +22,10 @@ class MicrosoftEntraClient(OAuthClient):
         )
         self.tenant_id = entra_tenant_id
         super().__init__(
-            redirect_uri=redirect_uri, scopes=scopes, token_url=token_url, **kwargs
+            redirect_uri=redirect_uri,
+            scopes=scopes,
+            token_url=token_url,
+            **kwargs,
         )
 
     def extract_token(self, json_response: JSONDict) -> str:
@@ -36,7 +39,7 @@ class MicrosoftEntraClient(OAuthClient):
             "id",
         ]
         group_data = self.query(
-            f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
+            f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}",
         )
         for group_dict in cast(
             list[JSONDict],
@@ -51,7 +54,7 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["oauth_id"] = group_dict.get("id", None)
                 # Add membership attributes
                 members = self.query(
-                    f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
+                    f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members",
                 )
                 attributes["memberUid"] = [
                     str(user["userPrincipalName"]).split("@")[0]
@@ -78,7 +81,7 @@ class MicrosoftEntraClient(OAuthClient):
                 "userPrincipalName",
             ]
             user_data = self.query(
-                f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}"
+                f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}",
             )
             for user_dict in cast(
                 list[JSONDict],
