@@ -112,6 +112,7 @@ select = [
   "N",     # pep8-naming
   "NPY",   # numpy-specific-rules
   "PD",    # pandas-vet
+  "PGH",   # pygrep-hooks
   "PIE",   # flake8-pie
   "PLC",   # pylint convention
   "PLE",   # pylint error

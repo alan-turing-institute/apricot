@@ -165,7 +165,7 @@ class OAuthClient(ABC):
             result = query_(*args, **kwargs)
         if result.status_code == HTTPStatus.NO_CONTENT:
             return {}
-        return result.json()  # type: ignore
+        return result.json()  # type: ignore[no-any-return]
 
     def verify(self: Self, username: str, password: str) -> bool:
         """Verify username and password by attempting to authenticate against the OAuth backend."""
