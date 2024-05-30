@@ -1,33 +1,33 @@
 from abc import ABC, abstractmethod
-from typing import cast
+from typing import Self, cast
 
 
 class UidCache(ABC):
     @abstractmethod
-    def get(self, identifier: str) -> int | None:
+    def get(self: Self, identifier: str) -> int | None:
         """
         Get the UID for a given identifier, returning None if it does not exist
         """
 
     @abstractmethod
-    def keys(self) -> list[str]:
+    def keys(self: Self) -> list[str]:
         """
         Get list of cached keys
         """
 
     @abstractmethod
-    def set(self, identifier: str, uid_value: int) -> None:
+    def set(self: Self, identifier: str, uid_value: int) -> None:
         """
         Set the UID for a given identifier
         """
 
     @abstractmethod
-    def values(self, keys: list[str]) -> list[int]:
+    def values(self: Self, keys: list[str]) -> list[int]:
         """
         Get list of cached values corresponding to requested keys
         """
 
-    def get_group_uid(self, identifier: str) -> int:
+    def get_group_uid(self: Self, identifier: str) -> int:
         """
         Get UID for a group, constructing one if necessary
 
@@ -35,7 +35,7 @@ class UidCache(ABC):
         """
         return self.get_uid(identifier, category="group", min_value=3000)
 
-    def get_user_uid(self, identifier: str) -> int:
+    def get_user_uid(self: Self, identifier: str) -> int:
         """
         Get UID for a user, constructing one if necessary
 
@@ -44,7 +44,7 @@ class UidCache(ABC):
         return self.get_uid(identifier, category="user", min_value=2000)
 
     def get_uid(
-        self,
+        self: Self,
         identifier: str,
         category: str,
         min_value: int | None = None,
@@ -64,7 +64,7 @@ class UidCache(ABC):
             self.set(identifier_, next_uid)
         return cast(int, self.get(identifier_))
 
-    def _get_max_uid(self, category: str | None) -> int:
+    def _get_max_uid(self: Self, category: str | None) -> int:
         """
         Get maximum UID for a given category
 
@@ -77,7 +77,7 @@ class UidCache(ABC):
         values = [*self.values(keys), -999]
         return max(values)
 
-    def overwrite_group_uid(self, identifier: str, uid: int) -> None:
+    def overwrite_group_uid(self: Self, identifier: str, uid: int) -> None:
         """
         Set UID for a group, overwriting the existing value if there is one
 
@@ -86,7 +86,7 @@ class UidCache(ABC):
         """
         return self.overwrite_uid(identifier, category="group", uid=uid)
 
-    def overwrite_user_uid(self, identifier: str, uid: int) -> None:
+    def overwrite_user_uid(self: Self, identifier: str, uid: int) -> None:
         """
         Get UID for a user, constructing one if necessary
 
@@ -95,7 +95,7 @@ class UidCache(ABC):
         """
         return self.overwrite_uid(identifier, category="user", uid=uid)
 
-    def overwrite_uid(self, identifier: str, category: str, uid: int) -> None:
+    def overwrite_uid(self: Self, identifier: str, category: str, uid: int) -> None:
         """
         Set UID, overwriting the existing one if necessary.
 

@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any
+from typing import Any, Self
 
 import requests
 from oauthlib.oauth2 import (
@@ -21,7 +21,7 @@ class OAuthClient(ABC):
     """Base class for OAuth client talking to a generic backend."""
 
     def __init__(
-        self,
+        self: Self,
         client_id: str,
         client_secret: str,
         debug: bool,  # noqa: FBT001
@@ -72,7 +72,7 @@ class OAuthClient(ABC):
             raise RuntimeError(msg) from exc
 
     @property
-    def bearer_token(self) -> str:
+    def bearer_token(self: Self) -> str:
         """
         Return a bearer token, requesting a new one if necessary
         """
@@ -91,26 +91,31 @@ class OAuthClient(ABC):
             raise RuntimeError(msg) from exc
 
     @abstractmethod
-    def extract_token(self, json_response: JSONDict) -> str:
+    def extract_token(self: Self, json_response: JSONDict) -> str:
         """
         Extract the bearer token from an OAuth2Session JSON response
         """
 
     @abstractmethod
-    def groups(self) -> list[JSONDict]:
+    def groups(self: Self) -> list[JSONDict]:
         """
         Return JSON data about groups from the OAuth backend.
         This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
 
     @abstractmethod
-    def users(self) -> list[JSONDict]:
+    def users(self: Self) -> list[JSONDict]:
         """
         Return JSON data about users from the OAuth backend.
         This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
 
-    def query(self, url: str, *, use_client_secret: bool = True) -> dict[str, Any]:
+    def query(
+        self: Self,
+        url: str,
+        *,
+        use_client_secret: bool = True,
+    ) -> dict[str, Any]:
         """
         Make a query against the OAuth backend
         """
@@ -128,7 +133,12 @@ class OAuthClient(ABC):
             **kwargs,
         )
 
-    def request(self, *args: Any, method: str = "GET", **kwargs: Any) -> dict[str, Any]:
+    def request(
+        self: Self,
+        *args: Any,
+        method: str = "GET",
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         """
         Make a request to the OAuth backend
         """
@@ -152,7 +162,7 @@ class OAuthClient(ABC):
             return {}
         return result.json()  # type: ignore
 
-    def verify(self, username: str, password: str) -> bool:
+    def verify(self: Self, username: str, password: str) -> bool:
         """
         Verify username and password by attempting to authenticate against the OAuth backend.
         """

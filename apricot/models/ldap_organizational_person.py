@@ -1,3 +1,5 @@
+from typing import Self
+
 from .ldap_person import LDAPPerson
 
 
@@ -13,5 +15,5 @@ class LDAPOrganizationalPerson(LDAPPerson):
 
     description: str
 
-    def names(self) -> list[str]:
+    def names(self: Self) -> list[str]:
         return [*super().names(), "organizationalPerson"]

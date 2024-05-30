@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from typing import Self
 
 from pydantic import ValidationError
 from twisted.python import log
@@ -22,12 +23,12 @@ class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(
-        self,
+        self: Self,
         domain: str,
         oauth_client: OAuthClient,
         *,
         enable_mirrored_groups: bool,
-    ):
+    ) -> None:
         """
         Initialise an OAuthDataAdaptor
 
@@ -50,27 +51,27 @@ class OAuthDataAdaptor:
             )
 
     @property
-    def groups(self) -> list[LDAPAttributeAdaptor]:
+    def groups(self: Self) -> list[LDAPAttributeAdaptor]:
         """
         Return a list of LDAPAttributeAdaptors representing validated group data.
         """
         return self.validated_groups
 
     @property
-    def users(self) -> list[LDAPAttributeAdaptor]:
+    def users(self: Self) -> list[LDAPAttributeAdaptor]:
         """
         Return a list of LDAPAttributeAdaptors representing validated user data.
         """
         return self.validated_users
 
-    def _dn_from_group_cn(self, group_cn: str) -> str:
+    def _dn_from_group_cn(self: Self, group_cn: str) -> str:
         return f"CN={group_cn},OU=groups,{self.root_dn}"
 
-    def _dn_from_user_cn(self, user_cn: str) -> str:
+    def _dn_from_user_cn(self: Self, user_cn: str) -> str:
         return f"CN={user_cn},OU=users,{self.root_dn}"
 
     def _extract_attributes(
-        self,
+        self: Self,
         input_dict: JSONDict,
         required_classes: Sequence[type[NamedLDAPClass]],
     ) -> LDAPAttributeAdaptor:
@@ -83,7 +84,7 @@ class OAuthDataAdaptor:
         return LDAPAttributeAdaptor(attributes)
 
     def _retrieve_entries(
-        self,
+        self: Self,
     ) -> tuple[
         list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
         list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
@@ -193,7 +194,7 @@ class OAuthDataAdaptor:
         return (annotated_groups, annotated_users)
 
     def _validate_groups(
-        self,
+        self: Self,
         annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """
@@ -220,7 +221,7 @@ class OAuthDataAdaptor:
         return output
 
     def _validate_users(
-        self,
+        self: Self,
         annotated_users: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """

@@ -1,6 +1,6 @@
 import inspect
 import sys
-from typing import Any, cast
+from typing import Any, Self, cast
 
 from twisted.internet import reactor, task
 from twisted.internet.endpoints import quoteStringArgument, serverFromString
@@ -14,7 +14,7 @@ from apricot.oauth import OAuthBackend, OAuthClientMap
 
 class ApricotServer:
     def __init__(
-        self,
+        self: Self,
         backend: OAuthBackend,
         client_id: str,
         client_secret: str,
@@ -111,7 +111,7 @@ class ApricotServer:
         # Load the Twisted reactor
         self.reactor = cast(IReactorCore, reactor)
 
-    def run(self) -> None:
+    def run(self: Self) -> None:
         """Start the Twisted reactor"""
         if self.debug:
             log.msg("Starting the Twisted reactor.")

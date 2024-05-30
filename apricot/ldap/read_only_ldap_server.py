@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Self
 
 from ldaptor.interfaces import ILDAPEntry
 from ldaptor.protocols.ldap.ldaperrors import LDAPProtocolError
@@ -24,12 +24,12 @@ from apricot.oauth import LDAPControlTuple
 
 
 class ReadOnlyLDAPServer(LDAPServer):
-    def __init__(self, *, debug: bool = False) -> None:
+    def __init__(self: Self, *, debug: bool = False) -> None:
         super().__init__()
         self.debug = debug
 
     def getRootDSE(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPProtocolRequest,
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> LDAPSearchResultDone:
@@ -45,7 +45,7 @@ class ReadOnlyLDAPServer(LDAPServer):
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPAddRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPAddRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
@@ -60,7 +60,7 @@ class ReadOnlyLDAPServer(LDAPServer):
         raise LDAPProtocolError(msg)
 
     def handle_LDAPBindRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPBindRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
@@ -77,7 +77,7 @@ class ReadOnlyLDAPServer(LDAPServer):
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPCompareRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPCompareRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
@@ -94,7 +94,7 @@ class ReadOnlyLDAPServer(LDAPServer):
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPDelRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPDelRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
@@ -109,7 +109,7 @@ class ReadOnlyLDAPServer(LDAPServer):
         raise LDAPProtocolError(msg)
 
     def handle_LDAPExtendedRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPExtendedRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
@@ -126,7 +126,7 @@ class ReadOnlyLDAPServer(LDAPServer):
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPModifyDNRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPModifyDNRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
@@ -141,7 +141,7 @@ class ReadOnlyLDAPServer(LDAPServer):
         raise LDAPProtocolError(msg)
 
     def handle_LDAPModifyRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPModifyRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
@@ -156,7 +156,7 @@ class ReadOnlyLDAPServer(LDAPServer):
         raise LDAPProtocolError(msg)
 
     def handle_LDAPSearchRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPSearchRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[[LDAPSearchResultEntry], None] | None,
@@ -173,7 +173,7 @@ class ReadOnlyLDAPServer(LDAPServer):
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPUnbindRequest(  # noqa: N802
-        self,
+        self: Self,
         request: LDAPUnbindRequest,
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,

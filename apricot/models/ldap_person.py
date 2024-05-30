@@ -1,3 +1,5 @@
+from typing import Self
+
 from .named_ldap_class import NamedLDAPClass
 
 
@@ -14,5 +16,5 @@ class LDAPPerson(NamedLDAPClass):
     cn: str
     sn: str
 
-    def names(self) -> list[str]:
+    def names(self: Self) -> list[str]:
         return ["person"]

@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any, Self, cast
 
 from apricot.types import JSONDict
 
@@ -11,11 +11,11 @@ class KeycloakClient(OAuthClient):
     max_rows = 100
 
     def __init__(
-        self,
+        self: Self,
         keycloak_base_url: str,
         keycloak_realm: str,
         **kwargs: Any,
-    ):
+    ) -> None:
         self.base_url = keycloak_base_url
         self.realm = keycloak_realm
 
@@ -30,10 +30,10 @@ class KeycloakClient(OAuthClient):
             **kwargs,
         )
 
-    def extract_token(self, json_response: JSONDict) -> str:
+    def extract_token(self: Self, json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def groups(self) -> list[JSONDict]:
+    def groups(self: Self) -> list[JSONDict]:
         output = []
         try:
             group_data: list[JSONDict] = []
@@ -90,7 +90,7 @@ class KeycloakClient(OAuthClient):
             pass
         return output
 
-    def users(self) -> list[JSONDict]:
+    def users(self: Self) -> list[JSONDict]:
         output = []
         try:
             user_data: list[JSONDict] = []

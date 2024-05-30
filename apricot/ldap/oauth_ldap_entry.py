@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Self, cast
 
 from ldaptor.inmemory import ReadOnlyInMemoryLDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import (
@@ -20,7 +20,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
     attributes: LDAPAttributeDict
 
     def __init__(
-        self,
+        self: Self,
         dn: DistinguishedName | str,
         attributes: LDAPAttributeDict,
         oauth_client: OAuthClient | None = None,
@@ -37,7 +37,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             dn = DistinguishedName(stringValue=dn)
         super().__init__(dn, attributes)
 
-    def __str__(self) -> str:
+    def __str__(self: Self) -> str:
         output = bytes(self.toWire()).decode("utf-8")
         for child in self._children.values():
             try:
@@ -52,7 +52,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return output
 
     @property
-    def oauth_client(self) -> OAuthClient:
+    def oauth_client(self: Self) -> OAuthClient:
         if not self.oauth_client_:
             if hasattr(self._parent, "oauth_client"):
                 self.oauth_client_ = self._parent.oauth_client
@@ -62,7 +62,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return self.oauth_client_
 
     def add_child(
-        self,
+        self: Self,
         rdn: RelativeDistinguishedName | str,
         attributes: LDAPAttributeDict,
     ) -> "OAuthLDAPEntry":
@@ -75,7 +75,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             output = self._children[rdn.getText()]
         return cast(OAuthLDAPEntry, output)
 
-    def bind(self, password: bytes) -> defer.Deferred["OAuthLDAPEntry"]:
+    def bind(self: Self, password: bytes) -> defer.Deferred["OAuthLDAPEntry"]:
         def _bind(password: bytes) -> "OAuthLDAPEntry":
             oauth_username = next(iter(self.get("oauth_username", "unknown")))
             s_password = password.decode("utf-8")
@@ -86,5 +86,5 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
 
         return defer.maybeDeferred(_bind, password)
 
-    def list_children(self) -> "list[OAuthLDAPEntry]":
+    def list_children(self: Self) -> "list[OAuthLDAPEntry]":
         return [cast(OAuthLDAPEntry, entry) for entry in self._children.values()]

@@ -1,4 +1,5 @@
 import time
+from typing import Self
 
 from ldaptor.interfaces import IConnectedLDAPEntry, ILDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
@@ -14,7 +15,7 @@ from apricot.oauth import OAuthClient, OAuthDataAdaptor
 class OAuthLDAPTree:
 
     def __init__(
-        self,
+        self: Self,
         domain: str,
         oauth_client: OAuthClient,
         *,
@@ -41,11 +42,11 @@ class OAuthLDAPTree:
         self.root_: OAuthLDAPEntry | None = None
 
     @property
-    def dn(self) -> DistinguishedName:
+    def dn(self: Self) -> DistinguishedName:
         return self.root.dn
 
     @property
-    def root(self) -> OAuthLDAPEntry:
+    def root(self: Self) -> OAuthLDAPEntry:
         """
         Lazy-load the LDAP tree on request
 
@@ -60,7 +61,7 @@ class OAuthLDAPTree:
             raise ValueError(msg)
         return self.root_
 
-    def refresh(self) -> None:
+    def refresh(self: Self) -> None:
         if (
             not self.root_
             or (time.monotonic() - self.last_update) > self.refresh_interval
@@ -121,10 +122,10 @@ class OAuthLDAPTree:
             log.msg("Finished building LDAP tree.")
             self.last_update = time.monotonic()
 
-    def __repr__(self) -> str:
+    def __repr__(self: Self) -> str:
         return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
 
-    def lookup(self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
+    def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
         """
         Lookup the referred to by dn.
 

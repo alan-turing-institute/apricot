@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any, Self, cast
 
 from twisted.python import log
 
@@ -11,10 +11,10 @@ class MicrosoftEntraClient(OAuthClient):
     """OAuth client for the Microsoft Entra backend."""
 
     def __init__(
-        self,
+        self: Self,
         entra_tenant_id: str,
         **kwargs: Any,
-    ):
+    ) -> None:
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         scopes = ["https://graph.microsoft.com/.default"]  # this is the default scope
         token_url = (
@@ -28,10 +28,10 @@ class MicrosoftEntraClient(OAuthClient):
             **kwargs,
         )
 
-    def extract_token(self, json_response: JSONDict) -> str:
+    def extract_token(self: Self, json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def groups(self) -> list[JSONDict]:
+    def groups(self: Self) -> list[JSONDict]:
         output = []
         queries = [
             "createdDateTime",
@@ -69,7 +69,7 @@ class MicrosoftEntraClient(OAuthClient):
                 log.msg(msg)
         return output
 
-    def users(self) -> list[JSONDict]:
+    def users(self: Self) -> list[JSONDict]:
         output = []
         try:
             queries = [

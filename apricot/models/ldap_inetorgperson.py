@@ -1,3 +1,5 @@
+from typing import Self
+
 from .ldap_organizational_person import LDAPOrganizationalPerson
 
 
@@ -19,5 +21,5 @@ class LDAPInetOrgPerson(LDAPOrganizationalPerson):
     mail: str | None = None
     telephoneNumber: str | None = None  # noqa: N815
 
-    def names(self) -> list[str]:
+    def names(self: Self) -> list[str]:
         return [*super().names(), "inetOrgPerson"]
