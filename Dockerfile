@@ -20,7 +20,8 @@ COPY ./run.py .
 RUN chmod ugo+x ./entrypoint.sh
 
 # Open appropriate ports
-EXPOSE 1389, 1636
+EXPOSE 1389
+EXPOSE 1636
 
 # Run the server
 ENTRYPOINT ["./entrypoint.sh"]
