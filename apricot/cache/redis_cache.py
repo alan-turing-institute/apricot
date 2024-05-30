@@ -36,7 +36,7 @@ class RedisCache(UidCache):
         return None if value is None else int(value)
 
     def keys(self: Self) -> list[str]:
-        return [str(k) for k in self.cache.keys()]
+        return [str(k) for k in self.cache.keys()]  # noqa: SIM118
 
     def set(self: Self, identifier: str, uid_value: int) -> None:
         self.cache.set(identifier, uid_value)

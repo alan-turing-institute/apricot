@@ -56,9 +56,8 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
 
     @property
     def oauth_client(self: Self) -> OAuthClient:
-        if not self.oauth_client_:
-            if hasattr(self._parent, "oauth_client"):
-                self.oauth_client_ = self._parent.oauth_client
+        if not self.oauth_client_ and hasattr(self._parent, "oauth_client"):
+            self.oauth_client_ = self._parent.oauth_client
         if not isinstance(self.oauth_client_, OAuthClient):
             msg = f"OAuthClient is of incorrect type {type(self.oauth_client_)}"
             raise TypeError(msg)

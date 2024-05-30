@@ -16,7 +16,7 @@ class LocalCache(UidCache):
         return self.cache.get(identifier, None)
 
     def keys(self: Self) -> list[str]:
-        return [str(k) for k in self.cache.keys()]
+        return [str(k) for k in self.cache]
 
     def set(self: Self, identifier: str, uid_value: int) -> None:
         self.cache[identifier] = uid_value

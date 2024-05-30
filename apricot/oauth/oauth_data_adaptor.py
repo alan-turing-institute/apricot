@@ -208,7 +208,7 @@ class OAuthDataAdaptor:
                     ),
                 )
             except ValidationError as exc:
-                name = group_dict["cn"] if "cn" in group_dict else "unknown"
+                name = group_dict.get("cn", "unknown")
                 log.msg(f"Validation failed for group '{name}'.")
                 for error in exc.errors():
                     log.msg(
@@ -233,7 +233,7 @@ class OAuthDataAdaptor:
                     ),
                 )
             except ValidationError as exc:
-                name = user_dict["cn"] if "cn" in user_dict else "unknown"
+                name = user_dict.get("cn", "unknown")
                 log.msg(f"Validation failed for user '{name}'.")
                 for error in exc.errors():
                     log.msg(

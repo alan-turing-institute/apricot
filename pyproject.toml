@@ -126,6 +126,7 @@ select = [
   "RSE",   # flake8-raise
   "RUF",   # ruff rules
   "S",     # flake8-bandit
+  "SIM",   # flake8-simplify
   "SLOT",  # flake8-slot
   "T",     # flake8-debugger and flake8-print
   "TCH",   # flake8-type-checking
