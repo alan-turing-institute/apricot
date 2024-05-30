@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import re
-from typing import Self, Type
+from typing import Self
 
 from pydantic import StringConstraints, validator
 from typing_extensions import Annotated
@@ -30,7 +32,7 @@ class LDAPPosixAccount(NamedLDAPClass):
 
     @validator("gidNumber")  # type: ignore[misc]
     @classmethod
-    def validate_gid_number(cls: Type[Self], gid_number: int) -> int:
+    def validate_gid_number(cls: type[Self], gid_number: int) -> int:
         """Avoid conflicts with existing users."""
         if not ID_MIN <= gid_number <= ID_MAX:
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
@@ -39,12 +41,12 @@ class LDAPPosixAccount(NamedLDAPClass):
 
     @validator("homeDirectory")  # type: ignore[misc]
     @classmethod
-    def validate_home_directory(cls: Type[Self], home_directory: str) -> str:
+    def validate_home_directory(cls: type[Self], home_directory: str) -> str:
         return re.sub(r"\s+", "-", home_directory)
 
     @validator("uidNumber")  # type: ignore[misc]
     @classmethod
-    def validate_uid_number(cls: Type[Self], uid_number: int) -> int:
+    def validate_uid_number(cls: type[Self], uid_number: int) -> int:
         """Avoid conflicts with existing users."""
         if not ID_MIN <= uid_number <= ID_MAX:
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."

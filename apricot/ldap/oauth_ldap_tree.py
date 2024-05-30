@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 import time
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 from ldaptor.interfaces import IConnectedLDAPEntry, ILDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
-from twisted.internet import defer
 from twisted.python import log
 from zope.interface import implementer
 
 from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
 from apricot.oauth import OAuthClient, OAuthDataAdaptor
+
+if TYPE_CHECKING:
+    from twisted.internet import defer
 
 
 @implementer(IConnectedLDAPEntry)

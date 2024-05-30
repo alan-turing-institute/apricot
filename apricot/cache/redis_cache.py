@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Self, cast
 
 import redis
@@ -16,10 +18,10 @@ class RedisCache(UidCache):
         """
         self.redis_host = redis_host
         self.redis_port = redis_port
-        self.cache_: "redis.Redis[str]" | None = None
+        self.cache_: redis.Redis[str] | None = None
 
     @property
-    def cache(self: Self) -> "redis.Redis[str]":
+    def cache(self: Self) -> redis.Redis[str]:
         """Lazy-load the cache on request."""
         if not self.cache_:
             self.cache_ = redis.Redis(

@@ -1,5 +1,6 @@
-from collections.abc import Sequence
-from typing import Self
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Self
 
 from pydantic import ValidationError
 from twisted.python import log
@@ -14,9 +15,13 @@ from apricot.models import (
     OverlayMemberOf,
     OverlayOAuthEntry,
 )
-from apricot.types import JSONDict
 
-from .oauth_client import OAuthClient
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from apricot.types import JSONDict
+
+    from .oauth_client import OAuthClient
 
 
 class OAuthDataAdaptor:

@@ -1,6 +1,9 @@
-from typing import Any, Self
+from __future__ import annotations
 
-from apricot.types import LDAPAttributeDict
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from apricot.types import LDAPAttributeDict
 
 
 class LDAPAttributeAdaptor:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .named_ldap_class import NamedLDAPClass
 
 

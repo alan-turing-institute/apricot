@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import os
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 import requests
 from oauthlib.oauth2 import (
@@ -13,8 +15,9 @@ from oauthlib.oauth2 import (
 from requests_oauthlib import OAuth2Session
 from twisted.python import log
 
-from apricot.cache import UidCache
-from apricot.types import JSONDict
+if TYPE_CHECKING:
+    from apricot.cache import UidCache
+    from apricot.types import JSONDict
 
 
 class OAuthClient(ABC):

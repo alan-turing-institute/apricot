@@ -1,4 +1,6 @@
-from typing import Self, Type
+from __future__ import annotations
+
+from typing import Self
 
 from pydantic import validator
 
@@ -23,7 +25,7 @@ class LDAPPosixGroup(NamedLDAPClass):
 
     @validator("gidNumber")  # type: ignore[misc]
     @classmethod
-    def validate_gid_number(cls: Type[Self], gid_number: int) -> int:
+    def validate_gid_number(cls: type[Self], gid_number: int) -> int:
         """Avoid conflicts with existing groups."""
         if not ID_MIN <= gid_number <= ID_MAX:
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."

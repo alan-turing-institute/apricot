@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Self, cast
 
 from ldaptor.inmemory import ReadOnlyInMemoryLDAPEntry
@@ -66,7 +68,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         self: Self,
         rdn: RelativeDistinguishedName | str,
         attributes: LDAPAttributeDict,
-    ) -> "OAuthLDAPEntry":
+    ) -> OAuthLDAPEntry:
         if isinstance(rdn, str):
             rdn = RelativeDistinguishedName(stringValue=rdn)
         try:
@@ -76,8 +78,8 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             output = self._children[rdn.getText()]
         return cast(OAuthLDAPEntry, output)
 
-    def bind(self: Self, password: bytes) -> defer.Deferred["OAuthLDAPEntry"]:
-        def _bind(password: bytes) -> "OAuthLDAPEntry":
+    def bind(self: Self, password: bytes) -> defer.Deferred[OAuthLDAPEntry]:
+        def _bind(password: bytes) -> OAuthLDAPEntry:
             oauth_username = next(iter(self.get("oauth_username", "unknown")))
             s_password = password.decode("utf-8")
             if self.oauth_client.verify(username=oauth_username, password=s_password):
@@ -87,5 +89,5 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
 
         return defer.maybeDeferred(_bind, password)
 
-    def list_children(self: Self) -> "list[OAuthLDAPEntry]":
+    def list_children(self: Self) -> list[OAuthLDAPEntry]:
         return [cast(OAuthLDAPEntry, entry) for entry in self._children.values()]

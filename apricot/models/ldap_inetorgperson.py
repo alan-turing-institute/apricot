@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Self
 
 from .ldap_organizational_person import LDAPOrganizationalPerson

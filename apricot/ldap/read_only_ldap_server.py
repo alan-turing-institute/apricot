@@ -1,26 +1,30 @@
-from typing import Callable, Self
+from __future__ import annotations
 
-from ldaptor.interfaces import ILDAPEntry
+from typing import TYPE_CHECKING, Callable, Self
+
 from ldaptor.protocols.ldap.ldaperrors import LDAPProtocolError
 from ldaptor.protocols.ldap.ldapserver import LDAPServer
-from ldaptor.protocols.pureldap import (
-    LDAPAddRequest,
-    LDAPBindRequest,
-    LDAPCompareRequest,
-    LDAPDelRequest,
-    LDAPExtendedRequest,
-    LDAPModifyDNRequest,
-    LDAPModifyRequest,
-    LDAPProtocolRequest,
-    LDAPSearchRequest,
-    LDAPSearchResultDone,
-    LDAPSearchResultEntry,
-    LDAPUnbindRequest,
-)
-from twisted.internet import defer
 from twisted.python import log
 
-from apricot.oauth import LDAPControlTuple
+if TYPE_CHECKING:
+    from ldaptor.interfaces import ILDAPEntry
+    from ldaptor.protocols.pureldap import (
+        LDAPAddRequest,
+        LDAPBindRequest,
+        LDAPCompareRequest,
+        LDAPDelRequest,
+        LDAPExtendedRequest,
+        LDAPModifyDNRequest,
+        LDAPModifyRequest,
+        LDAPProtocolRequest,
+        LDAPSearchRequest,
+        LDAPSearchResultDone,
+        LDAPSearchResultEntry,
+        LDAPUnbindRequest,
+    )
+    from twisted.internet import defer
+
+    from apricot.oauth import LDAPControlTuple
 
 
 class ReadOnlyLDAPServer(LDAPServer):
