@@ -23,12 +23,12 @@ if [ -z "${DOMAIN}" ]; then
     exit 1
 fi
 
+
 # Arguments with defaults
 if [ -z "${PORT}" ]; then
     PORT="1389"
     echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] PORT environment variable is not set: using default of '${PORT}'"
 fi
-
 
 
 # Optional arguments
@@ -41,10 +41,48 @@ if [ -n "${DISABLE_MIRRORED_GROUPS}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --disable-mirrored-groups"
 fi
 
+
+# Backend arguments: Entra
 if [ -n "${ENTRA_TENANT_ID}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --entra-tenant-id $ENTRA_TENANT_ID"
 fi
 
+
+# Backend arguments: Keycloak
+if [ -n "${KEYCLOAK_BASE_URL}" ]; then
+    if [ -z "${KEYCLOAK_REALM}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] KEYCLOAK_REALM environment variable is not set"
+        exit 1
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --keycloak-base-url $KEYCLOAK_BASE_URL --keycloak-realm $KEYCLOAK_REALM"
+fi
+
+
+# LDAP refresh arguments
+if [ -n "${BACKGROUND_REFRESH}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --background-refresh"
+fi
+
+if [ -n "${REFRESH_INTERVAL}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --refresh-interval $REFRESH_INTERVAL"
+fi
+
+
+# TLS arguments
+if [ -n "${TLS_PORT}" ]; then
+    if [ -z "${TLS_CERTIFICATE}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] TLS_CERTIFICATE environment variable is not set"
+        exit 1
+    fi
+    if [ -z "${TLS_PRIVATE_KEY}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] TLS_PRIVATE_KEY environment variable is not set"
+        exit 1
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --tls-port $TLS_PORT --tls-certificate $TLS_CERTIFICATE --tls-private-key $TLS_PRIVATE_KEY"
+fi
+
+
+# Redis arguments
 if [ -n "${REDIS_HOST}" ]; then
     if [ -z "${REDIS_PORT}" ]; then
         REDIS_PORT="6379"
@@ -53,13 +91,6 @@ if [ -n "${REDIS_HOST}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --redis-host $REDIS_HOST --redis-port $REDIS_PORT"
 fi
 
-if [ -n "${KEYCLOAK_BASE_URL}" ]; then
-    if [ -z "${KEYCLOAK_REALM}" ]; then
-        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] KEYCLOAK_REALM environment variable is not set"
-        exit 1
-    fi
-    EXTRA_OPTS="${EXTRA_OPTS} --keycloak-base-url $KEYCLOAK_BASE_URL --keycloak-realm $KEYCLOAK_REALM"
-fi
 
 # Run the server
 hatch run python run.py \

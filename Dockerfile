@@ -21,6 +21,7 @@ RUN chmod ugo+x ./entrypoint.sh
 
 # Open appropriate ports
 EXPOSE 1389
+EXPOSE 1636
 
 # Run the server
 ENTRYPOINT ["./entrypoint.sh"]

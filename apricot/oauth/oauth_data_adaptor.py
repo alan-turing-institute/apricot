@@ -24,6 +24,13 @@ class OAuthDataAdaptor:
     def __init__(
         self, domain: str, oauth_client: OAuthClient, *, enable_mirrored_groups: bool
     ):
+        """
+        Initialise an OAuthDataAdaptor
+
+        @param domain: The root domain of the LDAP tree
+        @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
+        @param oauth_client: An OAuth client used to construct the LDAP tree
+        """
         self.debug = oauth_client.debug
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
