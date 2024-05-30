@@ -96,10 +96,11 @@ class OAuthClient(ABC):
                     client_secret=self.client_secret,
                 )
                 self.bearer_token_ = self.extract_token(json_response)
-            return self.bearer_token_
         except Exception as exc:
             msg = f"Failed to fetch bearer token from OAuth endpoint.\n{exc!s}"
             raise RuntimeError(msg) from exc
+        else:
+            return self.bearer_token_
 
     @abstractmethod
     def extract_token(self: Self, json_response: JSONDict) -> str:
@@ -177,7 +178,8 @@ class OAuthClient(ABC):
                 client_id=self.session_interactive._client.client_id,
                 client_secret=self.client_secret,
             )
-            return True
         except InvalidGrantError as exc:
             log.msg(f"Authentication failed.\n{exc}")
-        return False
+            return False
+        else:
+            return True
