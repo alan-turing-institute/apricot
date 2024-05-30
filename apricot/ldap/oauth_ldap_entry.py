@@ -16,6 +16,8 @@ from apricot.oauth import LDAPAttributeDict, OAuthClient
 
 
 class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
+    """An LDAP entry that represents a view of an OAuth object."""
+
     dn: DistinguishedName
     attributes: LDAPAttributeDict
 
@@ -25,8 +27,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         attributes: LDAPAttributeDict,
         oauth_client: OAuthClient | None = None,
     ) -> None:
-        """
-        Initialize the object.
+        """Initialize the object.
 
         @param dn: Distinguished Name of the object
         @param attributes: Attributes of the object.

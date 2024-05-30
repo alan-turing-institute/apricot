@@ -13,6 +13,8 @@ from apricot.oauth import OAuthBackend, OAuthClientMap
 
 
 class ApricotServer:
+    """The Apricot server running via Twisted."""
+
     def __init__(
         self: Self,
         backend: OAuthBackend,
@@ -32,6 +34,23 @@ class ApricotServer:
         tls_private_key: str | None = None,
         **kwargs: Any,
     ) -> None:
+        """Initialise an ApricotServer.
+
+        @param backend: An OAuth backend,
+        @param client_id: An OAuth client ID
+        @param client_secret: An OAuth client secret
+        @param domain: The OAuth domain
+        @param port: Port to expose LDAP on
+        @param background_refresh: Whether to refresh the LDAP tree in the background
+        @param debug: Enable debug output
+        @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
+        @param redis_host: Host for a Redis cache (if used)
+        @param redis_port: Port for a Redis cache (if used)
+        @param refresh_interval: Interval after which the LDAP information is stale
+        @param tls_port: Port to expose LDAPS on
+        @param tls_certificate: TLS certificate for LDAPS
+        @param tls_private_key: TLS private key for LDAPS
+        """
         self.debug = debug
 
         # Log to stdout
@@ -112,7 +131,7 @@ class ApricotServer:
         self.reactor = cast(IReactorCore, reactor)
 
     def run(self: Self) -> None:
-        """Start the Twisted reactor"""
+        """Start the Twisted reactor."""
         if self.debug:
             log.msg("Starting the Twisted reactor.")
         self.reactor.run()

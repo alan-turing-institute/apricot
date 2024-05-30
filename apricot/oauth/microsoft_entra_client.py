@@ -15,6 +15,10 @@ class MicrosoftEntraClient(OAuthClient):
         entra_tenant_id: str,
         **kwargs: Any,
     ) -> None:
+        """Initialise a MicrosoftEntraClient.
+
+        @param entra_tenant_id: Tenant ID for the Entra ID
+        """
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         scopes = ["https://graph.microsoft.com/.default"]  # this is the default scope
         token_url = (

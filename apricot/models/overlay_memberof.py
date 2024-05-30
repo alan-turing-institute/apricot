@@ -2,8 +2,7 @@ from .named_ldap_class import NamedLDAPClass
 
 
 class OverlayMemberOf(NamedLDAPClass):
-    """
-    Abstraction for tracking the groups that an individual belongs to
+    """Abstraction for tracking the groups that an individual belongs to.
 
     OID: n/a
     Object class: Auxiliary

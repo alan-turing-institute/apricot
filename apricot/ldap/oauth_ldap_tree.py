@@ -13,6 +13,7 @@ from apricot.oauth import OAuthClient, OAuthDataAdaptor
 
 @implementer(IConnectedLDAPEntry)
 class OAuthLDAPTree:
+    """An LDAP tree that represents a view of an OAuth directory."""
 
     def __init__(
         self: Self,
@@ -23,8 +24,7 @@ class OAuthLDAPTree:
         enable_mirrored_groups: bool,
         refresh_interval: int,
     ) -> None:
-        """
-        Initialise an OAuthLDAPTree
+        """Initialise an OAuthLDAPTree.
 
         @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
         @param domain: The root domain of the LDAP tree
@@ -47,8 +47,7 @@ class OAuthLDAPTree:
 
     @property
     def root(self: Self) -> OAuthLDAPEntry:
-        """
-        Lazy-load the LDAP tree on request
+        """Lazy-load the LDAP tree on request.
 
         @return: An OAuthLDAPEntry for the tree
 
@@ -62,6 +61,7 @@ class OAuthLDAPTree:
         return self.root_
 
     def refresh(self: Self) -> None:
+        """Refresh the LDAP tree."""
         if (
             not self.root_
             or (time.monotonic() - self.last_update) > self.refresh_interval
@@ -126,8 +126,7 @@ class OAuthLDAPTree:
         return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
 
     def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
-        """
-        Lookup the referred to by dn.
+        """Lookup the referred to by dn.
 
         @return: A Deferred returning an ILDAPEntry.
 

@@ -4,7 +4,10 @@ from .uid_cache import UidCache
 
 
 class LocalCache(UidCache):
+    """Implementation of UidCache using an in-memory dictionary."""
+
     def __init__(self: Self) -> None:
+        """Initialise a RedisCache."""
         self.cache: dict[str, int] = {}
 
     def get(self: Self, identifier: str) -> int | None:

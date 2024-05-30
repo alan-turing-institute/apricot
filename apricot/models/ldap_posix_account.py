@@ -11,8 +11,7 @@ ID_MAX = 60000
 
 
 class LDAPPosixAccount(NamedLDAPClass):
-    """
-    Abstraction of an account with POSIX attributes
+    """Abstraction of an account with POSIX attributes.
 
     OID: 1.3.6.1.1.1.2.0
     Object class: Auxiliary
@@ -32,7 +31,7 @@ class LDAPPosixAccount(NamedLDAPClass):
     @validator("gidNumber")  # type: ignore[misc]
     @classmethod
     def validate_gid_number(cls: Type[Self], gid_number: int) -> int:
-        """Avoid conflicts with existing users"""
+        """Avoid conflicts with existing users."""
         if not ID_MIN <= gid_number <= ID_MAX:
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
@@ -46,7 +45,7 @@ class LDAPPosixAccount(NamedLDAPClass):
     @validator("uidNumber")  # type: ignore[misc]
     @classmethod
     def validate_uid_number(cls: Type[Self], uid_number: int) -> int:
-        """Avoid conflicts with existing users"""
+        """Avoid conflicts with existing users."""
         if not ID_MIN <= uid_number <= ID_MAX:
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)

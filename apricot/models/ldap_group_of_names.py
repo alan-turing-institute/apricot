@@ -4,8 +4,7 @@ from .named_ldap_class import NamedLDAPClass
 
 
 class LDAPGroupOfNames(NamedLDAPClass):
-    """
-    A group with named members
+    """A group with named members.
 
     OID: 2.5.6.9
     Object class: Structural

@@ -4,8 +4,7 @@ from .ldap_person import LDAPPerson
 
 
 class LDAPOrganizationalPerson(LDAPPerson):
-    """
-    A person belonging to an organisation
+    """A person belonging to an organisation.
 
     OID: 2.5.6.7
     Object class: Structural

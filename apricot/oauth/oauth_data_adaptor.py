@@ -29,8 +29,7 @@ class OAuthDataAdaptor:
         *,
         enable_mirrored_groups: bool,
     ) -> None:
-        """
-        Initialise an OAuthDataAdaptor
+        """Initialise an OAuthDataAdaptor.
 
         @param domain: The root domain of the LDAP tree
         @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
@@ -52,16 +51,12 @@ class OAuthDataAdaptor:
 
     @property
     def groups(self: Self) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated group data.
-        """
+        """Return a list of LDAPAttributeAdaptors representing validated group data."""
         return self.validated_groups
 
     @property
     def users(self: Self) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated user data.
-        """
+        """Return a list of LDAPAttributeAdaptors representing validated user data."""
         return self.validated_users
 
     def _dn_from_group_cn(self: Self, group_cn: str) -> str:
@@ -75,7 +70,7 @@ class OAuthDataAdaptor:
         input_dict: JSONDict,
         required_classes: Sequence[type[NamedLDAPClass]],
     ) -> LDAPAttributeAdaptor:
-        """Add appropriate LDAP class attributes"""
+        """Add appropriate LDAP class attributes."""
         attributes = {"objectclass": ["top"]}
         for ldap_class in required_classes:
             model = ldap_class(**input_dict)
@@ -89,9 +84,7 @@ class OAuthDataAdaptor:
         list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
         list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
     ]:
-        """
-        Obtain lists of users and groups, and construct necessary meta-entries.
-        """
+        """Obtain lists of users and groups, and construct necessary meta-entries."""
         # Get the initial set of users and groups
         oauth_groups = self.oauth_client.groups()
         oauth_users = self.oauth_client.users()
@@ -197,9 +190,7 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated group data.
-        """
+        """Return a list of LDAPAttributeAdaptors representing validated group data."""
         if self.debug:
             log.msg(f"Attempting to validate {len(annotated_groups)} groups.")
         output = []
@@ -224,9 +215,7 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_users: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated user data.
-        """
+        """Return a list of LDAPAttributeAdaptors representing validated user data."""
         if self.debug:
             log.msg(f"Attempting to validate {len(annotated_users)} users.")
         output = []

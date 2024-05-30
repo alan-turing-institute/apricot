@@ -1,4 +1,4 @@
-"""Patch LDAPString to avoid TypeError when parsing LDAP filter strings"""
+"""Patch LDAPString to avoid TypeError when parsing LDAP filter strings."""
 
 from typing import Any, Self
 
@@ -8,7 +8,7 @@ old_init = LDAPString.__init__
 
 
 def patched_init(self: Self, *args: Any, **kwargs: Any) -> None:  # type: ignore
-    """Patch LDAPString init to store its value as 'str' not 'bytes'"""
+    """Patch LDAPString init to store its value as 'str' not 'bytes'."""
     old_init(self, *args, **kwargs)
     if isinstance(self.value, bytes):
         self.value = self.value.decode()

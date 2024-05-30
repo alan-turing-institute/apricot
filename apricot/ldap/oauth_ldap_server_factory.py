@@ -10,6 +10,8 @@ from .read_only_ldap_server import ReadOnlyLDAPServer
 
 
 class OAuthLDAPServerFactory(ServerFactory):
+    """A Twisted ServerFactory that provides an LDAP tree."""
+
     def __init__(
         self: Self,
         domain: str,
@@ -19,8 +21,7 @@ class OAuthLDAPServerFactory(ServerFactory):
         enable_mirrored_groups: bool,
         refresh_interval: int,
     ) -> None:
-        """
-        Initialise an OAuthLDAPServerFactory
+        """Initialise an OAuthLDAPServerFactory.
 
         @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
         @param domain: The root domain of the LDAP tree
@@ -41,8 +42,7 @@ class OAuthLDAPServerFactory(ServerFactory):
         return f"{self.__class__.__name__} using adaptor {self.adaptor}"
 
     def buildProtocol(self: Self, addr: IAddress) -> Protocol:  # noqa: N802
-        """
-        Create an LDAPServer instance.
+        """Create an LDAPServer instance.
 
         This instance will use self.adaptor to produce LDAP entries.
 

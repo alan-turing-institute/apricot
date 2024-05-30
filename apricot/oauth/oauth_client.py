@@ -30,6 +30,16 @@ class OAuthClient(ABC):
         token_url: str,
         uid_cache: UidCache,
     ) -> None:
+        """Initialise an OAuthClient.
+
+        @param client_id: OAuth client ID
+        @param client_secret: OAuth client secret
+        @param debug: Enable debug output
+        @param redirect_uri: OAuth redirect URI
+        @param scopes: OAuth scopes
+        @param token_url: OAuth token URL
+        @param uid_cache: Cache for UIDs
+        """
         # Set attributes
         self.bearer_token_: str | None = None
         self.client_secret = client_secret
@@ -73,9 +83,7 @@ class OAuthClient(ABC):
 
     @property
     def bearer_token(self: Self) -> str:
-        """
-        Return a bearer token, requesting a new one if necessary
-        """
+        """Return a bearer token, requesting a new one if necessary."""
         try:
             if not self.bearer_token_:
                 log.msg("Requesting a new authentication token from the OAuth backend.")
@@ -92,21 +100,19 @@ class OAuthClient(ABC):
 
     @abstractmethod
     def extract_token(self: Self, json_response: JSONDict) -> str:
-        """
-        Extract the bearer token from an OAuth2Session JSON response
-        """
+        """Extract the bearer token from an OAuth2Session JSON response."""
 
     @abstractmethod
     def groups(self: Self) -> list[JSONDict]:
-        """
-        Return JSON data about groups from the OAuth backend.
+        """Return JSON data about groups from the OAuth backend.
+
         This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
 
     @abstractmethod
     def users(self: Self) -> list[JSONDict]:
-        """
-        Return JSON data about users from the OAuth backend.
+        """Return JSON data about users from the OAuth backend.
+
         This should be a list of JSON dictionaries where 'None' is used to signify missing values.
         """
 
@@ -116,9 +122,7 @@ class OAuthClient(ABC):
         *,
         use_client_secret: bool = True,
     ) -> dict[str, Any]:
-        """
-        Make a query against the OAuth backend
-        """
+        """Make a query against the OAuth backend."""
         kwargs = (
             {
                 "client_id": self.session_application._client.client_id,
@@ -139,9 +143,7 @@ class OAuthClient(ABC):
         method: str = "GET",
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """
-        Make a request to the OAuth backend
-        """
+        """Make a request to the OAuth backend."""
 
         def query_(*args: Any, **kwargs: Any) -> requests.Response:
             return self.session_application.request(  # type: ignore[no-any-return]
@@ -163,9 +165,7 @@ class OAuthClient(ABC):
         return result.json()  # type: ignore
 
     def verify(self: Self, username: str, password: str) -> bool:
-        """
-        Verify username and password by attempting to authenticate against the OAuth backend.
-        """
+        """Verify username and password by attempting to authenticate against the OAuth backend."""
         try:
             self.session_interactive.fetch_token(
                 token_url=self.token_url,

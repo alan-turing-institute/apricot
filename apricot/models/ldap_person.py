@@ -4,8 +4,7 @@ from .named_ldap_class import NamedLDAPClass
 
 
 class LDAPPerson(NamedLDAPClass):
-    """
-    A named person
+    """A named person.
 
     OID: 2.5.6.6
     Object class: Structural

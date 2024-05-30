@@ -16,6 +16,11 @@ class KeycloakClient(OAuthClient):
         keycloak_realm: str,
         **kwargs: Any,
     ) -> None:
+        """Initialise a KeycloakClient.
+
+        @param keycloak_base_url: Base URL for Keycloak server
+        @param keycloak_realm: Realm for Keycloak server
+        """
         self.base_url = keycloak_base_url
         self.realm = keycloak_realm
 

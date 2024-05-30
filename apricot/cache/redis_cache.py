@@ -6,16 +6,21 @@ from .uid_cache import UidCache
 
 
 class RedisCache(UidCache):
+    """Implementation of UidCache using a Redis backend."""
+
     def __init__(self: Self, redis_host: str, redis_port: int) -> None:
+        """Initialise a RedisCache.
+
+        @param redis_host: Host for the Redis cache
+        @param redis_port: Port for the Redis cache
+        """
         self.redis_host = redis_host
         self.redis_port = redis_port
         self.cache_: "redis.Redis[str]" | None = None
 
     @property
     def cache(self: Self) -> "redis.Redis[str]":
-        """
-        Lazy-load the cache on request
-        """
+        """Lazy-load the cache on request."""
         if not self.cache_:
             self.cache_ = redis.Redis(
                 host=self.redis_host,

@@ -9,8 +9,7 @@ ID_MAX = 4294967295
 
 
 class LDAPPosixGroup(NamedLDAPClass):
-    """
-    Abstraction of a group of accounts
+    """Abstraction of a group of accounts.
 
     OID: 1.3.6.1.1.1.2.2
     Object class: Auxiliary
@@ -25,7 +24,7 @@ class LDAPPosixGroup(NamedLDAPClass):
     @validator("gidNumber")  # type: ignore[misc]
     @classmethod
     def validate_gid_number(cls: Type[Self], gid_number: int) -> int:
-        """Avoid conflicts with existing groups"""
+        """Avoid conflicts with existing groups."""
         if not ID_MIN <= gid_number <= ID_MAX:
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
