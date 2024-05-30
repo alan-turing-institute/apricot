@@ -93,12 +93,12 @@ class ApricotServer:
         endpoint.listen(factory)
 
         # Attach a listening endpoint
-        if tls_port:
+        if tls_certificate or tls_private_key:
             if not tls_certificate:
-                msg = "No TLS certificate provided. Please provide one with --tls-certificate or disable TLS by not providing the --tls-port argument."
+                msg = "No TLS certificate provided. Please provide one with --tls-certificate or disable TLS."
                 raise ValueError(msg)
             if not tls_private_key:
-                msg = "No TLS private key provided. Please provide one with --tls-private-key or disable TLS by not providing the --tls-port argument."
+                msg = "No TLS private key provided. Please provide one with --tls-private-key or disable TLS."
                 raise ValueError(msg)
             if self.debug:
                 log.msg("Attaching a listening endpoint (TLS).")
