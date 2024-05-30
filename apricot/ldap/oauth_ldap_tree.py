@@ -25,7 +25,9 @@ class OAuthLDAPTree:
         """
         Initialise an OAuthLDAPTree
 
+        @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
         @param domain: The root domain of the LDAP tree
+        @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
         @param oauth_client: An OAuth client used to construct the LDAP tree
         @param refresh_interval: Interval in seconds after which the tree must be refreshed
         """

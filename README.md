@@ -26,10 +26,10 @@ To do this, you will need to provide the `--redis-host` and `--redis-port` argum
 
 ### Configure background refresh [Optional]
 
-By default Apricot will refresh on demand when the data is older than 60 seconds.
-If it takes a long time to fetch all users and groups, or you want to ensure that each request prompty gets a respose, you may want to configure background refresh to have it periodically be refreshed in the background.
+By default Apricot will refresh the LDAP tree whenever it is accessed and it contains data older than 60 seconds.
+If it takes a long time to fetch all users and groups, or you want to ensure that each request gets a prompt response, you may want to configure background refresh to have it periodically be refreshed in the background.
 
-This is enabled with the `--background-refresh` flag, which uses the `--refresh-interval=60` parameter as the interval to refresh the ldap database. 
+This is enabled with the `--background-refresh` flag, which uses the `--refresh-interval` parameter as the interval to refresh the ldap database.
 
 ### Using TLS [Optional]
 
