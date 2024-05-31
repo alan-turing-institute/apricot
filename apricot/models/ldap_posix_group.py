@@ -19,6 +19,8 @@ class LDAPPosixGroup(LDAPObjectClass):
     Schema: rfc2307bis
     """
 
+    _ldap_object_class_name: str = "posixGroup"
+
     description: str
     gidNumber: int  # noqa: N815
     memberUid: list[str]  # noqa: N815
@@ -31,6 +33,3 @@ class LDAPPosixGroup(LDAPObjectClass):
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
         return gid_number
-
-    def names(self: Self) -> list[str]:
-        return ["posixGroup"]

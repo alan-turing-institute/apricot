@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Self
-
 from .ldap_object_class import LDAPObjectClass
 
 
@@ -14,9 +12,8 @@ class LDAPGroupOfNames(LDAPObjectClass):
     Schema: rfc4519
     """
 
+    _ldap_object_class_name: str = "groupOfNames"
+
     cn: str
     description: str
     member: list[str]
-
-    def names(self: Self) -> list[str]:
-        return ["groupOfNames"]

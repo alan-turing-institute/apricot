@@ -9,9 +9,9 @@ from apricot.models import (
     LDAPAttributeAdaptor,
     LDAPGroupOfNames,
     LDAPInetOrgPerson,
+    LDAPObjectClass,
     LDAPPosixAccount,
     LDAPPosixGroup,
-    LDAPObjectClass,
     OverlayMemberOf,
     OverlayOAuthEntry,
 )

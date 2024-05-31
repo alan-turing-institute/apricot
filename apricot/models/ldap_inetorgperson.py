@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Self
-
 from .ldap_organizational_person import LDAPOrganizationalPerson
 
 
@@ -14,6 +12,8 @@ class LDAPInetOrgPerson(LDAPOrganizationalPerson):
     Schema: rfc2798
     """
 
+    _ldap_object_class_name: str = "inetOrgPerson"
+
     cn: str
     displayName: str | None = None  # noqa: N815
     employeeNumber: str | None = None  # noqa: N815
@@ -21,6 +21,3 @@ class LDAPInetOrgPerson(LDAPOrganizationalPerson):
     sn: str
     mail: str | None = None
     telephoneNumber: str | None = None  # noqa: N815
-
-    def names(self: Self) -> list[str]:
-        return [*super().names(), "inetOrgPerson"]

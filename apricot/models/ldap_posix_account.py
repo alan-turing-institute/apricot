@@ -21,6 +21,8 @@ class LDAPPosixAccount(LDAPObjectClass):
     Schema: rfc2307bis
     """
 
+    _ldap_object_class_name: str = "posixAccount"
+
     cn: str
     gidNumber: int  # noqa: N815
     homeDirectory: Annotated[  # noqa: N815
@@ -52,6 +54,3 @@ class LDAPPosixAccount(LDAPObjectClass):
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)
         return uid_number
-
-    def names(self: Self) -> list[str]:
-        return ["posixAccount"]
