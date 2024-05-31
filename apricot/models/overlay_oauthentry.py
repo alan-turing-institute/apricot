@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from .named_ldap_class import NamedLDAPClass
+from .ldap_object_class import LDAPObjectClass
 
 
-class OverlayOAuthEntry(NamedLDAPClass):
+class OverlayOAuthEntry(LDAPObjectClass):
     """Abstraction for tracking an OAuth entry.
 
     OID: n/a

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Self
 
-from .named_ldap_class import NamedLDAPClass
+from .ldap_object_class import LDAPObjectClass
 
 
-class LDAPPerson(NamedLDAPClass):
+class LDAPPerson(LDAPObjectClass):
     """A named person.
 
     OID: 2.5.6.6

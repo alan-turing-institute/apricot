@@ -11,7 +11,7 @@ from apricot.models import (
     LDAPInetOrgPerson,
     LDAPPosixAccount,
     LDAPPosixGroup,
-    NamedLDAPClass,
+    LDAPObjectClass,
     OverlayMemberOf,
     OverlayOAuthEntry,
 )
@@ -72,8 +72,8 @@ class OAuthDataAdaptor:
     def _retrieve_entries(
         self: Self,
     ) -> tuple[
-        list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
-        list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
+        list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
+        list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ]:
         """Obtain lists of users and groups, and construct necessary meta-entries."""
         # Get the initial set of users and groups
@@ -179,7 +179,7 @@ class OAuthDataAdaptor:
 
     def _validate_groups(
         self: Self,
-        annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
+        annotated_groups: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """Return a list of LDAPAttributeAdaptors representing validated group data."""
         if self.debug:
@@ -204,7 +204,7 @@ class OAuthDataAdaptor:
 
     def _validate_users(
         self: Self,
-        annotated_users: list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
+        annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """Return a list of LDAPAttributeAdaptors representing validated user data."""
         if self.debug:

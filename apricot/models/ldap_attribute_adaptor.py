@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Self, Sequence
 
 if TYPE_CHECKING:
-    from apricot.models import NamedLDAPClass
+    from apricot.models import LDAPObjectClass
     from apricot.types import JSONDict, LDAPAttributeDict
 
 
@@ -31,7 +31,7 @@ class LDAPAttributeAdaptor:
         cls: type[Self],
         input_dict: JSONDict,
         *,
-        required_classes: Sequence[type[NamedLDAPClass]],
+        required_classes: Sequence[type[LDAPObjectClass]],
     ) -> LDAPAttributeAdaptor:
         """Construct an LDAPAttributeAdaptor from attributes and required classes."""
         attributes = {"objectclass": ["top"]}

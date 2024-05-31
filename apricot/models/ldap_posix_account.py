@@ -6,13 +6,13 @@ from typing import Self
 from pydantic import StringConstraints, validator
 from typing_extensions import Annotated
 
-from .named_ldap_class import NamedLDAPClass
+from .ldap_object_class import LDAPObjectClass
 
 ID_MIN = 2000
 ID_MAX = 60000
 
 
-class LDAPPosixAccount(NamedLDAPClass):
+class LDAPPosixAccount(LDAPObjectClass):
     """Abstraction of an account with POSIX attributes.
 
     OID: 1.3.6.1.1.1.2.0

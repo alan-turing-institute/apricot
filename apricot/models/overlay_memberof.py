@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from .named_ldap_class import NamedLDAPClass
+from .ldap_object_class import LDAPObjectClass
 
 
-class OverlayMemberOf(NamedLDAPClass):
+class OverlayMemberOf(LDAPObjectClass):
     """Abstraction for tracking the groups that an individual belongs to.
 
     OID: n/a
