@@ -149,7 +149,6 @@ ignore = [
   "PLR0912",  # too-many-branches
   "PLR0913",  # too-many-arguments
   "PLR0917",  # too-many-positional-arguments
-  "PLR6301",  # method-could-be-function
 ]
 
 [tool.ruff.lint.flake8-annotations]
