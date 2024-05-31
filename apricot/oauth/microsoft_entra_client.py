@@ -35,7 +35,8 @@ class MicrosoftEntraClient(OAuthClient):
             **kwargs,
         )
 
-    def extract_token(self: Self, json_response: JSONDict) -> str:
+    @staticmethod
+    def extract_token(json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
     def groups(self: Self) -> list[JSONDict]:

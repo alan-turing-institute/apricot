@@ -102,8 +102,9 @@ class OAuthClient(ABC):
         else:
             return self.bearer_token_
 
+    @staticmethod
     @abstractmethod
-    def extract_token(self: Self, json_response: JSONDict) -> str:
+    def extract_token(json_response: JSONDict) -> str:
         """Extract the bearer token from an OAuth2Session JSON response."""
 
     @abstractmethod
