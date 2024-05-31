@@ -17,7 +17,6 @@ from apricot.models import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
 
     from apricot.types import JSONDict
 
@@ -69,19 +68,6 @@ class OAuthDataAdaptor:
 
     def _dn_from_user_cn(self: Self, user_cn: str) -> str:
         return f"CN={user_cn},OU=users,{self.root_dn}"
-
-    def _extract_attributes(
-        self: Self,
-        input_dict: JSONDict,
-        required_classes: Sequence[type[NamedLDAPClass]],
-    ) -> LDAPAttributeAdaptor:
-        """Add appropriate LDAP class attributes."""
-        attributes = {"objectclass": ["top"]}
-        for ldap_class in required_classes:
-            model = ldap_class(**input_dict)
-            attributes.update(model.model_dump())
-            attributes["objectclass"] += model.names()
-        return LDAPAttributeAdaptor(attributes)
 
     def _retrieve_entries(
         self: Self,
@@ -202,7 +188,7 @@ class OAuthDataAdaptor:
         for group_dict, required_classes in annotated_groups:
             try:
                 output.append(
-                    self._extract_attributes(
+                    LDAPAttributeAdaptor.from_attributes(
                         group_dict,
                         required_classes=required_classes,
                     ),
@@ -227,7 +213,7 @@ class OAuthDataAdaptor:
         for user_dict, required_classes in annotated_users:
             try:
                 output.append(
-                    self._extract_attributes(
+                    LDAPAttributeAdaptor.from_attributes(
                         user_dict,
                         required_classes=required_classes,
                     ),

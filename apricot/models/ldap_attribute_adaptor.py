@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, Sequence
 
 if TYPE_CHECKING:
-    from apricot.types import LDAPAttributeDict
+    from apricot.models import NamedLDAPClass
+    from apricot.types import JSONDict, LDAPAttributeDict
 
 
 class LDAPAttributeAdaptor:
@@ -24,6 +25,21 @@ class LDAPAttributeAdaptor:
     def cn(self: Self) -> str:
         """Return CN for this set of LDAP attributes."""
         return self.attributes["cn"][0]
+
+    @classmethod
+    def from_attributes(
+        cls: type[Self],
+        input_dict: JSONDict,
+        *,
+        required_classes: Sequence[type[NamedLDAPClass]],
+    ) -> LDAPAttributeAdaptor:
+        """Construct an LDAPAttributeAdaptor from attributes and required classes."""
+        attributes = {"objectclass": ["top"]}
+        for ldap_class in required_classes:
+            model = ldap_class(**input_dict)
+            attributes.update(model.model_dump())
+            attributes["objectclass"] += model.names()
+        return cls(attributes)
 
     def to_dict(self: Self) -> LDAPAttributeDict:
         """Convert the attributes to an LDAPAttributeDict."""
