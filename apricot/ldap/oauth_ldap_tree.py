@@ -1,20 +1,26 @@
+from __future__ import annotations
+
 import time
+from typing import TYPE_CHECKING, Self
 
 from ldaptor.interfaces import IConnectedLDAPEntry, ILDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
-from twisted.internet import defer
 from twisted.python import log
 from zope.interface import implementer
 
 from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
 from apricot.oauth import OAuthClient, OAuthDataAdaptor
 
+if TYPE_CHECKING:
+    from twisted.internet import defer
+
 
 @implementer(IConnectedLDAPEntry)
 class OAuthLDAPTree:
+    """An LDAP tree that represents a view of an OAuth directory."""
 
     def __init__(
-        self,
+        self: Self,
         domain: str,
         oauth_client: OAuthClient,
         *,
@@ -22,8 +28,7 @@ class OAuthLDAPTree:
         enable_mirrored_groups: bool,
         refresh_interval: int,
     ) -> None:
-        """
-        Initialise an OAuthLDAPTree
+        """Initialise an OAuthLDAPTree.
 
         @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
         @param domain: The root domain of the LDAP tree
@@ -41,13 +46,12 @@ class OAuthLDAPTree:
         self.root_: OAuthLDAPEntry | None = None
 
     @property
-    def dn(self) -> DistinguishedName:
+    def dn(self: Self) -> DistinguishedName:
         return self.root.dn
 
     @property
-    def root(self) -> OAuthLDAPEntry:
-        """
-        Lazy-load the LDAP tree on request
+    def root(self: Self) -> OAuthLDAPEntry:
+        """Lazy-load the LDAP tree on request.
 
         @return: An OAuthLDAPEntry for the tree
 
@@ -60,7 +64,8 @@ class OAuthLDAPTree:
             raise ValueError(msg)
         return self.root_
 
-    def refresh(self) -> None:
+    def refresh(self: Self) -> None:
+        """Refresh the LDAP tree."""
         if (
             not self.root_
             or (time.monotonic() - self.last_update) > self.refresh_interval
@@ -83,16 +88,18 @@ class OAuthLDAPTree:
 
             # Add OUs for users and groups
             groups_ou = self.root_.add_child(
-                "OU=groups", {"ou": ["groups"], "objectClass": ["organizationalUnit"]}
+                "OU=groups",
+                {"ou": ["groups"], "objectClass": ["organizationalUnit"]},
             )
             users_ou = self.root_.add_child(
-                "OU=users", {"ou": ["users"], "objectClass": ["organizationalUnit"]}
+                "OU=users",
+                {"ou": ["users"], "objectClass": ["organizationalUnit"]},
             )
 
             # Add groups to the groups OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(oauth_adaptor.groups)} groups to the LDAP tree."
+                    f"Attempting to add {len(oauth_adaptor.groups)} groups to the LDAP tree.",
                 )
             for group_attrs in oauth_adaptor.groups:
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
@@ -105,7 +112,7 @@ class OAuthLDAPTree:
             # Add users to the users OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(oauth_adaptor.users)} users to the LDAP tree."
+                    f"Attempting to add {len(oauth_adaptor.users)} users to the LDAP tree.",
                 )
             for user_attrs in oauth_adaptor.users:
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
@@ -119,12 +126,11 @@ class OAuthLDAPTree:
             log.msg("Finished building LDAP tree.")
             self.last_update = time.monotonic()
 
-    def __repr__(self) -> str:
+    def __repr__(self: Self) -> str:
         return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
 
-    def lookup(self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
-        """
-        Lookup the referred to by dn.
+    def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
+        """Lookup the referred to by dn.
 
         @return: A Deferred returning an ILDAPEntry.
 

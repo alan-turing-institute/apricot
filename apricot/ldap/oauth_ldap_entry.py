@@ -1,4 +1,6 @@
-from typing import cast
+from __future__ import annotations
+
+from typing import Self, cast
 
 from ldaptor.inmemory import ReadOnlyInMemoryLDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import (
@@ -16,17 +18,18 @@ from apricot.oauth import LDAPAttributeDict, OAuthClient
 
 
 class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
+    """An LDAP entry that represents a view of an OAuth object."""
+
     dn: DistinguishedName
     attributes: LDAPAttributeDict
 
     def __init__(
-        self,
+        self: Self,
         dn: DistinguishedName | str,
         attributes: LDAPAttributeDict,
         oauth_client: OAuthClient | None = None,
     ) -> None:
-        """
-        Initialize the object.
+        """Initialize the object.
 
         @param dn: Distinguished Name of the object
         @param attributes: Attributes of the object.
@@ -37,7 +40,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             dn = DistinguishedName(stringValue=dn)
         super().__init__(dn, attributes)
 
-    def __str__(self) -> str:
+    def __str__(self: Self) -> str:
         output = bytes(self.toWire()).decode("utf-8")
         for child in self._children.values():
             try:
@@ -52,18 +55,19 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return output
 
     @property
-    def oauth_client(self) -> OAuthClient:
-        if not self.oauth_client_:
-            if hasattr(self._parent, "oauth_client"):
-                self.oauth_client_ = self._parent.oauth_client
+    def oauth_client(self: Self) -> OAuthClient:
+        if not self.oauth_client_ and hasattr(self._parent, "oauth_client"):
+            self.oauth_client_ = self._parent.oauth_client
         if not isinstance(self.oauth_client_, OAuthClient):
             msg = f"OAuthClient is of incorrect type {type(self.oauth_client_)}"
             raise TypeError(msg)
         return self.oauth_client_
 
     def add_child(
-        self, rdn: RelativeDistinguishedName | str, attributes: LDAPAttributeDict
-    ) -> "OAuthLDAPEntry":
+        self: Self,
+        rdn: RelativeDistinguishedName | str,
+        attributes: LDAPAttributeDict,
+    ) -> OAuthLDAPEntry:
         if isinstance(rdn, str):
             rdn = RelativeDistinguishedName(stringValue=rdn)
         try:
@@ -73,8 +77,8 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             output = self._children[rdn.getText()]
         return cast(OAuthLDAPEntry, output)
 
-    def bind(self, password: bytes) -> defer.Deferred["OAuthLDAPEntry"]:
-        def _bind(password: bytes) -> "OAuthLDAPEntry":
+    def bind(self: Self, password: bytes) -> defer.Deferred[OAuthLDAPEntry]:
+        def _bind(password: bytes) -> OAuthLDAPEntry:
             oauth_username = next(iter(self.get("oauth_username", "unknown")))
             s_password = password.decode("utf-8")
             if self.oauth_client.verify(username=oauth_username, password=s_password):
@@ -84,5 +88,5 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
 
         return defer.maybeDeferred(_bind, password)
 
-    def list_children(self) -> "list[OAuthLDAPEntry]":
+    def list_children(self: Self) -> list[OAuthLDAPEntry]:
         return [cast(OAuthLDAPEntry, entry) for entry in self._children.values()]

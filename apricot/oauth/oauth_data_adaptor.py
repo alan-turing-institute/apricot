@@ -1,4 +1,6 @@
-from collections.abc import Sequence
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Self
 
 from pydantic import ValidationError
 from twisted.python import log
@@ -7,25 +9,31 @@ from apricot.models import (
     LDAPAttributeAdaptor,
     LDAPGroupOfNames,
     LDAPInetOrgPerson,
+    LDAPObjectClass,
     LDAPPosixAccount,
     LDAPPosixGroup,
-    NamedLDAPClass,
     OverlayMemberOf,
     OverlayOAuthEntry,
 )
-from apricot.types import JSONDict
 
-from .oauth_client import OAuthClient
+if TYPE_CHECKING:
+
+    from apricot.types import JSONDict
+
+    from .oauth_client import OAuthClient
 
 
 class OAuthDataAdaptor:
     """Adaptor for converting raw user and group data into LDAP format."""
 
     def __init__(
-        self, domain: str, oauth_client: OAuthClient, *, enable_mirrored_groups: bool
-    ):
-        """
-        Initialise an OAuthDataAdaptor
+        self: Self,
+        domain: str,
+        oauth_client: OAuthClient,
+        *,
+        enable_mirrored_groups: bool,
+    ) -> None:
+        """Initialise an OAuthDataAdaptor.
 
         @param domain: The root domain of the LDAP tree
         @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
@@ -42,57 +50,38 @@ class OAuthDataAdaptor:
         self.validated_users = self._validate_users(annotated_users)
         if self.debug:
             log.msg(
-                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users."
+                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users.",
             )
 
     @property
-    def groups(self) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated group data.
-        """
+    def groups(self: Self) -> list[LDAPAttributeAdaptor]:
+        """Return a list of LDAPAttributeAdaptors representing validated group data."""
         return self.validated_groups
 
     @property
-    def users(self) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated user data.
-        """
+    def users(self: Self) -> list[LDAPAttributeAdaptor]:
+        """Return a list of LDAPAttributeAdaptors representing validated user data."""
         return self.validated_users
 
-    def _dn_from_group_cn(self, group_cn: str) -> str:
+    def _dn_from_group_cn(self: Self, group_cn: str) -> str:
         return f"CN={group_cn},OU=groups,{self.root_dn}"
 
-    def _dn_from_user_cn(self, user_cn: str) -> str:
+    def _dn_from_user_cn(self: Self, user_cn: str) -> str:
         return f"CN={user_cn},OU=users,{self.root_dn}"
 
-    def _extract_attributes(
-        self,
-        input_dict: JSONDict,
-        required_classes: Sequence[type[NamedLDAPClass]],
-    ) -> LDAPAttributeAdaptor:
-        """Add appropriate LDAP class attributes"""
-        attributes = {"objectclass": ["top"]}
-        for ldap_class in required_classes:
-            model = ldap_class(**input_dict)
-            attributes.update(model.model_dump())
-            attributes["objectclass"] += model.names()
-        return LDAPAttributeAdaptor(attributes)
-
     def _retrieve_entries(
-        self,
+        self: Self,
     ) -> tuple[
-        list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
-        list[tuple[JSONDict, list[type[NamedLDAPClass]]]],
+        list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
+        list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ]:
-        """
-        Obtain lists of users and groups, and construct necessary meta-entries.
-        """
+        """Obtain lists of users and groups, and construct necessary meta-entries."""
         # Get the initial set of users and groups
         oauth_groups = self.oauth_client.groups()
         oauth_users = self.oauth_client.users()
         if self.debug:
             log.msg(
-                f"Loaded {len(oauth_groups)} groups and {len(oauth_users)} users from OAuth client."
+                f"Loaded {len(oauth_groups)} groups and {len(oauth_users)} users from OAuth client.",
             )
 
         # Ensure member is set for groups
@@ -142,7 +131,7 @@ class OAuthDataAdaptor:
             if self.debug:
                 for group_name in child_dict["memberOf"]:
                     log.msg(
-                        f"... user '{child_dict['cn']}' is a member of '{group_name}'"
+                        f"... user '{child_dict['cn']}' is a member of '{group_name}'",
                     )
 
         # Ensure memberOf is set correctly for groups
@@ -156,7 +145,7 @@ class OAuthDataAdaptor:
             if self.debug:
                 for group_name in child_dict["memberOf"]:
                     log.msg(
-                        f"... group '{child_dict['cn']}' is a member of '{group_name}'"
+                        f"... group '{child_dict['cn']}' is a member of '{group_name}'",
                     )
 
         # Annotate group and user dicts with the appropriate LDAP classes
@@ -189,52 +178,51 @@ class OAuthDataAdaptor:
         return (annotated_groups, annotated_users)
 
     def _validate_groups(
-        self, annotated_groups: list[tuple[JSONDict, list[type[NamedLDAPClass]]]]
+        self: Self,
+        annotated_groups: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated group data.
-        """
+        """Return a list of LDAPAttributeAdaptors representing validated group data."""
         if self.debug:
             log.msg(f"Attempting to validate {len(annotated_groups)} groups.")
         output = []
         for group_dict, required_classes in annotated_groups:
             try:
                 output.append(
-                    self._extract_attributes(
+                    LDAPAttributeAdaptor.from_attributes(
                         group_dict,
                         required_classes=required_classes,
-                    )
+                    ),
                 )
             except ValidationError as exc:
-                name = group_dict["cn"] if "cn" in group_dict else "unknown"
+                name = group_dict.get("cn", "unknown")
                 log.msg(f"Validation failed for group '{name}'.")
                 for error in exc.errors():
                     log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output
 
     def _validate_users(
-        self, annotated_users: list[tuple[JSONDict, list[type[NamedLDAPClass]]]]
+        self: Self,
+        annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """
-        Return a list of LDAPAttributeAdaptors representing validated user data.
-        """
+        """Return a list of LDAPAttributeAdaptors representing validated user data."""
         if self.debug:
             log.msg(f"Attempting to validate {len(annotated_users)} users.")
         output = []
         for user_dict, required_classes in annotated_users:
             try:
                 output.append(
-                    self._extract_attributes(
-                        user_dict, required_classes=required_classes
-                    )
+                    LDAPAttributeAdaptor.from_attributes(
+                        user_dict,
+                        required_classes=required_classes,
+                    ),
                 )
             except ValidationError as exc:
-                name = user_dict["cn"] if "cn" in user_dict else "unknown"
+                name = user_dict.get("cn", "unknown")
                 log.msg(f"Validation failed for user '{name}'.")
                 for error in exc.errors():
                     log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided."
+                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output

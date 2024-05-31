@@ -1,4 +1,7 @@
-from typing import Any, cast
+from __future__ import annotations
+
+import operator
+from typing import Any, Self, cast
 
 from apricot.types import JSONDict
 
@@ -11,11 +14,16 @@ class KeycloakClient(OAuthClient):
     max_rows = 100
 
     def __init__(
-        self,
+        self: Self,
         keycloak_base_url: str,
         keycloak_realm: str,
         **kwargs: Any,
-    ):
+    ) -> None:
+        """Initialise a KeycloakClient.
+
+        @param keycloak_base_url: Base URL for Keycloak server
+        @param keycloak_realm: Realm for Keycloak server
+        """
         self.base_url = keycloak_base_url
         self.realm = keycloak_realm
 
@@ -30,10 +38,11 @@ class KeycloakClient(OAuthClient):
             **kwargs,
         )
 
-    def extract_token(self, json_response: JSONDict) -> str:
+    @staticmethod
+    def extract_token(json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def groups(self) -> list[JSONDict]:
+    def groups(self: Self) -> list[JSONDict]:
         output = []
         try:
             group_data: list[JSONDict] = []
@@ -54,17 +63,18 @@ class KeycloakClient(OAuthClient):
                 # This ensures that any groups without a `gid` attribute will receive a
                 # UID that does not overlap with existing groups
                 if (group_gid := group_dict["attributes"]["gid"]) and len(
-                    group_dict["attributes"]["gid"]
+                    group_dict["attributes"]["gid"],
                 ) == 1:
                     self.uid_cache.overwrite_group_uid(
-                        group_dict["id"], int(group_gid[0], 10)
+                        group_dict["id"],
+                        int(group_gid[0], 10),
                     )
 
             # Read group attributes
             for group_dict in group_data:
                 if not group_dict["attributes"]["gid"]:
                     group_dict["attributes"]["gid"] = [
-                        str(self.uid_cache.get_group_uid(group_dict["id"]))
+                        str(self.uid_cache.get_group_uid(group_dict["id"])),
                     ]
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/groups/{group_dict['id']}",
@@ -89,7 +99,7 @@ class KeycloakClient(OAuthClient):
             pass
         return output
 
-    def users(self) -> list[JSONDict]:
+    def users(self: Self) -> list[JSONDict]:
         output = []
         try:
             user_data: list[JSONDict] = []
@@ -110,19 +120,21 @@ class KeycloakClient(OAuthClient):
                 # This ensures that any groups without a `gid` attribute will receive a
                 # UID that does not overlap with existing groups
                 if (user_uid := user_dict["attributes"]["uid"]) and len(
-                    user_dict["attributes"]["uid"]
+                    user_dict["attributes"]["uid"],
                 ) == 1:
                     self.uid_cache.overwrite_user_uid(
-                        user_dict["id"], int(user_uid[0], 10)
+                        user_dict["id"],
+                        int(user_uid[0], 10),
                     )
 
             # Read user attributes
             for user_dict in sorted(
-                user_data, key=lambda user: user["createdTimestamp"]
+                user_data,
+                key=operator.itemgetter("createdTimestamp"),
             ):
                 if not user_dict["attributes"]["uid"]:
                     user_dict["attributes"]["uid"] = [
-                        str(self.uid_cache.get_user_uid(user_dict["id"]))
+                        str(self.uid_cache.get_user_uid(user_dict["id"])),
                     ]
                     self.request(
                         f"{self.base_url}/admin/realms/{self.realm}/users/{user_dict['id']}",
@@ -144,10 +156,10 @@ class KeycloakClient(OAuthClient):
                 attributes["mail"] = user_dict.get("email")
                 attributes["description"] = ""
                 attributes["gidNumber"] = user_dict["attributes"]["uid"][0]
-                attributes["givenName"] = first_name if first_name else ""
+                attributes["givenName"] = first_name or ""
                 attributes["homeDirectory"] = f"/home/{username}" if username else None
                 attributes["oauth_id"] = user_dict.get("id", None)
-                attributes["sn"] = last_name if last_name else ""
+                attributes["sn"] = last_name or ""
                 attributes["uidNumber"] = user_dict["attributes"]["uid"][0]
                 output.append(attributes)
         except KeyError:

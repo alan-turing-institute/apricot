@@ -1,9 +1,10 @@
-from .named_ldap_class import NamedLDAPClass
+from __future__ import annotations
+
+from .ldap_object_class import LDAPObjectClass
 
 
-class LDAPPerson(NamedLDAPClass):
-    """
-    A named person
+class LDAPPerson(LDAPObjectClass):
+    """A named person.
 
     OID: 2.5.6.6
     Object class: Structural
@@ -11,8 +12,7 @@ class LDAPPerson(NamedLDAPClass):
     Schema: rfc4519
     """
 
+    _ldap_object_class_name: str = "person"
+
     cn: str
     sn: str
-
-    def names(self) -> list[str]:
-        return ["person"]

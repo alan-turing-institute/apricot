@@ -1,9 +1,10 @@
-from .named_ldap_class import NamedLDAPClass
+from __future__ import annotations
+
+from .ldap_object_class import LDAPObjectClass
 
 
-class LDAPGroupOfNames(NamedLDAPClass):
-    """
-    A group with named members
+class LDAPGroupOfNames(LDAPObjectClass):
+    """A group with named members.
 
     OID: 2.5.6.9
     Object class: Structural
@@ -11,9 +12,8 @@ class LDAPGroupOfNames(NamedLDAPClass):
     Schema: rfc4519
     """
 
+    _ldap_object_class_name: str = "groupOfNames"
+
     cn: str
     description: str
     member: list[str]
-
-    def names(self) -> list[str]:
-        return ["groupOfNames"]

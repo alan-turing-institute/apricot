@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import inspect
 import sys
-from typing import Any, cast
+from typing import Any, Self, cast
 
 from twisted.internet import reactor, task
 from twisted.internet.endpoints import quoteStringArgument, serverFromString
@@ -13,8 +15,10 @@ from apricot.oauth import OAuthBackend, OAuthClientMap
 
 
 class ApricotServer:
+    """The Apricot server running via Twisted."""
+
     def __init__(
-        self,
+        self: Self,
         backend: OAuthBackend,
         client_id: str,
         client_secret: str,
@@ -32,6 +36,23 @@ class ApricotServer:
         tls_private_key: str | None = None,
         **kwargs: Any,
     ) -> None:
+        """Initialise an ApricotServer.
+
+        @param backend: An OAuth backend,
+        @param client_id: An OAuth client ID
+        @param client_secret: An OAuth client secret
+        @param domain: The OAuth domain
+        @param port: Port to expose LDAP on
+        @param background_refresh: Whether to refresh the LDAP tree in the background
+        @param debug: Enable debug output
+        @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
+        @param redis_host: Host for a Redis cache (if used)
+        @param redis_port: Port for a Redis cache (if used)
+        @param refresh_interval: Interval after which the LDAP information is stale
+        @param tls_port: Port to expose LDAPS on
+        @param tls_certificate: TLS certificate for LDAPS
+        @param tls_private_key: TLS private key for LDAPS
+        """
         self.debug = debug
 
         # Log to stdout
@@ -41,7 +62,7 @@ class ApricotServer:
         uid_cache: UidCache
         if redis_host and redis_port:
             log.msg(
-                f"Using a Redis user-id cache at host '{redis_host}' on port '{redis_port}'."
+                f"Using a Redis user-id cache at host '{redis_host}' on port '{redis_port}'.",
             )
             uid_cache = RedisCache(redis_host=redis_host, redis_port=redis_port)
         else:
@@ -54,7 +75,7 @@ class ApricotServer:
                 log.msg(f"Creating an OAuthClient for {backend}.")
             oauth_backend = OAuthClientMap[backend]
             oauth_backend_args = inspect.getfullargspec(
-                oauth_backend.__init__  # type: ignore
+                oauth_backend.__init__,  # type: ignore[misc]
             ).args
             oauth_client = oauth_backend(
                 client_id=client_id,
@@ -81,7 +102,7 @@ class ApricotServer:
         if background_refresh:
             if self.debug:
                 log.msg(
-                    f"Starting background refresh (interval={factory.adaptor.refresh_interval})"
+                    f"Starting background refresh (interval={factory.adaptor.refresh_interval})",
                 )
             loop = task.LoopingCall(factory.adaptor.refresh)
             loop.start(factory.adaptor.refresh_interval)
@@ -111,8 +132,8 @@ class ApricotServer:
         # Load the Twisted reactor
         self.reactor = cast(IReactorCore, reactor)
 
-    def run(self) -> None:
-        """Start the Twisted reactor"""
+    def run(self: Self) -> None:
+        """Start the Twisted reactor."""
         if self.debug:
             log.msg("Starting the Twisted reactor.")
         self.reactor.run()

@@ -1,4 +1,7 @@
-from typing import Any, cast
+from __future__ import annotations
+
+import operator
+from typing import Any, Self, cast
 
 from twisted.python import log
 
@@ -11,10 +14,14 @@ class MicrosoftEntraClient(OAuthClient):
     """OAuth client for the Microsoft Entra backend."""
 
     def __init__(
-        self,
+        self: Self,
         entra_tenant_id: str,
         **kwargs: Any,
-    ):
+    ) -> None:
+        """Initialise a MicrosoftEntraClient.
+
+        @param entra_tenant_id: Tenant ID for the Entra ID
+        """
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         scopes = ["https://graph.microsoft.com/.default"]  # this is the default scope
         token_url = (
@@ -22,13 +29,17 @@ class MicrosoftEntraClient(OAuthClient):
         )
         self.tenant_id = entra_tenant_id
         super().__init__(
-            redirect_uri=redirect_uri, scopes=scopes, token_url=token_url, **kwargs
+            redirect_uri=redirect_uri,
+            scopes=scopes,
+            token_url=token_url,
+            **kwargs,
         )
 
-    def extract_token(self, json_response: JSONDict) -> str:
+    @staticmethod
+    def extract_token(json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    def groups(self) -> list[JSONDict]:
+    def groups(self: Self) -> list[JSONDict]:
         output = []
         queries = [
             "createdDateTime",
@@ -36,11 +47,11 @@ class MicrosoftEntraClient(OAuthClient):
             "id",
         ]
         group_data = self.query(
-            f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}"
+            f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}",
         )
         for group_dict in cast(
             list[JSONDict],
-            sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
+            sorted(group_data["value"], key=operator.itemgetter("createdDateTime")),
         ):
             try:
                 group_uid = self.uid_cache.get_group_uid(group_dict["id"])
@@ -51,7 +62,7 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["oauth_id"] = group_dict.get("id", None)
                 # Add membership attributes
                 members = self.query(
-                    f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members"
+                    f"https://graph.microsoft.com/v1.0/groups/{group_dict['id']}/members",
                 )
                 attributes["memberUid"] = [
                     str(user["userPrincipalName"]).split("@")[0]
@@ -66,7 +77,7 @@ class MicrosoftEntraClient(OAuthClient):
                 log.msg(msg)
         return output
 
-    def users(self) -> list[JSONDict]:
+    def users(self: Self) -> list[JSONDict]:
         output = []
         try:
             queries = [
@@ -78,11 +89,11 @@ class MicrosoftEntraClient(OAuthClient):
                 "userPrincipalName",
             ]
             user_data = self.query(
-                f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}"
+                f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}",
             )
             for user_dict in cast(
                 list[JSONDict],
-                sorted(user_data["value"], key=lambda user: user["createdDateTime"]),
+                sorted(user_data["value"], key=operator.itemgetter("createdDateTime")),
             ):
                 # Get user attributes
                 given_name = user_dict.get("givenName", None)
@@ -90,17 +101,17 @@ class MicrosoftEntraClient(OAuthClient):
                 uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
                 user_uid = self.uid_cache.get_user_uid(user_dict["id"])
                 attributes: JSONDict = {}
-                attributes["cn"] = uid if uid else None
+                attributes["cn"] = uid or None
                 attributes["description"] = user_dict.get("displayName", None)
                 attributes["displayName"] = user_dict.get("displayName", None)
                 attributes["domain"] = domain
                 attributes["gidNumber"] = user_uid
-                attributes["givenName"] = given_name if given_name else ""
+                attributes["givenName"] = given_name or ""
                 attributes["homeDirectory"] = f"/home/{uid}" if uid else None
                 attributes["oauth_id"] = user_dict.get("id", None)
                 attributes["oauth_username"] = user_dict.get("userPrincipalName", None)
-                attributes["sn"] = surname if surname else ""
-                attributes["uid"] = uid if uid else None
+                attributes["sn"] = surname or ""
+                attributes["uid"] = uid or None
                 attributes["uidNumber"] = user_uid
                 output.append(attributes)
         except KeyError:
