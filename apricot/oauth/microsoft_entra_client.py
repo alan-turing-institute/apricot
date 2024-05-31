@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import operator
 from typing import Any, Self, cast
 
 from twisted.python import log
@@ -49,7 +50,7 @@ class MicrosoftEntraClient(OAuthClient):
         )
         for group_dict in cast(
             list[JSONDict],
-            sorted(group_data["value"], key=lambda group: group["createdDateTime"]),
+            sorted(group_data["value"], key=operator.itemgetter("createdDateTime")),
         ):
             try:
                 group_uid = self.uid_cache.get_group_uid(group_dict["id"])
@@ -91,7 +92,7 @@ class MicrosoftEntraClient(OAuthClient):
             )
             for user_dict in cast(
                 list[JSONDict],
-                sorted(user_data["value"], key=lambda user: user["createdDateTime"]),
+                sorted(user_data["value"], key=operator.itemgetter("createdDateTime")),
             ):
                 # Get user attributes
                 given_name = user_dict.get("givenName", None)
@@ -99,17 +100,17 @@ class MicrosoftEntraClient(OAuthClient):
                 uid, domain = str(user_dict.get("userPrincipalName", "@")).split("@")
                 user_uid = self.uid_cache.get_user_uid(user_dict["id"])
                 attributes: JSONDict = {}
-                attributes["cn"] = uid if uid else None
+                attributes["cn"] = uid or None
                 attributes["description"] = user_dict.get("displayName", None)
                 attributes["displayName"] = user_dict.get("displayName", None)
                 attributes["domain"] = domain
                 attributes["gidNumber"] = user_uid
-                attributes["givenName"] = given_name if given_name else ""
+                attributes["givenName"] = given_name or ""
                 attributes["homeDirectory"] = f"/home/{uid}" if uid else None
                 attributes["oauth_id"] = user_dict.get("id", None)
                 attributes["oauth_username"] = user_dict.get("userPrincipalName", None)
-                attributes["sn"] = surname if surname else ""
-                attributes["uid"] = uid if uid else None
+                attributes["sn"] = surname or ""
+                attributes["uid"] = uid or None
                 attributes["uidNumber"] = user_uid
                 output.append(attributes)
         except KeyError:

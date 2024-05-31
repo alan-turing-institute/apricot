@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import operator
 from typing import Any, Self, cast
 
 from apricot.types import JSONDict
@@ -128,7 +129,7 @@ class KeycloakClient(OAuthClient):
             # Read user attributes
             for user_dict in sorted(
                 user_data,
-                key=lambda user: user["createdTimestamp"],
+                key=operator.itemgetter("createdTimestamp"),
             ):
                 if not user_dict["attributes"]["uid"]:
                     user_dict["attributes"]["uid"] = [
@@ -154,10 +155,10 @@ class KeycloakClient(OAuthClient):
                 attributes["mail"] = user_dict.get("email")
                 attributes["description"] = ""
                 attributes["gidNumber"] = user_dict["attributes"]["uid"][0]
-                attributes["givenName"] = first_name if first_name else ""
+                attributes["givenName"] = first_name or ""
                 attributes["homeDirectory"] = f"/home/{username}" if username else None
                 attributes["oauth_id"] = user_dict.get("id", None)
-                attributes["sn"] = last_name if last_name else ""
+                attributes["sn"] = last_name or ""
                 attributes["uidNumber"] = user_dict["attributes"]["uid"][0]
                 output.append(attributes)
         except KeyError:

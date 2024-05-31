@@ -61,12 +61,12 @@ dependencies = [
 typing = "mypy {args:apricot} run.py"
 
 style = [
-  "ruff check {args:apricot} run.py",
   "black --check --diff {args:apricot} run.py",
+  "ruff check --preview {args:apricot} run.py",
 ]
 fmt = [
   "black {args:apricot} run.py",
-  "ruff check --fix {args:apricot} run.py",
+  "ruff check --preview --fix {args:apricot} run.py",
   "style",
 ]
 all = [
@@ -89,7 +89,6 @@ select = [
   "BLE",   # flake8-blind-except
   "C",     # complexity, mcabe and flake8-comprehensions
   "COM",   # flake8-commas
-  "CPY",   # flake8-copyright
   "D",     # pydocstyle
   "DTZ",   # flake8-datetimez
   "E",     # pycodestyle errors
@@ -149,6 +148,8 @@ ignore = [
   "C901",     # complex-structure
   "PLR0912",  # too-many-branches
   "PLR0913",  # too-many-arguments
+  "PLR0917",  # too-many-positional-arguments
+  "PLR6301",  # method-could-be-function
 ]
 
 [tool.ruff.lint.flake8-annotations]

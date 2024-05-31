@@ -52,7 +52,7 @@ class UidCache(ABC):
         identifier_ = f"{category}-{identifier}"
         uid = self.get(identifier_)
         if not uid:
-            min_value = min_value if min_value else 0
+            min_value = min_value or 0
             next_uid = max(self._get_max_uid(category) + 1, min_value)
             self.set(identifier_, next_uid)
         return cast(int, self.get(identifier_))
