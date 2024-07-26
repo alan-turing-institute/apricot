@@ -33,7 +33,8 @@ class KeycloakClient(OAuthClient):
 
         super().__init__(
             redirect_uri=redirect_uri,
-            scopes=scopes,
+            scopes_application=scopes,
+            scopes_delegated=scopes,
             token_url=token_url,
             **kwargs,
         )

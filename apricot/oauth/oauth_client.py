@@ -29,7 +29,8 @@ class OAuthClient(ABC):
         client_secret: str,
         debug: bool,  # noqa: FBT001
         redirect_uri: str,
-        scopes: list[str],
+        scopes_application: list[str],
+        scopes_delegated: list[str],
         token_url: str,
         uid_cache: UidCache,
     ) -> None:
@@ -61,7 +62,7 @@ class OAuthClient(ABC):
             self.session_application = OAuth2Session(
                 client=BackendApplicationClient(
                     client_id=client_id,
-                    scope=scopes,
+                    scope=scopes_application,
                     redirect_uri=redirect_uri,
                 ),
             )
@@ -76,7 +77,7 @@ class OAuthClient(ABC):
             self.session_interactive = OAuth2Session(
                 client=LegacyApplicationClient(
                     client_id=client_id,
-                    scope=scopes,
+                    scope=scopes_delegated,
                     redirect_uri=redirect_uri,
                 ),
             )
@@ -180,7 +181,7 @@ class OAuthClient(ABC):
                 client_secret=self.client_secret,
             )
         except InvalidGrantError as exc:
-            log.msg(f"Authentication failed.\n{exc}")
+            log.msg(f"Authentication failed for user '{username}'.\n{exc}")
             return False
         else:
             return True
