@@ -23,15 +23,14 @@ class MicrosoftEntraClient(OAuthClient):
         @param entra_tenant_id: Tenant ID for the Entra ID
         """
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
-        scopes = ["https://graph.microsoft.com/.default"]  # this is the default scope
         token_url = (
             f"https://login.microsoftonline.com/{entra_tenant_id}/oauth2/v2.0/token"
         )
-        self.tenant_id = entra_tenant_id
+        # Use default application scope and minimal delegated scopes
         super().__init__(
             redirect_uri=redirect_uri,
-            scopes_application=scopes,
-            scopes_delegated=scopes,
+            scopes_application=["https://graph.microsoft.com/.default"],
+            scopes_delegated=["openid"],
             token_url=token_url,
             **kwargs,
         )
