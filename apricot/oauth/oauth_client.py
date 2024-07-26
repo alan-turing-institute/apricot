@@ -180,7 +180,7 @@ class OAuthClient(ABC):
                 client_secret=self.client_secret,
             )
         except InvalidGrantError as exc:
-            log.msg(f"Authentication failed.\n{exc}")
+            log.msg(f"Authentication failed for user '{username}'.\n{exc}")
             return False
         else:
             return True
