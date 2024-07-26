@@ -80,62 +80,62 @@ target-version = ["py310", "py311"]
 [tool.ruff.lint]
 select = [
   # See https://beta.ruff.rs/docs/rules/
-  "A",     # flake8-builtins
-  "AIR",   # Airflow
-  "ANN",   # flake8-annotations
-  "ARG",   # flake8-unused-arguments
-  "ASYNC", # flake8-async
-  "B",     # flake8-bugbear
-  "BLE",   # flake8-blind-except
-  "C",     # complexity, mcabe and flake8-comprehensions
-  "COM",   # flake8-commas
-  "D",     # pydocstyle
-  "DTZ",   # flake8-datetimez
-  "E",     # pycodestyle errors
-  "EM",    # flake8-errmsg
-  "ERA",   # eradicate
-  "EXE",   # flake8-executable
-  "F",     # pyflakes
-  "FA",    # flake8-future-annotations
-  "FBT",   # flake8-boolean-trap
-  "FIX",   # flake8-fixme
-  "FLY",   # flynt
-  "FURB",  # refurb
-  "G",     # flake8-logging-format
-  "I",     # isort
-  "ICN",   # flake8-import-conventions
-  "INP",   # flake8-no-pep420
-  "INT",   # flake8-gettext
-  "ISC",   # flake8-implicit-str-concat
-  "LOG",   # flake8-logging
-  "N",     # pep8-naming
-  "NPY",   # numpy-specific-rules
-  "PD",    # pandas-vet
-  "PGH",   # pygrep-hooks
-  "PIE",   # flake8-pie
-  "PLC",   # pylint convention
-  "PLE",   # pylint error
-  "PLR",   # pylint refactor
-  "PLW",   # pylint warning
-  "PT",    # flake8-pytest-style
-  "PTH",   # flake8-use-pathlib
-  "PYI",   # flake8-pyi
-  "Q",     # flake8-quotes
-  "RET",   # flake8-return
-  "RSE",   # flake8-raise
-  "RUF",   # ruff rules
-  "S",     # flake8-bandit
-  "SIM",   # flake8-simplify
-  "SLOT",  # flake8-slot
-  "T",     # flake8-debugger and flake8-print
-  "TCH",   # flake8-type-checking
-  "TD",    # flake8-todos
-  "TID",   # flake8-tidy-imports
-  "TRIO",  # flake8-trio
-  "TRY",   # tryceratops
-  "UP",    # pyupgrade
-  "W",     # pycodestyle warnings
-  "YTT",   # flake8-2020
+  "A",      # flake8-builtins
+  "AIR",    # Airflow
+  "ANN",    # flake8-annotations
+  "ARG",    # flake8-unused-arguments
+  "ASYNC",  # flake8-async
+  "ASYNC1", # flake8-trio
+  "B",      # flake8-bugbear
+  "BLE",    # flake8-blind-except
+  "C",      # complexity, mcabe and flake8-comprehensions
+  "COM",    # flake8-commas
+  "D",      # pydocstyle
+  "DTZ",    # flake8-datetimez
+  "E",      # pycodestyle errors
+  "EM",     # flake8-errmsg
+  "ERA",    # eradicate
+  "EXE",    # flake8-executable
+  "F",      # pyflakes
+  "FA",     # flake8-future-annotations
+  "FBT",    # flake8-boolean-trap
+  "FIX",    # flake8-fixme
+  "FLY",    # flynt
+  "FURB",   # refurb
+  "G",      # flake8-logging-format
+  "I",      # isort
+  "ICN",    # flake8-import-conventions
+  "INP",    # flake8-no-pep420
+  "INT",    # flake8-gettext
+  "ISC",    # flake8-implicit-str-concat
+  "LOG",    # flake8-logging
+  "N",      # pep8-naming
+  "NPY",    # numpy-specific-rules
+  "PD",     # pandas-vet
+  "PGH",    # pygrep-hooks
+  "PIE",    # flake8-pie
+  "PLC",    # pylint convention
+  "PLE",    # pylint error
+  "PLR",    # pylint refactor
+  "PLW",    # pylint warning
+  "PT",     # flake8-pytest-style
+  "PTH",    # flake8-use-pathlib
+  "PYI",    # flake8-pyi
+  "Q",      # flake8-quotes
+  "RET",    # flake8-return
+  "RSE",    # flake8-raise
+  "RUF",    # ruff rules
+  "S",      # flake8-bandit
+  "SIM",    # flake8-simplify
+  "SLOT",   # flake8-slot
+  "T",      # flake8-debugger and flake8-print
+  "TCH",    # flake8-type-checking
+  "TD",     # flake8-todos
+  "TID",    # flake8-tidy-imports
+  "TRY",    # tryceratops
+  "UP",     # pyupgrade
+  "W",      # pycodestyle warnings
+  "YTT",    # flake8-2020
 ]
 ignore = [
   "D100",     # missing-docstring-in-module

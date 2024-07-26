@@ -47,7 +47,7 @@ class OAuthDataAdaptor:
         # Retrieve and validate user and group information
         annotated_groups, annotated_users = self._retrieve_entries()
         self.validated_groups = self._validate_groups(annotated_groups)
-        self.validated_users = self._validate_users(annotated_users)
+        self.validated_users = self._validate_users(annotated_users, domain)
         if self.debug:
             log.msg(
                 f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users.",
@@ -195,34 +195,41 @@ class OAuthDataAdaptor:
                 )
             except ValidationError as exc:
                 name = group_dict.get("cn", "unknown")
-                log.msg(f"Validation failed for group '{name}'.")
+                log.msg(f"... group '{name}' failed validation.")
                 for error in exc.errors():
                     log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
+                        f" -> '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output
 
     def _validate_users(
         self: Self,
         annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
+        domain: str,
     ) -> list[LDAPAttributeAdaptor]:
         """Return a list of LDAPAttributeAdaptors representing validated user data."""
         if self.debug:
             log.msg(f"Attempting to validate {len(annotated_users)} users.")
         output = []
         for user_dict, required_classes in annotated_users:
+            name = user_dict.get("cn", "unknown")
             try:
-                output.append(
-                    LDAPAttributeAdaptor.from_attributes(
-                        user_dict,
-                        required_classes=required_classes,
-                    ),
-                )
+                if (user_domain := user_dict.get("domain", None)) == domain:
+                    output.append(
+                        LDAPAttributeAdaptor.from_attributes(
+                            user_dict,
+                            required_classes=required_classes,
+                        ),
+                    )
+                else:
+                    log.msg(f"... user '{name}' failed validation.")
+                    log.msg(
+                        f" -> 'domain': expected '{domain}' but '{user_domain}' was provided.",
+                    )
             except ValidationError as exc:
-                name = user_dict.get("cn", "unknown")
-                log.msg(f"Validation failed for user '{name}'.")
+                log.msg(f"... user '{name}' failed validation.")
                 for error in exc.errors():
                     log.msg(
-                        f"... '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
+                        f" -> '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output
