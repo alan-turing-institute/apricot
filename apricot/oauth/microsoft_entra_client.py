@@ -30,7 +30,8 @@ class MicrosoftEntraClient(OAuthClient):
         self.tenant_id = entra_tenant_id
         super().__init__(
             redirect_uri=redirect_uri,
-            scopes=scopes,
+            scopes_application=scopes,
+            scopes_delegated=scopes,
             token_url=token_url,
             **kwargs,
         )
