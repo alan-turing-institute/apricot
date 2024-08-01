@@ -200,12 +200,27 @@ Do this as follows:
 You will need to use the following command line arguments:
 
 ```bash
---backend Keycloak --keycloak-base-url "<your hostname>/<path to keycloak>" --keycloak-realm "<your realm>"
+--backend Keycloak --keycloak-base-url "<your hostname>/<path to keycloak>" --keycloak-realm "<your realm>" --keycloak-domain-attribute "<your domain attribute>"
 ```
 
 You will need to register an application to interact with `Keycloak`.
 Do this as follows:
 
+- Under the realm option `Client scopes` create a new scope, e.g. `domainScope` with:
+    - Type: `Default`
+    - Include in token scope: `true`
+    - Save
+- In the created scope click `Mappers` > `Configure new mapper` and now create either
+    - `Hardcoded claim`
+        - => Every user gets the same domain
+        - name: `domain`
+        - token claim name: `domain`
+        - claim value: `<your domain>`
+    - `User attribute`
+        - => Every user has an attribute for the domain
+        - name: `domain`
+        - user attribute: `<the attribute to use as domain>`
+        - token claim name: `domain`
 - Create a new `Client` in your `Keycloak` instance.
     - Set the name to whatever you choose (e.g. `apricot`)
     - Enable `Client authentication`
@@ -220,3 +235,5 @@ Do this as follows:
         - `realm-management` > `manage-users`
         - `realm-management` > `query-groups`
         - `realm-management` > `query-users`
+- Under `Client scopes` click `Add client scope` > `domainScope`. Make sure to select type `Default`
+
