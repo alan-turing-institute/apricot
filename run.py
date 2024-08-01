@@ -82,6 +82,12 @@ if __name__ == "__main__":
             type=str,
             help="Keycloak Realm.",
         )
+        keycloak_group.add_argument(
+            "--keycloak-domain-attribute",
+            type=str,
+            default="domain",
+            help="The attribute in Keycloak that contains the users' domain.",
+        )
         # Options for Redis cache
         redis_group = parser.add_argument_group("Redis")
         redis_group.add_argument(

@@ -17,6 +17,7 @@ class KeycloakClient(OAuthClient):
         self: Self,
         keycloak_base_url: str,
         keycloak_realm: str,
+        keycloak_domain_attribute: str,
         **kwargs: Any,
     ) -> None:
         """Initialise a KeycloakClient.
@@ -26,6 +27,7 @@ class KeycloakClient(OAuthClient):
         """
         self.base_url = keycloak_base_url
         self.realm = keycloak_realm
+        self.domain_attribute = keycloak_domain_attribute
 
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         scopes: list[str] = []  # this is the default scope
@@ -162,6 +164,7 @@ class KeycloakClient(OAuthClient):
                 attributes["oauth_id"] = user_dict.get("id", None)
                 attributes["sn"] = last_name or ""
                 attributes["uidNumber"] = user_dict["attributes"]["uid"][0]
+                attributes["domain"] = user_dict["attributes"].get(self.domain_attribute, [None])[0]
                 output.append(attributes)
         except KeyError:
             pass
