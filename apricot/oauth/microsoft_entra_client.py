@@ -114,6 +114,7 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["uid"] = uid or None
                 attributes["uidNumber"] = user_uid
                 output.append(attributes)
-        except KeyError:
-            pass
+        except KeyError as exc:
+            msg = f"Failed to process user {user_dict} due to a missing key {exc}."
+            log.msg(msg)
         return output
