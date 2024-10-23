@@ -17,7 +17,7 @@ from twisted.python import log
 
 if TYPE_CHECKING:
     from apricot.cache import UidCache
-    from apricot.types import JSONDict
+    from apricot.typedefs import JSONDict
 
 
 class OAuthClient(ABC):

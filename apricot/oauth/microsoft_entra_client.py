@@ -5,7 +5,7 @@ from typing import Any, Self, cast
 
 from twisted.python import log
 
-from apricot.types import JSONDict
+from apricot.typedefs import JSONDict
 
 from .oauth_client import OAuthClient
 
