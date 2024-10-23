@@ -174,7 +174,8 @@ Instructions for specific OpenID Connect backends below.
 You will need to use the following command line arguments:
 
 ```bash
---backend MicrosoftEntra --entra-tenant-id "<your tenant ID>"
+--backend MicrosoftEntra \
+--entra-tenant-id "<your tenant ID>"
 ```
 
 You will need to register an application to interact with `Microsoft Entra`.
@@ -200,7 +201,10 @@ Do this as follows:
 You will need to use the following command line arguments:
 
 ```bash
---backend Keycloak --keycloak-base-url "<your hostname>/<path to keycloak>" --keycloak-realm "<your realm>" --keycloak-domain-attribute "<your domain attribute>"
+--backend Keycloak \
+--keycloak-base-url "<your hostname>/<path to keycloak>" \
+--keycloak-domain-attribute "<the attribute used as your domain>" \
+--keycloak-realm "<your realm>"
 ```
 
 You will need to register an application to interact with `Keycloak`.
@@ -219,7 +223,7 @@ Do this as follows:
     - `User attribute`
         - => Every user has an attribute for the domain
         - name: `domain`
-        - user attribute: `<the attribute to use as domain>`
+        - user attribute: `<the attribute used as your domain>`
         - token claim name: `domain`
 - Create a new `Client` in your `Keycloak` instance.
     - Set the name to whatever you choose (e.g. `apricot`)
@@ -236,4 +240,3 @@ Do this as follows:
         - `realm-management` > `query-groups`
         - `realm-management` > `query-users`
 - Under `Client scopes` click `Add client scope` > `domainScope`. Make sure to select type `Default`
-
