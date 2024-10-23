@@ -156,7 +156,10 @@ class KeycloakClient(OAuthClient):
                 attributes["cn"] = username
                 attributes["description"] = ""
                 attributes["displayName"] = full_name
-                attributes["domain"] = user_dict["attributes"].get(self.domain_attribute, [None])[0]
+                attributes["domain"] = user_dict["attributes"].get(
+                    self.domain_attribute,
+                    [None],
+                )[0]
                 attributes["gidNumber"] = user_dict["attributes"]["uid"][0]
                 attributes["givenName"] = first_name or ""
                 attributes["homeDirectory"] = f"/home/{username}" if username else None
