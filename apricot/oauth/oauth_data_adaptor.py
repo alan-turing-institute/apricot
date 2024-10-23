@@ -18,7 +18,7 @@ from apricot.models import (
 
 if TYPE_CHECKING:
 
-    from apricot.types import JSONDict
+    from apricot.typedefs import JSONDict
 
     from .oauth_client import OAuthClient
 
