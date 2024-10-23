@@ -162,8 +162,8 @@ class OAuthClient(ABC):
         try:
             result = query_(*args, **kwargs)
             result.raise_for_status()
-        except (TokenExpiredError, requests.exceptions.HTTPError):
-            log.msg("Authentication token has expired.")
+        except (TokenExpiredError, requests.exceptions.HTTPError) as exc:
+            log.msg(f"Authentication token is invalid.\n{exc!s}")
             self.bearer_token_ = None
             result = query_(*args, **kwargs)
         if result.status_code == HTTPStatus.NO_CONTENT:
@@ -181,7 +181,7 @@ class OAuthClient(ABC):
                 client_secret=self.client_secret,
             )
         except InvalidGrantError as exc:
-            log.msg(f"Authentication failed for user '{username}'.\n{exc}")
+            log.msg(f"Authentication failed for user '{username}'.\n{exc!s}")
             return False
         else:
             return True
