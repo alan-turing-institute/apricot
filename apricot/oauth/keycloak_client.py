@@ -16,15 +16,18 @@ class KeycloakClient(OAuthClient):
     def __init__(
         self: Self,
         keycloak_base_url: str,
+        keycloak_domain_attribute: str,
         keycloak_realm: str,
         **kwargs: Any,
     ) -> None:
         """Initialise a KeycloakClient.
 
         @param keycloak_base_url: Base URL for Keycloak server
+        @param keycloak_domain_attribute: Keycloak attribute used to define your domain
         @param keycloak_realm: Realm for Keycloak server
         """
         self.base_url = keycloak_base_url
+        self.domain_attribute = keycloak_domain_attribute
         self.realm = keycloak_realm
 
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
@@ -151,16 +154,20 @@ class KeycloakClient(OAuthClient):
                 username = user_dict.get("username")
                 attributes: JSONDict = {}
                 attributes["cn"] = username
-                attributes["uid"] = username
-                attributes["oauth_username"] = username
-                attributes["displayName"] = full_name
-                attributes["mail"] = user_dict.get("email")
                 attributes["description"] = ""
+                attributes["displayName"] = full_name
+                attributes["domain"] = user_dict["attributes"].get(
+                    self.domain_attribute,
+                    [None],
+                )[0]
                 attributes["gidNumber"] = user_dict["attributes"]["uid"][0]
                 attributes["givenName"] = first_name or ""
                 attributes["homeDirectory"] = f"/home/{username}" if username else None
+                attributes["mail"] = user_dict.get("email")
                 attributes["oauth_id"] = user_dict.get("id", None)
+                attributes["oauth_username"] = username
                 attributes["sn"] = last_name or ""
+                attributes["uid"] = username
                 attributes["uidNumber"] = user_dict["attributes"]["uid"][0]
                 output.append(attributes)
         except KeyError:
