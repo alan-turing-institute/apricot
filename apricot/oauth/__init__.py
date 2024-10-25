@@ -1,4 +1,4 @@
-from apricot.types import LDAPAttributeDict, LDAPControlTuple
+from apricot.typedefs import LDAPAttributeDict, LDAPControlTuple
 
 from .enums import OAuthBackend
 from .keycloak_client import KeycloakClient

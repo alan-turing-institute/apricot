@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Self, Sequence
 
 if TYPE_CHECKING:
     from apricot.models import LDAPObjectClass
-    from apricot.types import JSONDict, LDAPAttributeDict
+    from apricot.typedefs import JSONDict, LDAPAttributeDict
 
 
 class LDAPAttributeAdaptor:

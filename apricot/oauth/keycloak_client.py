@@ -3,7 +3,9 @@ from __future__ import annotations
 import operator
 from typing import Any, Self, cast
 
-from apricot.types import JSONDict
+from twisted.python import log
+
+from apricot.typedefs import JSONDict
 
 from .oauth_client import OAuthClient
 
@@ -99,8 +101,9 @@ class KeycloakClient(OAuthClient):
                     user["username"] for user in cast(list[JSONDict], members)
                 ]
                 output.append(attributes)
-        except KeyError:
-            pass
+        except KeyError as exc:
+            msg = f"Failed to process group {group_dict} due to a missing key {exc}."
+            log.msg(msg)
         return output
 
     def users(self: Self) -> list[JSONDict]:
@@ -170,6 +173,7 @@ class KeycloakClient(OAuthClient):
                 attributes["uid"] = username
                 attributes["uidNumber"] = user_dict["attributes"]["uid"][0]
                 output.append(attributes)
-        except KeyError:
-            pass
+        except KeyError as exc:
+            msg = f"Failed to process user {user_dict} due to a missing key {exc}."
+            log.msg(msg)
         return output
