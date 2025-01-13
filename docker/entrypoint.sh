@@ -56,6 +56,9 @@ if [ -n "${KEYCLOAK_BASE_URL}" ]; then
     fi
     EXTRA_OPTS="${EXTRA_OPTS} --keycloak-base-url $KEYCLOAK_BASE_URL --keycloak-realm $KEYCLOAK_REALM"
 fi
+if [ -n "${KEYCLOAK_DOMAIN_ATTRIBUTE}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --keycloak-domain-attribute $KEYCLOAK_DOMAIN_ATTRIBUTE"
+fi
 
 
 # LDAP refresh arguments

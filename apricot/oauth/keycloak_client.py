@@ -75,9 +75,7 @@ class KeycloakClient(OAuthClient):
                         group_dict["id"],
                         int(group_gid[0], 10),
                     )
-
-            # Read group attributes
-            for group_dict in group_data:
+                # Set group attributes
                 if not group_dict["attributes"]["gid"]:
                     group_dict["attributes"]["gid"] = [
                         str(self.uid_cache.get_group_uid(group_dict["id"])),
@@ -87,6 +85,9 @@ class KeycloakClient(OAuthClient):
                         method="PUT",
                         json=group_dict,
                     )
+
+            # Read group attributes
+            for group_dict in group_data:
                 attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("name", None)
                 attributes["description"] = group_dict.get("id", None)
@@ -133,12 +134,7 @@ class KeycloakClient(OAuthClient):
                         user_dict["id"],
                         int(user_uid[0], 10),
                     )
-
-            # Read user attributes
-            for user_dict in sorted(
-                user_data,
-                key=operator.itemgetter("createdTimestamp"),
-            ):
+                # Set user attributes
                 if not user_dict["attributes"]["uid"]:
                     user_dict["attributes"]["uid"] = [
                         str(self.uid_cache.get_user_uid(user_dict["id"])),
@@ -148,6 +144,12 @@ class KeycloakClient(OAuthClient):
                         method="PUT",
                         json=user_dict,
                     )
+
+            # Read user attributes
+            for user_dict in sorted(
+                user_data,
+                key=operator.itemgetter("createdTimestamp"),
+            ):
                 # Get user attributes
                 first_name = user_dict.get("firstName", None)
                 last_name = user_dict.get("lastName", None)

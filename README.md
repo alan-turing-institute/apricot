@@ -207,36 +207,36 @@ You will need to use the following command line arguments:
 --keycloak-realm "<your realm>"
 ```
 
+#### User attribute
+
+You will need to add a custom attribute to each user you want Apricot to use.
+The name of this attribute should be used as the value of the `--keycloak-domain-attribute` argument above.
+The value of this attribute should be the same as the `--domain` argument to Apricot.
+
+Any users with this attribute missing or set to something else will be ignored by Apricot.
+This allows you to attach multiple Apricot servers to the same Keycloak instance, each with their own set of users.
+
+#### Client application
+
 You will need to register an application to interact with `Keycloak`.
 Do this as follows:
 
-- Under the realm option `Client scopes` create a new scope, e.g. `domainScope` with:
-    - Type: `Default`
-    - Include in token scope: `true`
-    - Save
-- In the created scope click `Mappers` > `Configure new mapper` and now create either
-    - `Hardcoded claim`
-        - => Every user gets the same domain
-        - name: `domain`
-        - token claim name: `domain`
-        - claim value: `<your domain>`
-    - `User attribute`
-        - => Every user has an attribute for the domain
-        - name: `domain`
-        - user attribute: `<the attribute used as your domain>`
-        - token claim name: `domain`
 - Create a new `Client` in your `Keycloak` instance.
-    - Set the name to whatever you choose (e.g. `apricot`)
-    - Enable `Client authentication`
-    - Enable the following authentication flows and disable the rest:
-        - Direct access grants
-        - Service account roles
-- Under `Credentials` copy `client secret`
-- Under `Service account roles`:
-    - Click on `Assign role` then `Filter by clients`
-    - Assign the following roles:
-        - `realm-management` > `view-users`
-        - `realm-management` > `manage-users`
-        - `realm-management` > `query-groups`
-        - `realm-management` > `query-users`
-- Under `Client scopes` click `Add client scope` > `domainScope`. Make sure to select type `Default`
+    - Under `General Settings`:
+        -  Client type: `OpenID Connect`
+        -  Client name: `apricot`
+    - Under `Capability config`
+        - Enable `Client authentication`
+        - Enable the following authentication flows and disable the rest:
+            - `Direct access grants`
+            - `Service accounts roles`
+    - Save the client
+- For the client you have just created
+  - Under `Credentials` copy `client secret`
+  - Under `Service accounts roles`:
+      - Click on `Assign role` then `Filter by clients`
+      - Assign the following roles:
+          - `realm-management` > `view-users`
+          - `realm-management` > `manage-users`
+          - `realm-management` > `query-groups`
+          - `realm-management` > `query-users`

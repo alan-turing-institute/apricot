@@ -151,7 +151,7 @@ class OAuthClient(ABC):
     ) -> dict[str, Any]:
         """Make a request to the OAuth backend."""
 
-        def query_(*args: Any, **kwargs: Any) -> requests.Response:
+        def request_(*args: Any, **kwargs: Any) -> requests.Response:
             return self.session_application.request(  # type: ignore[no-any-return]
                 method,
                 *args,
@@ -160,12 +160,12 @@ class OAuthClient(ABC):
             )
 
         try:
-            result = query_(*args, **kwargs)
+            result = request_(*args, **kwargs)
             result.raise_for_status()
         except (TokenExpiredError, requests.exceptions.HTTPError) as exc:
             log.msg(f"Authentication token is invalid.\n{exc!s}")
             self.bearer_token_ = None
-            result = query_(*args, **kwargs)
+            result = request_(*args, **kwargs)
         if result.status_code == HTTPStatus.NO_CONTENT:
             return {}
         return result.json()  # type: ignore[no-any-return]
