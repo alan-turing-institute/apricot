@@ -8,7 +8,7 @@ The name is a slightly tortured acronym for: LD**A**P **pr**oxy for Open**I**D *
 Start the `Apricot` server on port 1389 by running:
 
 ```bash
-python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port 1389 --domain "<your domain name>" --redis-host "<your Redis server>"
+python run.py --client-id "<your client ID>" --client-secret "<your client secret>" --backend "<your backend>" --port "<your desired port>" --domain "<your domain name>" --redis-host "<your Redis server>"
 ```
 
 If you prefer to use Docker, you can edit `docker/docker-compose.yaml` and run:
@@ -41,14 +41,14 @@ To enable it you need to configure the tls port ex. `--tls-port=1636`, and provi
 This will create an LDAP tree that looks like this:
 
 ```ldif
-dn: DC=<your domain>
+dn: DC=example,DC=com
 objectClass: dcObject
 
-dn: OU=users,DC=<your domain>
+dn: OU=users,DC=example,DC=com
 objectClass: organizationalUnit
 ou: users
 
-dn: OU=groups,DC=<your domain>
+dn: OU=groups,DC=example,DC=com
 objectClass: organizationalUnit
 ou: groups
 ```
@@ -56,7 +56,7 @@ ou: groups
 Each user will have an entry like
 
 ```ldif
-dn: CN=<user name>,OU=users,DC=<your domain>
+dn: CN=<user name>,OU=users,DC=example,DC=com
 objectClass: inetOrgPerson
 objectClass: organizationalPerson
 objectClass: person
@@ -69,7 +69,7 @@ memberOf: <DN for each group that this user belongs to>
 Each group will have an entry like
 
 ```ldif
-dn: CN=<group name>,OU=groups,DC=<your domain>
+dn: CN=<group name>,OU=groups,DC=example,DC=com
 objectClass: groupOfNames
 objectClass: posixGroup
 objectClass: top
@@ -77,92 +77,18 @@ objectClass: top
 member: <DN for each user belonging to this group>
 ```
 
-## Primary groups
+## Querying the server
 
-:exclamation: You can disable the creation of mirrored groups with the `--disable-primary-groups` command line option :exclamation:
+Anonymous queries are enabled by default.
 
-Apricot creates an associated group for each user, which acts as its POSIX user primary group.
-
-For example:
-
-```ldif
-dn: CN=sherlock.holmes,OU=users,DC=<your domain>
-objectClass: inetOrgPerson
-objectClass: organizationalPerson
-objectClass: person
-objectClass: posixAccount
-objectClass: top
-...
-memberOf: CN=sherlock.holmes,OU=groups,DC=<your domain>
-...
+```bash
+ldapsearch -H ldap://<your server location>:<your desired port> -x -b "DC=example,DC=com"
 ```
 
-will have an associated group
+If you want to query on behalf of a particular user you will need to use the full distinguished name.
 
-```ldif
-dn: CN=sherlock.holmes,OU=groups,DC=<your domain>
-objectClass: groupOfNames
-objectClass: posixGroup
-objectClass: top
-...
-member: CN=sherlock.holmes,OU=users,DC=<your domain>
-...
-```
-
-## Mirrored groups
-
-:exclamation: You can disable the creation of mirrored groups with the `--disable-mirrored-groups` command line option :exclamation:
-
-Each group of users will have an associated group-of-groups where each user in the group will have its user primary group in the group-of-groups.
-Note that these groups-of-groups are **not** `posixGroup`s as POSIX does not allow nested groups.
-
-For example:
-
-```ldif
-dn:CN=Detectives,OU=groups,DC=<your domain>
-objectClass: groupOfNames
-objectClass: posixGroup
-objectClass: top
-...
-member: CN=sherlock.holmes,OU=users,DC=<your domain>
-...
-```
-
-will have an associated group-of-groups
-
-```ldif
-dn: CN=Primary user groups for Detectives,OU=groups,DC=<your domain>
-objectClass: groupOfNames
-objectClass: top
-...
-member: CN=sherlock.holmes,OU=groups,DC=<your domain>
-...
-```
-
-This allows a user to make a request for "all primary user groups needed by members of group X" without getting a large number of primary user groups for unrelated users. To do this, you will need an LDAP request that looks like:
-
-```ldif
-(&(objectClass=posixGroup)(|(CN=Detectives)(memberOf=Primary user groups for Detectives)))
-```
-
-which will return:
-
-```ldif
-dn:CN=Detectives,OU=groups,DC=<your domain>
-objectClass: groupOfNames
-objectClass: posixGroup
-objectClass: top
-...
-member: CN=sherlock.holmes,OU=users,DC=<your domain>
-...
-
-dn: CN=sherlock.holmes,OU=groups,DC=<your domain>
-objectClass: groupOfNames
-objectClass: posixGroup
-objectClass: top
-...
-member: CN=sherlock.holmes,OU=users,DC=<your domain>
-...
+```bash
+ldapsearch -H ldap://<your server location>:<your desired port> -x -b "DC=example,DC=com" -D "CN=<user name>,OU=users,DC=example,DC=com"
 ```
 
 ## OpenID Connect
@@ -207,7 +133,7 @@ You will need to use the following command line arguments:
 --keycloak-realm "<your realm>"
 ```
 
-#### User attribute
+#### User domain attribute
 
 You will need to add a custom attribute to each user you want Apricot to use.
 The name of this attribute should be used as the value of the `--keycloak-domain-attribute` argument above.
@@ -240,3 +166,95 @@ Do this as follows:
           - `realm-management` > `manage-users`
           - `realm-management` > `query-groups`
           - `realm-management` > `query-users`
+
+## Disabling Apricot groups
+
+### Primary groups
+
+Apricot creates an associated group for each user, which acts as its POSIX user primary group.
+
+For example:
+
+```ldif
+dn: CN=sherlock.holmes,OU=users,DC=example,DC=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: posixAccount
+objectClass: top
+...
+memberOf: CN=sherlock.holmes,OU=groups,DC=example,DC=com
+...
+```
+
+will have an associated group
+
+```ldif
+dn: CN=sherlock.holmes,OU=groups,DC=example,DC=com
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=example,DC=com
+...
+```
+
+:exclamation: You can disable the creation of these groups with the `--disable-primary-groups` command line option :exclamation:
+
+
+## Mirrored groups
+
+Apricot creates a group-of-groups for each group of users.
+This simply contains the primary group for each user in the original group.
+Note that these groups-of-groups are **not** `posixGroup`s as POSIX does not allow nested groups.
+
+For example:
+
+```ldif
+dn:CN=Detectives,OU=groups,DC=example,DC=com
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=example,DC=com
+...
+```
+
+will have an associated group-of-groups
+
+```ldif
+dn: CN=Primary user groups for Detectives,OU=groups,DC=example,DC=com
+objectClass: groupOfNames
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=groups,DC=example,DC=com
+...
+```
+
+This allows a user to make a request for "all primary user groups needed by members of group X" without getting a large number of primary user groups for unrelated users. To do this, you will need an LDAP request that looks like:
+
+```ldif
+(&(objectClass=posixGroup)(|(CN=Detectives)(memberOf=Primary user groups for Detectives)))
+```
+
+which will return:
+
+```ldif
+dn:CN=Detectives,OU=groups,DC=example,DC=com
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=example,DC=com
+...
+
+dn: CN=sherlock.holmes,OU=groups,DC=example,DC=com
+objectClass: groupOfNames
+objectClass: posixGroup
+objectClass: top
+...
+member: CN=sherlock.holmes,OU=users,DC=example,DC=com
+...
+```
+
+:exclamation: You can disable the creation of mirrored groups with the `--disable-mirrored-groups` command line option :exclamation:
