@@ -54,7 +54,12 @@ if [ -n "${KEYCLOAK_BASE_URL}" ]; then
         echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] KEYCLOAK_REALM environment variable is not set"
         exit 1
     fi
-    EXTRA_OPTS="${EXTRA_OPTS} --keycloak-base-url $KEYCLOAK_BASE_URL --keycloak-realm $KEYCLOAK_REALM"
+
+    if [ -z "${KEYCLOAK_DOMAIN_ATTRIBUTE}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] KEYCLOAK_DOMAIN_ATTRIBUTE environment variable is not set"
+        exit 1
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --keycloak-base-url $KEYCLOAK_BASE_URL --keycloak-realm $KEYCLOAK_REALM --keycloak-domain-attribute $KEYCLOAK_DOMAIN_ATTRIBUTE"
 fi
 
 
