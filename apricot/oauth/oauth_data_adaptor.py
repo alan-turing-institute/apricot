@@ -45,16 +45,6 @@ class OAuthDataAdaptor:
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.enable_mirrored_groups = enable_mirrored_groups
 
-    @property
-    def groups(self: Self) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated group data."""
-        return self.validated_groups
-
-    @property
-    def users(self: Self) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated user data."""
-        return self.validated_users
-
     def _dn_from_group_cn(self: Self, group_cn: str) -> str:
         return f"CN={group_cn},OU=groups,{self.root_dn}"
 
@@ -226,12 +216,15 @@ class OAuthDataAdaptor:
                     )
         return output
 
-    def refresh(self) -> None:
-        """Retrieve and validate user and group information."""
+    def retrieve_all(
+        self,
+    ) -> tuple[list[LDAPAttributeAdaptor], list[LDAPAttributeAdaptor]]:
+        """Retrieve and return validated user and group information."""
         annotated_groups, annotated_users = self._retrieve_entries()
-        self.validated_groups = self._validate_groups(annotated_groups)
-        self.validated_users = self._validate_users(annotated_users, self.domain)
+        validated_groups = self._validate_groups(annotated_groups)
+        validated_users = self._validate_users(annotated_users, self.domain)
         if self.debug:
             log.msg(
-                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users.",
+                f"Validated {len(validated_groups)} groups and {len(validated_users)} users.",
             )
+        return (validated_groups, validated_users)

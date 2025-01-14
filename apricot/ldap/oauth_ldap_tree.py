@@ -62,6 +62,22 @@ class OAuthLDAPTree:
             raise ValueError(msg)
         return self.root_
 
+    def __repr__(self: Self) -> str:
+        return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
+
+    def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
+        """Lookup the referred to by dn.
+
+        @return: A Deferred returning an ILDAPEntry.
+
+        @raises: LDAPNoSuchObject.
+        """
+        if not isinstance(dn, DistinguishedName):
+            dn = DistinguishedName(stringValue=dn)
+        if self.debug:
+            log.msg(f"Starting an LDAP lookup for '{dn.getText()}'.")
+        return self.root.lookup(dn)
+
     def refresh(self: Self) -> None:
         """Refresh the LDAP tree."""
         if (
@@ -70,7 +86,7 @@ class OAuthLDAPTree:
         ):
             # Update users and groups from the OAuth server
             log.msg("Retrieving OAuth data.")
-            self.oauth_adaptor.refresh()
+            oauth_groups, oauth_users = self.oauth_adaptor.retrieve_all()
 
             # Create a root node for the tree
             log.msg("Rebuilding LDAP tree.")
@@ -93,9 +109,9 @@ class OAuthLDAPTree:
             # Add groups to the groups OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(self.oauth_adaptor.groups)} groups to the LDAP tree.",
+                    f"Attempting to add {len(oauth_groups)} groups to the LDAP tree.",
                 )
-            for group_attrs in self.oauth_adaptor.groups:
+            for group_attrs in oauth_groups:
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
             if self.debug:
                 children = groups_ou.list_children()
@@ -106,9 +122,9 @@ class OAuthLDAPTree:
             # Add users to the users OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(self.oauth_adaptor.users)} users to the LDAP tree.",
+                    f"Attempting to add {len(oauth_users)} users to the LDAP tree.",
                 )
-            for user_attrs in self.oauth_adaptor.users:
+            for user_attrs in oauth_users:
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
             if self.debug:
                 children = users_ou.list_children()
@@ -119,19 +135,3 @@ class OAuthLDAPTree:
             # Set last updated time
             log.msg("Finished building LDAP tree.")
             self.last_update = time.monotonic()
-
-    def __repr__(self: Self) -> str:
-        return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
-
-    def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
-        """Lookup the referred to by dn.
-
-        @return: A Deferred returning an ILDAPEntry.
-
-        @raises: LDAPNoSuchObject.
-        """
-        if not isinstance(dn, DistinguishedName):
-            dn = DistinguishedName(stringValue=dn)
-        if self.debug:
-            log.msg(f"Starting an LDAP lookup for '{dn.getText()}'.")
-        return self.root.lookup(dn)
