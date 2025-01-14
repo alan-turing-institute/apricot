@@ -40,18 +40,10 @@ class OAuthDataAdaptor:
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
         self.debug = oauth_client.debug
+        self.domain = domain
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.enable_mirrored_groups = enable_mirrored_groups
-
-        # Retrieve and validate user and group information
-        annotated_groups, annotated_users = self._retrieve_entries()
-        self.validated_groups = self._validate_groups(annotated_groups)
-        self.validated_users = self._validate_users(annotated_users, domain)
-        if self.debug:
-            log.msg(
-                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users.",
-            )
 
     @property
     def groups(self: Self) -> list[LDAPAttributeAdaptor]:
@@ -233,3 +225,13 @@ class OAuthDataAdaptor:
                         f" -> '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output
+
+    def refresh(self) -> None:
+        """Retrieve and validate user and group information."""
+        annotated_groups, annotated_users = self._retrieve_entries()
+        self.validated_groups = self._validate_groups(annotated_groups)
+        self.validated_users = self._validate_users(annotated_users, self.domain)
+        if self.debug:
+            log.msg(
+                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users.",
+            )

@@ -77,6 +77,7 @@ class OAuthLDAPTree:
                 self.oauth_client,
                 enable_mirrored_groups=self.enable_mirrored_groups,
             )
+            oauth_adaptor.refresh()
 
             # Create a root node for the tree
             log.msg("Rebuilding LDAP tree.")
