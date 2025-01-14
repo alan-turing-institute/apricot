@@ -142,6 +142,8 @@ The value of this attribute should be the same as the `--domain` argument to Apr
 Any users with this attribute missing or set to something else will be ignored by Apricot.
 This allows you to attach multiple Apricot servers to the same Keycloak instance, each with their own set of users.
 
+:exclamation: You can disable user domain verification with the `--disable-user-domain-verification` command line option :exclamation:
+
 #### Client application
 
 You will need to register an application to interact with `Keycloak`.
