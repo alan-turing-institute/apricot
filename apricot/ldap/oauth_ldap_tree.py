@@ -9,10 +9,11 @@ from twisted.python import log
 from zope.interface import implementer
 
 from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
-from apricot.oauth import OAuthClient, OAuthDataAdaptor
 
 if TYPE_CHECKING:
     from twisted.internet import defer
+
+    from apricot.oauth import OAuthClient, OAuthDataAdaptor
 
 
 @implementer(IConnectedLDAPEntry)
@@ -21,26 +22,23 @@ class OAuthLDAPTree:
 
     def __init__(
         self: Self,
-        domain: str,
+        oauth_adaptor: OAuthDataAdaptor,
         oauth_client: OAuthClient,
         *,
         background_refresh: bool,
-        enable_mirrored_groups: bool,
         refresh_interval: int,
     ) -> None:
         """Initialise an OAuthLDAPTree.
 
         @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
-        @param domain: The root domain of the LDAP tree
-        @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
-        @param oauth_client: An OAuth client used to construct the LDAP tree
+        @param oauth_adaptor: An OAuth data adaptor used to construct the LDAP tree
+        @param oauth_client: An OAuth client used to retrieve user and group data
         @param refresh_interval: Interval in seconds after which the tree must be refreshed
         """
         self.background_refresh = background_refresh
         self.debug = oauth_client.debug
-        self.domain = domain
-        self.enable_mirrored_groups = enable_mirrored_groups
         self.last_update = time.monotonic()
+        self.oauth_adaptor = oauth_adaptor
         self.oauth_client = oauth_client
         self.refresh_interval = refresh_interval
         self.root_: OAuthLDAPEntry | None = None
@@ -72,17 +70,12 @@ class OAuthLDAPTree:
         ):
             # Update users and groups from the OAuth server
             log.msg("Retrieving OAuth data.")
-            oauth_adaptor = OAuthDataAdaptor(
-                self.domain,
-                self.oauth_client,
-                enable_mirrored_groups=self.enable_mirrored_groups,
-            )
-            oauth_adaptor.refresh()
+            self.oauth_adaptor.refresh()
 
             # Create a root node for the tree
             log.msg("Rebuilding LDAP tree.")
             self.root_ = OAuthLDAPEntry(
-                dn=oauth_adaptor.root_dn,
+                dn=self.oauth_adaptor.root_dn,
                 attributes={"objectClass": ["dcObject"]},
                 oauth_client=self.oauth_client,
             )
@@ -100,9 +93,9 @@ class OAuthLDAPTree:
             # Add groups to the groups OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(oauth_adaptor.groups)} groups to the LDAP tree.",
+                    f"Attempting to add {len(self.oauth_adaptor.groups)} groups to the LDAP tree.",
                 )
-            for group_attrs in oauth_adaptor.groups:
+            for group_attrs in self.oauth_adaptor.groups:
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
             if self.debug:
                 children = groups_ou.list_children()
@@ -113,9 +106,9 @@ class OAuthLDAPTree:
             # Add users to the users OU
             if self.debug:
                 log.msg(
-                    f"Attempting to add {len(oauth_adaptor.users)} users to the LDAP tree.",
+                    f"Attempting to add {len(self.oauth_adaptor.users)} users to the LDAP tree.",
                 )
-            for user_attrs in oauth_adaptor.users:
+            for user_attrs in self.oauth_adaptor.users:
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
             if self.debug:
                 children = users_ou.list_children()

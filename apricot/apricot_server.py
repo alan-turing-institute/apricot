@@ -11,7 +11,7 @@ from twisted.python import log
 
 from apricot.cache import LocalCache, RedisCache, UidCache
 from apricot.ldap import OAuthLDAPServerFactory
-from apricot.oauth import OAuthBackend, OAuthClientMap
+from apricot.oauth import OAuthBackend, OAuthClientMap, OAuthDataAdaptor
 
 
 class ApricotServer:
@@ -69,7 +69,7 @@ class ApricotServer:
             log.msg("Using a local user-id cache.")
             uid_cache = LocalCache()
 
-        # Initialize the appropriate OAuth client
+        # Initialise the appropriate OAuth client
         try:
             if self.debug:
                 log.msg(f"Creating an OAuthClient for {backend}.")
@@ -88,24 +88,30 @@ class ApricotServer:
             msg = f"Could not construct an OAuth client for the '{backend}' backend.\n{exc!s}"
             raise ValueError(msg) from exc
 
+        # Initialise the OAuth data adaptor
+        oauth_adaptor = OAuthDataAdaptor(
+            domain,
+            oauth_client,
+            enable_mirrored_groups=enable_mirrored_groups,
+        )
+
         # Create an LDAPServerFactory
         if self.debug:
             log.msg("Creating an LDAPServerFactory.")
         factory = OAuthLDAPServerFactory(
-            domain,
+            oauth_adaptor,
             oauth_client,
             background_refresh=background_refresh,
-            enable_mirrored_groups=enable_mirrored_groups,
             refresh_interval=refresh_interval,
         )
 
         if background_refresh:
             if self.debug:
                 log.msg(
-                    f"Starting background refresh (interval={factory.adaptor.refresh_interval})",
+                    f"Starting background refresh (interval={refresh_interval})",
                 )
             loop = task.LoopingCall(factory.adaptor.refresh)
-            loop.start(factory.adaptor.refresh_interval)
+            loop.start(refresh_interval)
 
         # Attach a listening endpoint
         if self.debug:
