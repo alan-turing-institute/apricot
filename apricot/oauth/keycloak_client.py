@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import operator
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from twisted.python import log
 
-from apricot.typedefs import JSONDict
-
 from .oauth_client import OAuthClient
+
+if TYPE_CHECKING:
+    from apricot.typedefs import JSONDict
 
 
 class KeycloakClient(OAuthClient):
@@ -56,7 +57,7 @@ class KeycloakClient(OAuthClient):
                 f"{self.base_url}/admin/realms/{self.realm}/groups?first={len(group_data)}&max={self.max_rows}&briefRepresentation=false",
                 use_client_secret=False,
             ):
-                group_data.extend(cast(list[JSONDict], data))
+                group_data.extend(cast("list[JSONDict]", data))
                 if len(data) != self.max_rows:
                     break
 
@@ -99,7 +100,7 @@ class KeycloakClient(OAuthClient):
                     use_client_secret=False,
                 )
                 attributes["memberUid"] = [
-                    user["username"] for user in cast(list[JSONDict], members)
+                    user["username"] for user in cast("list[JSONDict]", members)
                 ]
                 output.append(attributes)
         except KeyError as exc:
@@ -115,7 +116,7 @@ class KeycloakClient(OAuthClient):
                 f"{self.base_url}/admin/realms/{self.realm}/users?first={len(user_data)}&max={self.max_rows}&briefRepresentation=false",
                 use_client_secret=False,
             ):
-                user_data.extend(cast(list[JSONDict], data))
+                user_data.extend(cast("list[JSONDict]", data))
                 if len(data) != self.max_rows:
                     break
 

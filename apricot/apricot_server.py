@@ -2,16 +2,18 @@ from __future__ import annotations
 
 import inspect
 import sys
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from twisted.internet import reactor, task
 from twisted.internet.endpoints import quoteStringArgument, serverFromString
-from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 from twisted.python import log
 
 from apricot.cache import LocalCache, RedisCache, UidCache
 from apricot.ldap import OAuthLDAPServerFactory
 from apricot.oauth import OAuthBackend, OAuthClientMap, OAuthDataAdaptor
+
+if TYPE_CHECKING:
+    from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 
 
 class ApricotServer:
@@ -139,7 +141,7 @@ class ApricotServer:
             ssl_endpoint.listen(factory)
 
         # Load the Twisted reactor
-        self.reactor = cast(IReactorCore, reactor)
+        self.reactor = cast("IReactorCore", reactor)
 
     def run(self: Self) -> None:
         """Start the Twisted reactor."""

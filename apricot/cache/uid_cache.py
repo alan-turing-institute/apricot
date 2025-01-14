@@ -55,7 +55,7 @@ class UidCache(ABC):
             min_value = min_value or 0
             next_uid = max(self._get_max_uid(category) + 1, min_value)
             self.set(identifier_, next_uid)
-        return cast(int, self.get(identifier_))
+        return cast("int", self.get(identifier_))
 
     def _get_max_uid(self: Self, category: str | None) -> int:
         """Get maximum UID for a given category.

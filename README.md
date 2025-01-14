@@ -151,8 +151,8 @@ Do this as follows:
 
 - Create a new `Client` in your `Keycloak` instance.
     - Under `General Settings`:
-        -  Client type: `OpenID Connect`
-        -  Client name: `apricot`
+        - Client type: `OpenID Connect`
+        - Client name: `apricot`
     - Under `Capability config`
         - Enable `Client authentication`
         - Enable the following authentication flows and disable the rest:
@@ -160,14 +160,14 @@ Do this as follows:
             - `Service accounts roles`
     - Save the client
 - For the client you have just created
-  - Under `Credentials` copy `client secret`
-  - Under `Service accounts roles`:
-      - Click on `Assign role` then `Filter by clients`
-      - Assign the following roles:
-          - `realm-management` > `view-users`
-          - `realm-management` > `manage-users`
-          - `realm-management` > `query-groups`
-          - `realm-management` > `query-users`
+    - Under `Credentials` copy `client secret`
+    - Under `Service accounts roles`:
+        - Click on `Assign role` then `Filter by clients`
+        - Assign the following roles:
+            - `realm-management` > `view-users`
+            - `realm-management` > `manage-users`
+            - `realm-management` > `query-groups`
+            - `realm-management` > `query-users`
 
 ## Disabling Apricot groups
 
@@ -202,7 +202,6 @@ member: CN=sherlock.holmes,OU=users,DC=example,DC=com
 ```
 
 :exclamation: You can disable the creation of these groups with the `--disable-primary-groups` command line option :exclamation:
-
 
 ## Mirrored groups
 

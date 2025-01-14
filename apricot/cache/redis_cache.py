@@ -42,4 +42,4 @@ class RedisCache(UidCache):
         self.cache.set(identifier, uid_value)
 
     def values(self: Self, keys: list[str]) -> list[int]:
-        return [int(cast(str, v)) for v in self.cache.mget(keys)]
+        return [int(cast("str", v)) for v in self.cache.mget(keys)]
