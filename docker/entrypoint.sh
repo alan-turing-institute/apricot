@@ -27,6 +27,10 @@ if [ -n "${DISABLE_MIRRORED_GROUPS}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --disable-mirrored-groups"
 fi
 
+if [ -n "${DISABLE_PRIMARY_GROUPS}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --disable-primary-groups"
+fi
+
 if [ -n "${DISABLE_USER_DOMAIN_VERIFICATION}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --disable-user-domain-verification"
 fi

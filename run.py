@@ -41,6 +41,13 @@ if __name__ == "__main__":
             help="Disable creation of mirrored groups.",
         )
         ldap_group.add_argument(
+            "--disable-primary-groups",
+            action="store_false",
+            default=True,
+            dest="enable_primary_groups",
+            help="Disable creation of POSIX primary groups for each user.",
+        )
+        ldap_group.add_argument(
             "--disable-user-domain-verification",
             action="store_false",
             default=True,

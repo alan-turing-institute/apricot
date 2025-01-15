@@ -32,12 +32,14 @@ class OAuthDataAdaptor:
         oauth_client: OAuthClient,
         *,
         enable_mirrored_groups: bool,
+        enable_primary_groups: bool,
         enable_user_domain_verification: bool,
     ) -> None:
         """Initialise an OAuthDataAdaptor.
 
         @param domain: The root domain of the LDAP tree
         @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
+        @param enable_primary_groups: Whether to create an LDAP primary group for each user
         @param enable_user_domain_verification: Whether to verify users belong to the correct domain
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
@@ -46,6 +48,7 @@ class OAuthDataAdaptor:
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.enable_mirrored_groups = enable_mirrored_groups
+        self.enable_primary_groups = enable_primary_groups
         self.enable_user_domain_verification = enable_user_domain_verification
 
     def _dn_from_group_cn(self: Self, group_cn: str) -> str:
@@ -75,21 +78,22 @@ class OAuthDataAdaptor:
                 self._dn_from_user_cn(user_cn) for user_cn in group_dict["memberUid"]
             ]
 
-        # Add one self-titled group for each user
+        # Add one self-titled primary group for each user
         # Group name is taken from 'cn' which should match the username
         user_primary_groups = []
-        for user in oauth_users:
-            group_dict = {}
-            for attr in ("cn", "description", "gidNumber"):
-                group_dict[attr] = user[attr]
-            group_dict["member"] = [self._dn_from_user_cn(user["cn"])]
-            group_dict["memberUid"] = [user["cn"]]
-            user_primary_groups.append(group_dict)
+        if self.enable_primary_groups:
+            for user in oauth_users:
+                group_dict = {}
+                for attr in ("cn", "description", "gidNumber"):
+                    group_dict[attr] = user[attr]
+                group_dict["member"] = [self._dn_from_user_cn(user["cn"])]
+                group_dict["memberUid"] = [user["cn"]]
+                user_primary_groups.append(group_dict)
 
         # Add one group of groups for each existing group.
         # Its members are the primary user groups for each original group member.
         groups_of_groups = []
-        if self.enable_mirrored_groups:
+        if self.enable_primary_groups and self.enable_mirrored_groups:
             for group in oauth_groups:
                 group_dict = {}
                 group_dict["cn"] = f"Primary user groups for {group['cn']}"

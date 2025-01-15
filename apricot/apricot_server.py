@@ -30,6 +30,7 @@ class ApricotServer:
         background_refresh: bool = False,
         debug: bool = False,
         enable_mirrored_groups: bool = True,
+        enable_primary_groups: bool = True,
         enable_user_domain_verification: bool = True,
         redis_host: str | None = None,
         redis_port: int | None = None,
@@ -49,6 +50,7 @@ class ApricotServer:
         @param background_refresh: Whether to refresh the LDAP tree in the background
         @param debug: Enable debug output
         @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
+        @param enable_primary_groups: Whether to create an LDAP primary group for each user
         @param enable_user_domain_verification: Whether to verify users belong to the correct domain
         @param redis_host: Host for a Redis cache (if used)
         @param redis_port: Port for a Redis cache (if used)
@@ -97,6 +99,7 @@ class ApricotServer:
             domain,
             oauth_client,
             enable_mirrored_groups=enable_mirrored_groups,
+            enable_primary_groups=enable_primary_groups,
             enable_user_domain_verification=enable_user_domain_verification,
         )
 
