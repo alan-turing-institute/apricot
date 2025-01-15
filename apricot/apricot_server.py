@@ -95,6 +95,8 @@ class ApricotServer:
             raise ValueError(msg) from exc
 
         # Initialise the OAuth data adaptor
+        if self.debug:
+            log.msg("Creating an OAuthDataAdaptor.")
         oauth_adaptor = OAuthDataAdaptor(
             domain,
             oauth_client,
