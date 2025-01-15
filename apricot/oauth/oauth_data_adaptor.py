@@ -32,36 +32,21 @@ class OAuthDataAdaptor:
         oauth_client: OAuthClient,
         *,
         enable_mirrored_groups: bool,
+        enable_user_domain_verification: bool,
     ) -> None:
         """Initialise an OAuthDataAdaptor.
 
         @param domain: The root domain of the LDAP tree
-        @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
+        @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
+        @param enable_user_domain_verification: Whether to verify users belong to the correct domain
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
         self.debug = oauth_client.debug
+        self.domain = domain
         self.oauth_client = oauth_client
         self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.enable_mirrored_groups = enable_mirrored_groups
-
-        # Retrieve and validate user and group information
-        annotated_groups, annotated_users = self._retrieve_entries()
-        self.validated_groups = self._validate_groups(annotated_groups)
-        self.validated_users = self._validate_users(annotated_users, domain)
-        if self.debug:
-            log.msg(
-                f"Validated {len(self.validated_groups)} groups and {len(self.validated_users)} users.",
-            )
-
-    @property
-    def groups(self: Self) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated group data."""
-        return self.validated_groups
-
-    @property
-    def users(self: Self) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated user data."""
-        return self.validated_users
+        self.enable_user_domain_verification = enable_user_domain_verification
 
     def _dn_from_group_cn(self: Self, group_cn: str) -> str:
         return f"CN={group_cn},OU=groups,{self.root_dn}"
@@ -205,7 +190,6 @@ class OAuthDataAdaptor:
     def _validate_users(
         self: Self,
         annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
-        domain: str,
     ) -> list[LDAPAttributeAdaptor]:
         """Return a list of LDAPAttributeAdaptors representing validated user data."""
         if self.debug:
@@ -214,18 +198,23 @@ class OAuthDataAdaptor:
         for user_dict, required_classes in annotated_users:
             name = user_dict.get("cn", "unknown")
             try:
-                if (user_domain := user_dict.get("domain", None)) == domain:
-                    output.append(
-                        LDAPAttributeAdaptor.from_attributes(
-                            user_dict,
-                            required_classes=required_classes,
-                        ),
-                    )
-                else:
+                # Verify user domain if enabled
+                if (
+                    self.enable_user_domain_verification
+                    and (user_domain := user_dict.get("domain", None)) != self.domain
+                ):
                     log.msg(f"... user '{name}' failed validation.")
                     log.msg(
-                        f" -> 'domain': expected '{domain}' but '{user_domain}' was provided.",
+                        f" -> 'domain': expected '{self.domain}' but '{user_domain}' was provided.",
                     )
+                    continue
+                # Construct an LDAPAttributeAdaptor from the user attributes
+                output.append(
+                    LDAPAttributeAdaptor.from_attributes(
+                        user_dict,
+                        required_classes=required_classes,
+                    ),
+                )
             except ValidationError as exc:
                 log.msg(f"... user '{name}' failed validation.")
                 for error in exc.errors():
@@ -233,3 +222,16 @@ class OAuthDataAdaptor:
                         f" -> '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
                     )
         return output
+
+    def retrieve_all(
+        self,
+    ) -> tuple[list[LDAPAttributeAdaptor], list[LDAPAttributeAdaptor]]:
+        """Retrieve and return validated user and group information."""
+        annotated_groups, annotated_users = self._retrieve_entries()
+        validated_groups = self._validate_groups(annotated_groups)
+        validated_users = self._validate_users(annotated_users)
+        if self.debug:
+            log.msg(
+                f"Validated {len(validated_groups)} groups and {len(validated_users)} users.",
+            )
+        return (validated_groups, validated_users)

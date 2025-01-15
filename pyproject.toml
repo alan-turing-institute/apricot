@@ -168,10 +168,10 @@ strict = true                     # enable all optional error checking flags
 
 [[tool.mypy.overrides]]
 module = [
-    "ldaptor.*",
-    "pydantic.*",
-    "requests_oauthlib.*",
-    "twisted.*",
-    "zope.interface.*",
+  "ldaptor.*",
+  "pydantic.*",
+  "requests_oauthlib.*",
+  "twisted.*",
+  "zope.interface.*",
 ]
 ignore_missing_imports = true

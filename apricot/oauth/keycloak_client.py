@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import operator
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from twisted.python import log
 
-from apricot.typedefs import JSONDict
-
 from .oauth_client import OAuthClient
+
+if TYPE_CHECKING:
+    from apricot.typedefs import JSONDict
 
 
 class KeycloakClient(OAuthClient):
@@ -56,7 +57,7 @@ class KeycloakClient(OAuthClient):
                 f"{self.base_url}/admin/realms/{self.realm}/groups?first={len(group_data)}&max={self.max_rows}&briefRepresentation=false",
                 use_client_secret=False,
             ):
-                group_data.extend(cast(list[JSONDict], data))
+                group_data.extend(cast("list[JSONDict]", data))
                 if len(data) != self.max_rows:
                     break
 
@@ -75,9 +76,7 @@ class KeycloakClient(OAuthClient):
                         group_dict["id"],
                         int(group_gid[0], 10),
                     )
-
-            # Read group attributes
-            for group_dict in group_data:
+                # Set group attributes
                 if not group_dict["attributes"]["gid"]:
                     group_dict["attributes"]["gid"] = [
                         str(self.uid_cache.get_group_uid(group_dict["id"])),
@@ -87,6 +86,9 @@ class KeycloakClient(OAuthClient):
                         method="PUT",
                         json=group_dict,
                     )
+
+            # Read group attributes
+            for group_dict in group_data:
                 attributes: JSONDict = {}
                 attributes["cn"] = group_dict.get("name", None)
                 attributes["description"] = group_dict.get("id", None)
@@ -98,7 +100,7 @@ class KeycloakClient(OAuthClient):
                     use_client_secret=False,
                 )
                 attributes["memberUid"] = [
-                    user["username"] for user in cast(list[JSONDict], members)
+                    user["username"] for user in cast("list[JSONDict]", members)
                 ]
                 output.append(attributes)
         except KeyError as exc:
@@ -114,7 +116,7 @@ class KeycloakClient(OAuthClient):
                 f"{self.base_url}/admin/realms/{self.realm}/users?first={len(user_data)}&max={self.max_rows}&briefRepresentation=false",
                 use_client_secret=False,
             ):
-                user_data.extend(cast(list[JSONDict], data))
+                user_data.extend(cast("list[JSONDict]", data))
                 if len(data) != self.max_rows:
                     break
 
@@ -133,12 +135,7 @@ class KeycloakClient(OAuthClient):
                         user_dict["id"],
                         int(user_uid[0], 10),
                     )
-
-            # Read user attributes
-            for user_dict in sorted(
-                user_data,
-                key=operator.itemgetter("createdTimestamp"),
-            ):
+                # Set user attributes
                 if not user_dict["attributes"]["uid"]:
                     user_dict["attributes"]["uid"] = [
                         str(self.uid_cache.get_user_uid(user_dict["id"])),
@@ -148,6 +145,12 @@ class KeycloakClient(OAuthClient):
                         method="PUT",
                         json=user_dict,
                     )
+
+            # Read user attributes
+            for user_dict in sorted(
+                user_data,
+                key=operator.itemgetter("createdTimestamp"),
+            ):
                 # Get user attributes
                 first_name = user_dict.get("firstName", None)
                 last_name = user_dict.get("lastName", None)

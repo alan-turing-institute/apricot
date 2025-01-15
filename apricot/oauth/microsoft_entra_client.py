@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import operator
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from twisted.python import log
 
-from apricot.typedefs import JSONDict
-
 from .oauth_client import OAuthClient
+
+if TYPE_CHECKING:
+    from apricot.typedefs import JSONDict
 
 
 class MicrosoftEntraClient(OAuthClient):
@@ -50,7 +51,7 @@ class MicrosoftEntraClient(OAuthClient):
             f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}",
         )
         for group_dict in cast(
-            list[JSONDict],
+            "list[JSONDict]",
             sorted(group_data["value"], key=operator.itemgetter("createdDateTime")),
         ):
             try:
@@ -92,7 +93,7 @@ class MicrosoftEntraClient(OAuthClient):
                 f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}",
             )
             for user_dict in cast(
-                list[JSONDict],
+                "list[JSONDict]",
                 sorted(user_data["value"], key=operator.itemgetter("createdDateTime")),
             ):
                 # Get user attributes

@@ -75,7 +75,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         except LDAPEntryAlreadyExists:
             log.msg(f"Refusing to add child '{rdn.getText()}' as it already exists.")
             output = self._children[rdn.getText()]
-        return cast(OAuthLDAPEntry, output)
+        return cast("OAuthLDAPEntry", output)
 
     def bind(self: Self, password: bytes) -> defer.Deferred[OAuthLDAPEntry]:
         def _bind(password: bytes) -> OAuthLDAPEntry:
@@ -89,4 +89,4 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return defer.maybeDeferred(_bind, password)
 
     def list_children(self: Self) -> list[OAuthLDAPEntry]:
-        return [cast(OAuthLDAPEntry, entry) for entry in self._children.values()]
+        return [cast("OAuthLDAPEntry", entry) for entry in self._children.values()]

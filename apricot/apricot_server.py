@@ -2,16 +2,18 @@ from __future__ import annotations
 
 import inspect
 import sys
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from twisted.internet import reactor, task
 from twisted.internet.endpoints import quoteStringArgument, serverFromString
-from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 from twisted.python import log
 
 from apricot.cache import LocalCache, RedisCache, UidCache
 from apricot.ldap import OAuthLDAPServerFactory
-from apricot.oauth import OAuthBackend, OAuthClientMap
+from apricot.oauth import OAuthBackend, OAuthClientMap, OAuthDataAdaptor
+
+if TYPE_CHECKING:
+    from twisted.internet.interfaces import IReactorCore, IStreamServerEndpoint
 
 
 class ApricotServer:
@@ -28,6 +30,7 @@ class ApricotServer:
         background_refresh: bool = False,
         debug: bool = False,
         enable_mirrored_groups: bool = True,
+        enable_user_domain_verification: bool = True,
         redis_host: str | None = None,
         redis_port: int | None = None,
         refresh_interval: int = 60,
@@ -45,7 +48,8 @@ class ApricotServer:
         @param port: Port to expose LDAP on
         @param background_refresh: Whether to refresh the LDAP tree in the background
         @param debug: Enable debug output
-        @param enable_mirrored_groups: Create a mirrored LDAP group-of-groups for each group-of-users
+        @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
+        @param enable_user_domain_verification: Whether to verify users belong to the correct domain
         @param redis_host: Host for a Redis cache (if used)
         @param redis_port: Port for a Redis cache (if used)
         @param refresh_interval: Interval after which the LDAP information is stale
@@ -69,7 +73,7 @@ class ApricotServer:
             log.msg("Using a local user-id cache.")
             uid_cache = LocalCache()
 
-        # Initialize the appropriate OAuth client
+        # Initialise the appropriate OAuth client
         try:
             if self.debug:
                 log.msg(f"Creating an OAuthClient for {backend}.")
@@ -88,24 +92,31 @@ class ApricotServer:
             msg = f"Could not construct an OAuth client for the '{backend}' backend.\n{exc!s}"
             raise ValueError(msg) from exc
 
+        # Initialise the OAuth data adaptor
+        oauth_adaptor = OAuthDataAdaptor(
+            domain,
+            oauth_client,
+            enable_mirrored_groups=enable_mirrored_groups,
+            enable_user_domain_verification=enable_user_domain_verification,
+        )
+
         # Create an LDAPServerFactory
         if self.debug:
             log.msg("Creating an LDAPServerFactory.")
         factory = OAuthLDAPServerFactory(
-            domain,
+            oauth_adaptor,
             oauth_client,
             background_refresh=background_refresh,
-            enable_mirrored_groups=enable_mirrored_groups,
             refresh_interval=refresh_interval,
         )
 
         if background_refresh:
             if self.debug:
                 log.msg(
-                    f"Starting background refresh (interval={factory.adaptor.refresh_interval})",
+                    f"Starting background refresh (interval={refresh_interval})",
                 )
             loop = task.LoopingCall(factory.adaptor.refresh)
-            loop.start(factory.adaptor.refresh_interval)
+            loop.start(refresh_interval)
 
         # Attach a listening endpoint
         if self.debug:
@@ -130,7 +141,7 @@ class ApricotServer:
             ssl_endpoint.listen(factory)
 
         # Load the Twisted reactor
-        self.reactor = cast(IReactorCore, reactor)
+        self.reactor = cast("IReactorCore", reactor)
 
     def run(self: Self) -> None:
         """Start the Twisted reactor."""

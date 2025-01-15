@@ -2,7 +2,37 @@
 # shellcheck disable=SC2086
 # shellcheck disable=SC2089
 
-# Required arguments
+# Optional arguments
+EXTRA_OPTS=""
+
+
+# Common server-level options
+if [ -z "${PORT}" ]; then
+    PORT="1389"
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] PORT environment variable is not set: using default of '${PORT}'"
+fi
+
+if [ -n "${DEBUG}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --debug"
+fi
+
+
+# LDAP tree arguments
+if [ -z "${DOMAIN}" ]; then
+    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] DOMAIN environment variable is not set"
+    exit 1
+fi
+
+if [ -n "${DISABLE_MIRRORED_GROUPS}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --disable-mirrored-groups"
+fi
+
+if [ -n "${DISABLE_USER_DOMAIN_VERIFICATION}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --disable-user-domain-verification"
+fi
+
+
+# OAuth client arguments
 if [ -z "${BACKEND}" ]; then
     echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] BACKEND environment variable is not set"
     exit 1
@@ -18,27 +48,14 @@ if [ -z "${CLIENT_SECRET}" ]; then
     exit 1
 fi
 
-if [ -z "${DOMAIN}" ]; then
-    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] DOMAIN environment variable is not set"
-    exit 1
+
+# LDAP refresh arguments
+if [ -n "${BACKGROUND_REFRESH}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --background-refresh"
 fi
 
-
-# Arguments with defaults
-if [ -z "${PORT}" ]; then
-    PORT="1389"
-    echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] PORT environment variable is not set: using default of '${PORT}'"
-fi
-
-
-# Optional arguments
-EXTRA_OPTS=""
-if [ -n "${DEBUG}" ]; then
-    EXTRA_OPTS="${EXTRA_OPTS} --debug"
-fi
-
-if [ -n "${DISABLE_MIRRORED_GROUPS}" ]; then
-    EXTRA_OPTS="${EXTRA_OPTS} --disable-mirrored-groups"
+if [ -n "${REFRESH_INTERVAL}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --refresh-interval $REFRESH_INTERVAL"
 fi
 
 
@@ -56,15 +73,18 @@ if [ -n "${KEYCLOAK_BASE_URL}" ]; then
     fi
     EXTRA_OPTS="${EXTRA_OPTS} --keycloak-base-url $KEYCLOAK_BASE_URL --keycloak-realm $KEYCLOAK_REALM"
 fi
-
-
-# LDAP refresh arguments
-if [ -n "${BACKGROUND_REFRESH}" ]; then
-    EXTRA_OPTS="${EXTRA_OPTS} --background-refresh"
+if [ -n "${KEYCLOAK_DOMAIN_ATTRIBUTE}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --keycloak-domain-attribute $KEYCLOAK_DOMAIN_ATTRIBUTE"
 fi
 
-if [ -n "${REFRESH_INTERVAL}" ]; then
-    EXTRA_OPTS="${EXTRA_OPTS} --refresh-interval $REFRESH_INTERVAL"
+
+# Redis arguments
+if [ -n "${REDIS_HOST}" ]; then
+    if [ -z "${REDIS_PORT}" ]; then
+        REDIS_PORT="6379"
+        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_PORT environment variable is not set: using default of '${REDIS_PORT}'"
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --redis-host $REDIS_HOST --redis-port $REDIS_PORT"
 fi
 
 
@@ -79,16 +99,6 @@ if [ -n "${TLS_PORT}" ]; then
         exit 1
     fi
     EXTRA_OPTS="${EXTRA_OPTS} --tls-port $TLS_PORT --tls-certificate $TLS_CERTIFICATE --tls-private-key $TLS_PRIVATE_KEY"
-fi
-
-
-# Redis arguments
-if [ -n "${REDIS_HOST}" ]; then
-    if [ -z "${REDIS_PORT}" ]; then
-        REDIS_PORT="6379"
-        echo "$(date +'%Y-%m-%d %H:%M:%S+0000') [-] REDIS_PORT environment variable is not set: using default of '${REDIS_PORT}'"
-    fi
-    EXTRA_OPTS="${EXTRA_OPTS} --redis-host $REDIS_HOST --redis-port $REDIS_PORT"
 fi
 
 
