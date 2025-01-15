@@ -12,6 +12,7 @@ from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
 
 if TYPE_CHECKING:
     from twisted.internet import defer
+    from twisted.python.failure import Failure
 
     from apricot.oauth import OAuthClient, OAuthDataAdaptor
 
@@ -67,14 +68,37 @@ class OAuthLDAPTree:
         return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
 
     def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
-        """Lookup the referred to by dn.
+        """Lookup a DistinguishedName in the LDAP tree.
 
         @return: A Deferred returning an ILDAPEntry.
         """
+
+        def result_callback(ldap_entry: OAuthLDAPEntry | None) -> OAuthLDAPEntry | None:
+            if ldap_entry:
+                self.logger.debug(
+                    "LDAP lookup succeeded: found {dn}",
+                    dn=ldap_entry.dn.getText(),
+                )
+            return ldap_entry
+
+        def failure_callback(failure: Failure) -> Failure:
+            self.logger.debug(
+                "LDAP lookup failed: {error}",
+                error=failure.getErrorMessage(),
+            )
+            return failure
+
+        # Construct a complete DN
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
-        self.logger.debug("Starting an LDAP lookup for '{dn}'.", dn=dn.getText())
-        return self.root.lookup(dn)
+        self.logger.info("Starting an LDAP lookup for '{dn}'.", dn=dn.getText())
+
+        # Attach debug callbacks to the lookup and return
+        return (
+            self.root.lookup(dn)
+            .addErrback(failure_callback)
+            .addCallback(result_callback)
+        )
 
     def refresh(self: Self) -> None:
         """Refresh the LDAP tree."""
