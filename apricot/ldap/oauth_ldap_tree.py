@@ -69,8 +69,6 @@ class OAuthLDAPTree:
         """Lookup the referred to by dn.
 
         @return: A Deferred returning an ILDAPEntry.
-
-        @raises: LDAPNoSuchObject.
         """
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
