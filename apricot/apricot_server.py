@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-import sys
+import logging
 from typing import TYPE_CHECKING, Any, Self, cast
 
 from twisted.internet import reactor, task
@@ -61,8 +61,14 @@ class ApricotServer:
         """
         self.debug = debug
 
-        # Log to stdout
-        log.startLogging(sys.stdout)
+        # Set up Python logging and add this as a Twisted observer
+        logging.basicConfig(
+            level=logging.DEBUG if debug else logging.INFO,
+            datefmt=r"%Y-%m-%d %H:%M:%S",
+            format=r"%(asctime)s [%(levelname)-8s] %(message)s",
+        )
+        observer = log.PythonLoggingObserver("apricot")
+        observer.start()
 
         # Initialise the UID cache
         uid_cache: UidCache
