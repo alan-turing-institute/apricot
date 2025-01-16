@@ -135,13 +135,15 @@ class OAuthLDAPTree:
             )
             for group_attrs in oauth_groups:
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
-            if self.debug:
-                children = groups_ou.list_children()
-                for child in children:
-                    self.logger.info("... {child}", child=child.dn.getText())
-                self.logger.info(
-                    "There are {n_groups} groups in the LDAP tree.",
-                    n_groups=len(children),
+            ldap_groups = groups_ou.list_children()
+            self.logger.info(
+                "There are {n_groups} groups in the LDAP tree.",
+                n_groups=len(ldap_groups),
+            )
+            for ldap_group in ldap_groups:
+                self.logger.debug(
+                    "... {ldap_group}",
+                    ldap_group=ldap_group.dn.getText(),
                 )
 
             # Add users to the users OU
@@ -151,14 +153,13 @@ class OAuthLDAPTree:
             )
             for user_attrs in oauth_users:
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
-            if self.debug:
-                children = users_ou.list_children()
-                for child in children:
-                    self.logger.info("... {child}", child=child.dn.getText())
-                self.logger.info(
-                    "There are {n_users} users in the LDAP tree.",
-                    n_users=len(children),
-                )
+            ldap_users = users_ou.list_children()
+            self.logger.info(
+                "There are {n_users} users in the LDAP tree.",
+                n_users=len(ldap_users),
+            )
+            for ldap_user in ldap_users:
+                self.logger.debug("... {ldap_user}", ldap_user=ldap_user.dn.getText())
 
             # Set last updated time
             self.logger.info("Finished building LDAP tree.")

@@ -62,15 +62,19 @@ class ApricotServer:
         """
         self.debug = debug
 
-        # Set up Python logging and add this as a Twisted observer
-        self.logger = Logger()
+        # Set up Python root logger
         logging.basicConfig(
-            level=logging.DEBUG if debug else logging.INFO,
+            level=logging.INFO,
             datefmt=r"%Y-%m-%d %H:%M:%S",
             format=r"%(asctime)s [%(levelname)-8s] %(message)s",
         )
+        if debug:
+            logging.getLogger("apricot").setLevel(logging.DEBUG)
+
+        # Configure Twisted loggers to write to Python logging
         observer = log.PythonLoggingObserver("apricot")
         observer.start()
+        self.logger = Logger()
 
         # Initialise the UID cache
         uid_cache: UidCache
@@ -87,7 +91,7 @@ class ApricotServer:
 
         # Initialise the appropriate OAuth client
         try:
-            self.logger.info(
+            self.logger.debug(
                 "Creating an OAuthClient for the '{backend}' backend.",
                 backend=backend.value,
             )
@@ -107,7 +111,7 @@ class ApricotServer:
             raise ValueError(msg) from exc
 
         # Initialise the OAuth data adaptor
-        self.logger.info("Creating an OAuthDataAdaptor.")
+        self.logger.debug("Creating an OAuthDataAdaptor.")
         oauth_adaptor = OAuthDataAdaptor(
             domain,
             oauth_client,
@@ -116,8 +120,8 @@ class ApricotServer:
             enable_user_domain_verification=enable_user_domain_verification,
         )
 
-        # Create an LDAPServerFactory
-        self.logger.info("Creating an LDAPServerFactory.")
+        # Create an OAuthLDAPServerFactory
+        self.logger.debug("Creating an OAuthLDAPServerFactory.")
         factory = OAuthLDAPServerFactory(
             oauth_adaptor,
             oauth_client,
@@ -161,5 +165,4 @@ class ApricotServer:
 
     def run(self: Self) -> None:
         """Start the Twisted reactor."""
-        self.logger.info("Starting the Twisted reactor.")
         self.reactor.run()
