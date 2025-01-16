@@ -74,6 +74,9 @@ class ApricotServer:
         observer.start()
         self.logger = Logger()
 
+        # Load the Twisted reactor
+        self.reactor = cast("IReactorCore", reactor)
+
         # Initialise the UID cache
         uid_cache: UidCache
         if redis_host and redis_port:
@@ -90,7 +93,7 @@ class ApricotServer:
         # Initialise the appropriate OAuth client
         try:
             self.logger.debug(
-                "Creating an OAuthClient for the '{backend}' backend.",
+                "Creating an OAuthClient for the {backend} backend.",
                 backend=backend.value,
             )
             oauth_backend = OAuthClientMap[backend]
@@ -104,7 +107,7 @@ class ApricotServer:
                 **{k: v for k, v in kwargs.items() if k in oauth_backend_args},
             )
         except Exception as exc:
-            msg = f"Could not construct an OAuth client for the '{backend.value}' backend.\n{exc!s}"
+            msg = f"Could not construct an OAuth client for the {backend.value} backend.\n{exc!s}"
             raise ValueError(msg) from exc
 
         # Initialise the OAuth data adaptor
@@ -136,7 +139,7 @@ class ApricotServer:
 
         # Attach a listening endpoint
         self.logger.info("Listening for LDAP requests on port {port}.", port=port)
-        endpoint: IStreamServerEndpoint = serverFromString(reactor, f"tcp:{port}")
+        endpoint: IStreamServerEndpoint = serverFromString(self.reactor, f"tcp:{port}")
         endpoint.listen(factory)
 
         # Attach a listening endpoint
@@ -152,13 +155,10 @@ class ApricotServer:
                 port=tls_port,
             )
             ssl_endpoint: IStreamServerEndpoint = serverFromString(
-                reactor,
+                self.reactor,
                 f"ssl:{tls_port}:privateKey={quoteStringArgument(tls_private_key)}:certKey={quoteStringArgument(tls_certificate)}",
             )
             ssl_endpoint.listen(factory)
-
-        # Load the Twisted reactor
-        self.reactor = cast("IReactorCore", reactor)
 
     def run(self: Self) -> None:
         """Start the Twisted reactor."""
