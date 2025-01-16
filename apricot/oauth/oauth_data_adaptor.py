@@ -43,7 +43,6 @@ class OAuthDataAdaptor:
         @param enable_user_domain_verification: Whether to verify users belong to the correct domain
         @param oauth_client: An OAuth client used to construct the LDAP tree
         """
-        self.debug = oauth_client.debug
         self.domain = domain
         self.enable_mirrored_groups = enable_mirrored_groups
         self.enable_primary_groups = enable_primary_groups

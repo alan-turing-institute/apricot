@@ -37,7 +37,6 @@ class OAuthLDAPTree:
         @param refresh_interval: Interval in seconds after which the tree must be refreshed
         """
         self.background_refresh = background_refresh
-        self.debug = oauth_client.debug
         self.last_update = time.monotonic()
         self.logger = Logger()
         self.oauth_adaptor = oauth_adaptor

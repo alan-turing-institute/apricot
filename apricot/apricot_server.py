@@ -60,8 +60,6 @@ class ApricotServer:
         @param tls_certificate: TLS certificate for LDAPS
         @param tls_private_key: TLS private key for LDAPS
         """
-        self.debug = debug
-
         # Set up Python root logger
         logging.basicConfig(
             level=logging.INFO,
@@ -102,7 +100,6 @@ class ApricotServer:
             oauth_client = oauth_backend(
                 client_id=client_id,
                 client_secret=client_secret,
-                debug=debug,
                 uid_cache=uid_cache,
                 **{k: v for k, v in kwargs.items() if k in oauth_backend_args},
             )

@@ -30,14 +30,10 @@ if TYPE_CHECKING:
 class ReadOnlyLDAPServer(LDAPServer):
     """A read-only LDAP server."""
 
-    def __init__(self: Self, *, debug: bool = False) -> None:
-        """Initialise a ReadOnlyLDAPServer.
-
-        @param debug: Enable debug output
-        """
-        self.logger = Logger()
+    def __init__(self: Self) -> None:
+        """Initialise a ReadOnlyLDAPServer."""
         super().__init__()
-        self.debug = debug
+        self.logger = Logger()
 
     def getRootDSE(  # noqa: N802
         self: Self,

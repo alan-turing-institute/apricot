@@ -46,6 +46,6 @@ class OAuthLDAPServerFactory(ServerFactory):
         @param addr: an object implementing L{IAddress}
         """
         id(addr)  # ignore unused arguments
-        proto = ReadOnlyLDAPServer(debug=self.adaptor.debug)
+        proto = ReadOnlyLDAPServer()
         proto.factory = self.adaptor
         return proto

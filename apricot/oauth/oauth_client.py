@@ -27,7 +27,6 @@ class OAuthClient(ABC):
         self: Self,
         client_id: str,
         client_secret: str,
-        debug: bool,  # noqa: FBT001
         redirect_uri: str,
         scopes_application: list[str],
         scopes_delegated: list[str],
@@ -38,7 +37,6 @@ class OAuthClient(ABC):
 
         @param client_id: OAuth client ID
         @param client_secret: OAuth client secret
-        @param debug: Enable debug output
         @param redirect_uri: OAuth redirect URI
         @param scopes: OAuth scopes
         @param token_url: OAuth token URL
@@ -47,7 +45,6 @@ class OAuthClient(ABC):
         # Set attributes
         self.bearer_token_: str | None = None
         self.client_secret = client_secret
-        self.debug = debug
         self.logger = Logger()
         self.token_url = token_url
         self.uid_cache = uid_cache
