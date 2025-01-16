@@ -34,6 +34,13 @@ if __name__ == "__main__":
             required=True,
         )
         ldap_group.add_argument(
+            "--disable-anonymous-binds",
+            action="store_false",
+            default=True,
+            dest="allow_anonymous_binds",
+            help="Disable anonymous LDAP binds.",
+        )
+        ldap_group.add_argument(
             "--disable-mirrored-groups",
             action="store_false",
             default=True,

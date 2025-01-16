@@ -17,11 +17,13 @@ class OAuthLDAPServerFactory(ServerFactory):
         oauth_adaptor: OAuthDataAdaptor,
         oauth_client: OAuthClient,
         *,
+        allow_anonymous_binds: bool,
         background_refresh: bool,
         refresh_interval: int,
     ) -> None:
         """Initialise an OAuthLDAPServerFactory.
 
+        @param allow_anonymous_binds: Whether to allow anonymous LDAP binds
         @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
         @param oauth_adaptor: An OAuth data adaptor used to construct the LDAP tree
         @param oauth_client: An OAuth client used to retrieve user and group data
@@ -34,6 +36,7 @@ class OAuthLDAPServerFactory(ServerFactory):
             background_refresh=background_refresh,
             refresh_interval=refresh_interval,
         )
+        self.allow_anonymous_binds = allow_anonymous_binds
 
     def __repr__(self: Self) -> str:
         return f"{self.__class__.__name__} using adaptor {self.adaptor}"
@@ -46,6 +49,6 @@ class OAuthLDAPServerFactory(ServerFactory):
         @param addr: an object implementing L{IAddress}
         """
         id(addr)  # ignore unused arguments
-        proto = ReadOnlyLDAPServer()
+        proto = ReadOnlyLDAPServer(allow_anonymous_binds=self.allow_anonymous_binds)
         proto.factory = self.adaptor
         return proto

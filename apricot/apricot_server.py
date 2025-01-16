@@ -28,6 +28,7 @@ class ApricotServer:
         domain: str,
         port: int,
         *,
+        allow_anonymous_binds: bool = True,
         background_refresh: bool = False,
         debug: bool = False,
         enable_mirrored_groups: bool = True,
@@ -43,6 +44,7 @@ class ApricotServer:
     ) -> None:
         """Initialise an ApricotServer.
 
+        @param allow_anonymous_binds: Whether to allow anonymous LDAP binds
         @param backend: An OAuth backend,
         @param client_id: An OAuth client ID
         @param client_secret: An OAuth client secret
@@ -125,6 +127,7 @@ class ApricotServer:
         factory = OAuthLDAPServerFactory(
             oauth_adaptor,
             oauth_client,
+            allow_anonymous_binds=allow_anonymous_binds,
             background_refresh=background_refresh,
             refresh_interval=refresh_interval,
         )

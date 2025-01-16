@@ -23,6 +23,10 @@ if [ -z "${DOMAIN}" ]; then
     exit 1
 fi
 
+if [ -n "${DISABLE_ANONYMOUS_BINDS}" ]; then
+    EXTRA_OPTS="${EXTRA_OPTS} --disable-anonymous-binds"
+fi
+
 if [ -n "${DISABLE_MIRRORED_GROUPS}" ]; then
     EXTRA_OPTS="${EXTRA_OPTS} --disable-mirrored-groups"
 fi
