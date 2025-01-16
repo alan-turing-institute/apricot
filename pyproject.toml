@@ -146,6 +146,7 @@ ignore = [
   "D213",     # multi-line-summary-second-line due to conflict with D212
   "E501",     # line length
   "C901",     # complex-structure
+  "G010",     # logging-warn due to incorrect heuristic
   "PLR0912",  # too-many-branches
   "PLR0913",  # too-many-arguments
   "PLR0917",  # too-many-positional-arguments

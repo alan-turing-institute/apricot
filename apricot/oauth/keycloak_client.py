@@ -3,8 +3,6 @@ from __future__ import annotations
 import operator
 from typing import TYPE_CHECKING, Any, Self, cast
 
-from twisted.python import log
-
 from .oauth_client import OAuthClient
 
 if TYPE_CHECKING:
@@ -105,7 +103,7 @@ class KeycloakClient(OAuthClient):
                 output.append(attributes)
         except KeyError as exc:
             msg = f"Failed to process group {group_dict} due to a missing key {exc}."
-            log.msg(msg)
+            self.logger.warn(msg)
         return output
 
     def users(self: Self) -> list[JSONDict]:
@@ -178,5 +176,5 @@ class KeycloakClient(OAuthClient):
                 output.append(attributes)
         except KeyError as exc:
             msg = f"Failed to process user {user_dict} due to a missing key {exc}."
-            log.msg(msg)
+            self.logger.warn(msg)
         return output

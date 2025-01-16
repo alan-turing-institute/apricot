@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Callable, Self
 
 from ldaptor.protocols.ldap.ldaperrors import LDAPProtocolError
 from ldaptor.protocols.ldap.ldapserver import LDAPServer
-from twisted.python import log
+from twisted.logger import Logger
 
 if TYPE_CHECKING:
     from ldaptor.interfaces import ILDAPEntry
@@ -30,13 +30,10 @@ if TYPE_CHECKING:
 class ReadOnlyLDAPServer(LDAPServer):
     """A read-only LDAP server."""
 
-    def __init__(self: Self, *, debug: bool = False) -> None:
-        """Initialise a ReadOnlyLDAPServer.
-
-        @param debug: Enable debug output
-        """
+    def __init__(self: Self) -> None:
+        """Initialise a ReadOnlyLDAPServer."""
         super().__init__()
-        self.debug = debug
+        self.logger = Logger()
 
     def getRootDSE(  # noqa: N802
         self: Self,
@@ -44,14 +41,12 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> LDAPSearchResultDone:
         """Handle an LDAP Root DSE request."""
-        if self.debug:
-            log.msg("Handling an LDAP Root DSE request.")
         try:
+            self.logger.debug("Handling an LDAP Root DSE request.")
             return super().getRootDSE(request, reply)
         except Exception as exc:
-            msg = f"LDAP Root DSE request failed. {exc}"
-            if self.debug:
-                log.msg(msg)
+            msg = f"LDAP Root DSE request failed. {exc!s}"
+            self.logger.error(msg)  # noqa: TRY400
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPAddRequest(  # noqa: N802
@@ -62,11 +57,9 @@ class ReadOnlyLDAPServer(LDAPServer):
     ) -> defer.Deferred[ILDAPEntry]:
         """Refuse to handle an LDAP add request."""
         id((request, controls, reply))  # ignore unused arguments
-        if self.debug:
-            log.msg("Handling an LDAP add request.")
+        self.logger.debug("Handling an LDAP add request.")
         msg = "ReadOnlyLDAPServer will not handle LDAP add requests"
-        if self.debug:
-            log.msg(msg)
+        self.logger.error(msg)
         raise LDAPProtocolError(msg)
 
     def handle_LDAPBindRequest(  # noqa: N802
@@ -76,14 +69,12 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """Handle an LDAP bind request."""
-        if self.debug:
-            log.msg("Handling an LDAP bind request.")
         try:
+            self.logger.debug("Handling an LDAP bind request.")
             return super().handle_LDAPBindRequest(request, controls, reply)
         except Exception as exc:
-            msg = f"LDAP bind request failed. {exc}"
-            if self.debug:
-                log.msg(msg)
+            msg = f"LDAP bind request failed. {exc!s}"
+            self.logger.error(msg)  # noqa: TRY400
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPCompareRequest(  # noqa: N802
@@ -93,14 +84,12 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """Handle an LDAP compare request."""
-        if self.debug:
-            log.msg("Handling an LDAP compare request.")
         try:
+            self.logger.debug("Handling an LDAP compare request.")
             return super().handle_LDAPCompareRequest(request, controls, reply)
         except Exception as exc:
-            msg = f"LDAP compare request failed. {exc}"
-            if self.debug:
-                log.msg(msg)
+            msg = f"LDAP compare request failed. {exc!s}"
+            self.logger.error(msg)  # noqa: TRY400
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPDelRequest(  # noqa: N802
@@ -111,11 +100,9 @@ class ReadOnlyLDAPServer(LDAPServer):
     ) -> defer.Deferred[ILDAPEntry]:
         """Refuse to handle an LDAP delete request."""
         id((request, controls, reply))  # ignore unused arguments
-        if self.debug:
-            log.msg("Handling an LDAP delete request.")
+        self.logger.debug("Handling an LDAP delete request.")
         msg = "ReadOnlyLDAPServer will not handle LDAP delete requests"
-        if self.debug:
-            log.msg(msg)
+        self.logger.error(msg)
         raise LDAPProtocolError(msg)
 
     def handle_LDAPExtendedRequest(  # noqa: N802
@@ -125,14 +112,12 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """Handle an LDAP extended request."""
-        if self.debug:
-            log.msg("Handling an LDAP extended request.")
         try:
+            self.logger.debug("Handling an LDAP extended request.")
             return super().handle_LDAPExtendedRequest(request, controls, reply)
         except Exception as exc:
-            msg = f"LDAP extended request failed. {exc}"
-            if self.debug:
-                log.msg(msg)
+            msg = f"LDAP extended request failed. {exc!s}"
+            self.logger.error(msg)  # noqa: TRY400
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPModifyDNRequest(  # noqa: N802
@@ -142,12 +127,10 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """Refuse to handle an LDAP modify DN request."""
-        if self.debug:
-            log.msg("Handling an LDAP modify DN request.")
+        self.logger.debug("Handling an LDAP modify DN request.")
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP modify DN requests"
-        if self.debug:
-            log.msg(msg)
+        self.logger.error(msg)
         raise LDAPProtocolError(msg)
 
     def handle_LDAPModifyRequest(  # noqa: N802
@@ -157,10 +140,10 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """Refuse to handle an LDAP modify request."""
-        if self.debug:
-            log.msg("Handling an LDAP modify request.")
+        self.logger.debug("Handling an LDAP modify request.")
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP modify requests"
+        self.logger.error(msg)
         raise LDAPProtocolError(msg)
 
     def handle_LDAPSearchRequest(  # noqa: N802
@@ -170,14 +153,12 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
         """Handle an LDAP search request."""
-        if self.debug:
-            log.msg("Handling an LDAP search request.")
         try:
+            self.logger.debug("Handling an LDAP search request.")
             return super().handle_LDAPSearchRequest(request, controls, reply)
         except Exception as exc:
-            msg = f"LDAP search request failed. {exc}"
-            if self.debug:
-                log.msg(msg)
+            msg = f"LDAP search request failed. {exc!s}"
+            self.logger.error(msg)  # noqa: TRY400
             raise LDAPProtocolError(msg) from exc
 
     def handle_LDAPUnbindRequest(  # noqa: N802
@@ -187,12 +168,10 @@ class ReadOnlyLDAPServer(LDAPServer):
         reply: Callable[..., None] | None,
     ) -> None:
         """Handle an LDAP unbind request."""
-        if self.debug:
-            log.msg("Handling an LDAP unbind request.")
         try:
+            self.logger.debug("Handling an LDAP unbind request.")
             super().handle_LDAPUnbindRequest(request, controls, reply)
         except Exception as exc:
-            msg = f"LDAP unbind request failed. {exc}"
-            if self.debug:
-                log.msg(msg)
+            msg = f"LDAP unbind request failed. {exc!s}"
+            self.logger.error(msg)  # noqa: TRY400
             raise LDAPProtocolError(msg) from exc
