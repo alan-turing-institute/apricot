@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Self
 
 from ldaptor.interfaces import IConnectedLDAPEntry, ILDAPEntry
 from ldaptor.protocols.ldap.distinguishedname import DistinguishedName
-from twisted.python import log
+from twisted.logger import Logger
 from zope.interface import implementer
 
 from apricot.ldap.oauth_ldap_entry import OAuthLDAPEntry
@@ -38,6 +38,7 @@ class OAuthLDAPTree:
         self.background_refresh = background_refresh
         self.debug = oauth_client.debug
         self.last_update = time.monotonic()
+        self.logger = Logger()
         self.oauth_adaptor = oauth_adaptor
         self.oauth_client = oauth_client
         self.refresh_interval = refresh_interval
@@ -72,8 +73,7 @@ class OAuthLDAPTree:
         """
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
-        if self.debug:
-            log.msg(f"Starting an LDAP lookup for '{dn.getText()}'.")
+        self.logger.debug("Starting an LDAP lookup for '{dn}'.", dn=dn.getText())
         return self.root.lookup(dn)
 
     def refresh(self: Self) -> None:
@@ -83,11 +83,11 @@ class OAuthLDAPTree:
             or (time.monotonic() - self.last_update) > self.refresh_interval
         ):
             # Update users and groups from the OAuth server
-            log.msg("Retrieving OAuth data.")
+            self.logger.info("Retrieving OAuth data.")
             oauth_groups, oauth_users = self.oauth_adaptor.retrieve_all()
 
             # Create a root node for the tree
-            log.msg("Rebuilding LDAP tree.")
+            self.logger.info("Rebuilding LDAP tree.")
             self.root_ = OAuthLDAPEntry(
                 dn=self.oauth_adaptor.root_dn,
                 attributes={"objectClass": ["dcObject"]},
@@ -105,31 +105,37 @@ class OAuthLDAPTree:
             )
 
             # Add groups to the groups OU
-            if self.debug:
-                log.msg(
-                    f"Attempting to add {len(oauth_groups)} groups to the LDAP tree.",
-                )
+            self.logger.debug(
+                "Attempting to add {n_groups} groups to the LDAP tree.",
+                n_groups=len(oauth_groups),
+            )
             for group_attrs in oauth_groups:
                 groups_ou.add_child(f"CN={group_attrs.cn}", group_attrs.to_dict())
             if self.debug:
                 children = groups_ou.list_children()
                 for child in children:
-                    log.msg(f"... {child.dn.getText()}")
-                log.msg(f"There are {len(children)} groups in the LDAP tree.")
+                    self.logger.info("... {child}", child=child.dn.getText())
+                self.logger.info(
+                    "There are {n_groups} groups in the LDAP tree.",
+                    n_groups=len(children),
+                )
 
             # Add users to the users OU
-            if self.debug:
-                log.msg(
-                    f"Attempting to add {len(oauth_users)} users to the LDAP tree.",
-                )
+            self.logger.debug(
+                "Attempting to add {n_users} users to the LDAP tree.",
+                n_users=len(oauth_users),
+            )
             for user_attrs in oauth_users:
                 users_ou.add_child(f"CN={user_attrs.cn}", user_attrs.to_dict())
             if self.debug:
                 children = users_ou.list_children()
                 for child in children:
-                    log.msg(f"... {child.dn.getText()}")
-                log.msg(f"There are {len(children)} users in the LDAP tree.")
+                    self.logger.info("... {child}", child=child.dn.getText())
+                self.logger.info(
+                    "There are {n_users} users in the LDAP tree.",
+                    n_users=len(children),
+                )
 
             # Set last updated time
-            log.msg("Finished building LDAP tree.")
+            self.logger.info("Finished building LDAP tree.")
             self.last_update = time.monotonic()

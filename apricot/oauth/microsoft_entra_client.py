@@ -3,8 +3,6 @@ from __future__ import annotations
 import operator
 from typing import TYPE_CHECKING, Any, Self, cast
 
-from twisted.python import log
-
 from .oauth_client import OAuthClient
 
 if TYPE_CHECKING:
@@ -72,10 +70,11 @@ class MicrosoftEntraClient(OAuthClient):
                 ]
                 output.append(attributes)
             except KeyError as exc:
-                msg = (
-                    f"Failed to process group {group_dict} due to a missing key {exc}."
+                self.logger.warn(
+                    "Failed to process group {group} due to a missing key {key}.",
+                    group=group_dict,
+                    key=str(exc),
                 )
-                log.msg(msg)
         return output
 
     def users(self: Self) -> list[JSONDict]:
@@ -116,6 +115,9 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["uidNumber"] = user_uid
                 output.append(attributes)
         except KeyError as exc:
-            msg = f"Failed to process user {user_dict} due to a missing key {exc}."
-            log.msg(msg)
+            self.logger.warn(
+                "Failed to process user {user} due to a missing key {key}.",
+                user=user_dict,
+                key=str(exc),
+            )
         return output

@@ -12,7 +12,7 @@ from ldaptor.protocols.ldap.ldaperrors import (
     LDAPInvalidCredentials,
 )
 from twisted.internet import defer
-from twisted.python import log
+from twisted.logger import Logger
 
 from apricot.oauth import LDAPAttributeDict, OAuthClient
 
@@ -35,6 +35,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         @param attributes: Attributes of the object.
         @param oauth_client: An OAuth client used for binding
         """
+        self.logger = Logger()
         self.oauth_client_ = oauth_client
         if not isinstance(dn, DistinguishedName):
             dn = DistinguishedName(stringValue=dn)
@@ -73,7 +74,10 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         try:
             output = self.addChild(rdn, attributes)
         except LDAPEntryAlreadyExists:
-            log.msg(f"Refusing to add child '{rdn.getText()}' as it already exists.")
+            self.logger.warn(
+                "Refusing to add child '{child}' as it already exists.",
+                child=rdn.getText(),
+            )
             output = self._children[rdn.getText()]
         return cast("OAuthLDAPEntry", output)
 
@@ -84,6 +88,7 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
             if self.oauth_client.verify(username=oauth_username, password=s_password):
                 return self
             msg = f"Invalid password for user '{oauth_username}'."
+            self.logger.error(msg)
             raise LDAPInvalidCredentials(msg)
 
         return defer.maybeDeferred(_bind, password)

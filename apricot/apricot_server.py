@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Self, cast
 
 from twisted.internet import reactor, task
 from twisted.internet.endpoints import quoteStringArgument, serverFromString
+from twisted.logger import Logger
 from twisted.python import log
 
 from apricot.cache import LocalCache, RedisCache, UidCache
@@ -62,6 +63,7 @@ class ApricotServer:
         self.debug = debug
 
         # Set up Python logging and add this as a Twisted observer
+        self.logger = Logger()
         logging.basicConfig(
             level=logging.DEBUG if debug else logging.INFO,
             datefmt=r"%Y-%m-%d %H:%M:%S",
@@ -73,18 +75,22 @@ class ApricotServer:
         # Initialise the UID cache
         uid_cache: UidCache
         if redis_host and redis_port:
-            log.msg(
-                f"Using a Redis user-id cache at host '{redis_host}' on port '{redis_port}'.",
+            self.logger.info(
+                "Using a Redis user-id cache at host '{host}' on port '{port}'.",
+                host=redis_host,
+                port=redis_port,
             )
             uid_cache = RedisCache(redis_host=redis_host, redis_port=redis_port)
         else:
-            log.msg("Using a local user-id cache.")
+            self.logger.info("Using a local user-id cache.")
             uid_cache = LocalCache()
 
         # Initialise the appropriate OAuth client
         try:
-            if self.debug:
-                log.msg(f"Creating an OAuthClient for {backend}.")
+            self.logger.info(
+                "Creating an OAuthClient for the '{backend}' backend.",
+                backend=backend.value,
+            )
             oauth_backend = OAuthClientMap[backend]
             oauth_backend_args = inspect.getfullargspec(
                 oauth_backend.__init__,  # type: ignore[misc]
@@ -97,12 +103,11 @@ class ApricotServer:
                 **{k: v for k, v in kwargs.items() if k in oauth_backend_args},
             )
         except Exception as exc:
-            msg = f"Could not construct an OAuth client for the '{backend}' backend.\n{exc!s}"
+            msg = f"Could not construct an OAuth client for the '{backend.value}' backend.\n{exc!s}"
             raise ValueError(msg) from exc
 
         # Initialise the OAuth data adaptor
-        if self.debug:
-            log.msg("Creating an OAuthDataAdaptor.")
+        self.logger.info("Creating an OAuthDataAdaptor.")
         oauth_adaptor = OAuthDataAdaptor(
             domain,
             oauth_client,
@@ -112,8 +117,7 @@ class ApricotServer:
         )
 
         # Create an LDAPServerFactory
-        if self.debug:
-            log.msg("Creating an LDAPServerFactory.")
+        self.logger.info("Creating an LDAPServerFactory.")
         factory = OAuthLDAPServerFactory(
             oauth_adaptor,
             oauth_client,
@@ -122,16 +126,15 @@ class ApricotServer:
         )
 
         if background_refresh:
-            if self.debug:
-                log.msg(
-                    f"Starting background refresh (interval={refresh_interval})",
-                )
+            self.logger.info(
+                "Starting background refresh (interval={interval})",
+                interval=refresh_interval,
+            )
             loop = task.LoopingCall(factory.adaptor.refresh)
             loop.start(refresh_interval)
 
         # Attach a listening endpoint
-        if self.debug:
-            log.msg("Attaching a listening endpoint (plain).")
+        self.logger.info("Listening for LDAP requests on port {port}.", port=port)
         endpoint: IStreamServerEndpoint = serverFromString(reactor, f"tcp:{port}")
         endpoint.listen(factory)
 
@@ -143,8 +146,10 @@ class ApricotServer:
             if not tls_private_key:
                 msg = "No TLS private key provided. Please provide one with --tls-private-key or disable TLS."
                 raise ValueError(msg)
-            if self.debug:
-                log.msg("Attaching a listening endpoint (TLS).")
+            self.logger.info(
+                "Listening for LDAPS requests on port {port}.",
+                port=tls_port,
+            )
             ssl_endpoint: IStreamServerEndpoint = serverFromString(
                 reactor,
                 f"ssl:{tls_port}:privateKey={quoteStringArgument(tls_private_key)}:certKey={quoteStringArgument(tls_certificate)}",
@@ -156,6 +161,5 @@ class ApricotServer:
 
     def run(self: Self) -> None:
         """Start the Twisted reactor."""
-        if self.debug:
-            log.msg("Starting the Twisted reactor.")
+        self.logger.info("Starting the Twisted reactor.")
         self.reactor.run()

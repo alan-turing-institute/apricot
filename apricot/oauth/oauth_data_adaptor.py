@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Self
 
 from pydantic import ValidationError
-from twisted.python import log
+from twisted.logger import Logger
 
 from apricot.models import (
     LDAPAttributeAdaptor,
@@ -45,11 +45,12 @@ class OAuthDataAdaptor:
         """
         self.debug = oauth_client.debug
         self.domain = domain
-        self.oauth_client = oauth_client
-        self.root_dn = "DC=" + domain.replace(".", ",DC=")
         self.enable_mirrored_groups = enable_mirrored_groups
         self.enable_primary_groups = enable_primary_groups
         self.enable_user_domain_verification = enable_user_domain_verification
+        self.logger = Logger()
+        self.oauth_client = oauth_client
+        self.root_dn = "DC=" + domain.replace(".", ",DC=")
 
     def _dn_from_group_cn(self: Self, group_cn: str) -> str:
         return f"CN={group_cn},OU=groups,{self.root_dn}"
@@ -67,10 +68,11 @@ class OAuthDataAdaptor:
         # Get the initial set of users and groups
         oauth_groups = self.oauth_client.groups()
         oauth_users = self.oauth_client.users()
-        if self.debug:
-            log.msg(
-                f"Loaded {len(oauth_groups)} groups and {len(oauth_users)} users from OAuth client.",
-            )
+        self.logger.debug(
+            "Loaded {n_groups} groups and {n_users} users from OAuth client.",
+            n_groups=len(oauth_groups),
+            n_users=len(oauth_users),
+        )
 
         # Ensure member is set for groups
         for group_dict in oauth_groups:
@@ -117,11 +119,12 @@ class OAuthDataAdaptor:
                 for parent_dict in oauth_groups + user_primary_groups + groups_of_groups
                 if child_dn in parent_dict["member"]
             ]
-            if self.debug:
-                for group_name in child_dict["memberOf"]:
-                    log.msg(
-                        f"... user '{child_dict['cn']}' is a member of '{group_name}'",
-                    )
+            for group_name in child_dict["memberOf"]:
+                self.logger.debug(
+                    "... user '{user}' is a member of '{group_name}'",
+                    user=child_dict["cn"],
+                    group_name=group_name,
+                )
 
         # Ensure memberOf is set correctly for groups
         for child_dict in oauth_groups + user_primary_groups + groups_of_groups:
@@ -131,11 +134,12 @@ class OAuthDataAdaptor:
                 for parent_dict in oauth_groups + user_primary_groups + groups_of_groups
                 if child_dn in parent_dict["member"]
             ]
-            if self.debug:
-                for group_name in child_dict["memberOf"]:
-                    log.msg(
-                        f"... group '{child_dict['cn']}' is a member of '{group_name}'",
-                    )
+            for group_name in child_dict["memberOf"]:
+                self.logger.debug(
+                    "... group '{group}' is a member of '{group_name}'",
+                    group=child_dict["cn"],
+                    group_name=group_name,
+                )
 
         # Annotate group and user dicts with the appropriate LDAP classes
         annotated_groups = [
@@ -171,8 +175,10 @@ class OAuthDataAdaptor:
         annotated_groups: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """Return a list of LDAPAttributeAdaptors representing validated group data."""
-        if self.debug:
-            log.msg(f"Attempting to validate {len(annotated_groups)} groups.")
+        self.logger.debug(
+            "Attempting to validate {n_groups} groups.",
+            n_groups=len(annotated_groups),
+        )
         output = []
         for group_dict, required_classes in annotated_groups:
             try:
@@ -183,12 +189,18 @@ class OAuthDataAdaptor:
                     ),
                 )
             except ValidationError as exc:
-                name = group_dict.get("cn", "unknown")
-                log.msg(f"... group '{name}' failed validation.")
+                self.logger.warn(
+                    "... group '{group_name}' failed validation.",
+                    group_name=group_dict.get("cn", "unknown"),
+                )
                 for error in exc.errors():
-                    log.msg(
-                        f" -> '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
+                    self.logger.warn(
+                        " -> '{attribute}': {expected} but '{actual}' was provided.",
+                        attribute=error["loc"][0],
+                        expected=error["msg"],
+                        actual=error["input"],
                     )
+
         return output
 
     def _validate_users(
@@ -196,20 +208,26 @@ class OAuthDataAdaptor:
         annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
         """Return a list of LDAPAttributeAdaptors representing validated user data."""
-        if self.debug:
-            log.msg(f"Attempting to validate {len(annotated_users)} users.")
+        self.logger.debug(
+            "Attempting to validate {n_users} users.",
+            n_users=len(annotated_users),
+        )
         output = []
         for user_dict, required_classes in annotated_users:
-            name = user_dict.get("cn", "unknown")
             try:
                 # Verify user domain if enabled
                 if (
                     self.enable_user_domain_verification
                     and (user_domain := user_dict.get("domain", None)) != self.domain
                 ):
-                    log.msg(f"... user '{name}' failed validation.")
-                    log.msg(
-                        f" -> 'domain': expected '{self.domain}' but '{user_domain}' was provided.",
+                    self.logger.warn(
+                        "... user '{user_name}' failed validation.",
+                        user_name=user_dict.get("cn", "unknown"),
+                    )
+                    self.logger.warn(
+                        " -> 'domain': expected '{expected_domain}' but '{actual_domain}' was provided.",
+                        expected_domain=self.domain,
+                        actual_domain=user_domain,
                     )
                     continue
                 # Construct an LDAPAttributeAdaptor from the user attributes
@@ -220,10 +238,16 @@ class OAuthDataAdaptor:
                     ),
                 )
             except ValidationError as exc:
-                log.msg(f"... user '{name}' failed validation.")
+                self.logger.warn(
+                    "... user '{user_name}' failed validation.",
+                    user_name=user_dict.get("cn", "unknown"),
+                )
                 for error in exc.errors():
-                    log.msg(
-                        f" -> '{error['loc'][0]}': {error['msg']} but '{error['input']}' was provided.",
+                    self.logger.warn(
+                        " -> '{attribute}': {expected} but '{actual}' was provided.",
+                        attribute=error["loc"][0],
+                        expected=error["msg"],
+                        actual=error["input"],
                     )
         return output
 
@@ -234,8 +258,9 @@ class OAuthDataAdaptor:
         annotated_groups, annotated_users = self._retrieve_entries()
         validated_groups = self._validate_groups(annotated_groups)
         validated_users = self._validate_users(annotated_users)
-        if self.debug:
-            log.msg(
-                f"Validated {len(validated_groups)} groups and {len(validated_users)} users.",
-            )
+        self.logger.debug(
+            "Validated {n_groups} groups and {n_users} users.",
+            n_groups=len(validated_groups),
+            n_users=len(validated_users),
+        )
         return (validated_groups, validated_users)
