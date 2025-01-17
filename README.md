@@ -169,7 +169,12 @@ Do this as follows:
             - `realm-management` > `query-groups`
             - `realm-management` > `query-users`
 
-## Disabling Apricot groups
+## Configuring the Apricot LDAP server
+
+### Anonymous binds
+
+By default, Apricot allows anonymous queries.
+If you would prefer to disable these, please use the `--disable-anonymous-binds` command line option.
 
 ### Primary groups
 
