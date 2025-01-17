@@ -83,7 +83,7 @@ class ApricotServer:
         uid_cache: UidCache
         if redis_host and redis_port:
             self.logger.info(
-                "Using a Redis user-id cache at host '{host}' on port '{port}'.",
+                "Using a Redis user-id cache at port {port} on host {host}.",
                 host=redis_host,
                 port=redis_port,
             )

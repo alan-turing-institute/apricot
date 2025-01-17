@@ -97,7 +97,8 @@ fi
 
 
 # TLS arguments
-if [ -n "${TLS_PORT}" ]; then
+if [ -n "${TLS_CERTIFICATE}" ] || [ -n "${TLS_PRIVATE_KEY}" ]; then
+    # Certificate and key are required
     if [ -z "${TLS_CERTIFICATE}" ]; then
         echo "$(date +'%Y-%m-%d %H:%M:%S') [INFO    ] TLS_CERTIFICATE environment variable is not set"
         exit 1
@@ -106,7 +107,11 @@ if [ -n "${TLS_PORT}" ]; then
         echo "$(date +'%Y-%m-%d %H:%M:%S') [INFO    ] TLS_PRIVATE_KEY environment variable is not set"
         exit 1
     fi
-    EXTRA_OPTS="${EXTRA_OPTS} --tls-port $TLS_PORT --tls-certificate $TLS_CERTIFICATE --tls-private-key $TLS_PRIVATE_KEY"
+    EXTRA_OPTS="${EXTRA_OPTS} --tls-certificate $TLS_CERTIFICATE --tls-private-key $TLS_PRIVATE_KEY"
+    # ... but port is optional
+    if [ -n "${TLS_PORT}" ]; then
+        EXTRA_OPTS="${EXTRA_OPTS} --tls-port $TLS_PORT"
+    fi
 fi
 
 
