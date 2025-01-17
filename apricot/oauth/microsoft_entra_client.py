@@ -19,7 +19,9 @@ class MicrosoftEntraClient(OAuthClient):
     ) -> None:
         """Initialise a MicrosoftEntraClient.
 
-        @param entra_tenant_id: Tenant ID for the Entra ID
+        Args:
+            entra_tenant_id: Tenant ID for the Entra ID
+            kwargs: OAuthClient keyword arguments
         """
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         token_url = (

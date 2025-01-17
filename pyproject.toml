@@ -85,7 +85,6 @@ ignore = [
   "D104",    # missing-docstring-in-package
   "D203",    # one-blank-line-before-class (due to conflict with D211)
   "D213",    # multi-line-summary-second-line (due to conflict with D212)
-  "D413",    # missing-blank-line-after-last-section
   "CPY001",  # missing-copyright-notice
   "G010",    # logging-warn (due to incorrect heuristic)
 ]
@@ -101,6 +100,7 @@ combine-as-imports = true
 known-first-party = ["apricot"]
 
 [tool.ruff.lint.pydocstyle]
+convention = "google"
 ignore-decorators = ["typing.overload"]
 
 [tool.mypy]

@@ -23,9 +23,11 @@ class KeycloakClient(OAuthClient):
     ) -> None:
         """Initialise a KeycloakClient.
 
-        @param keycloak_base_url: Base URL for Keycloak server
-        @param keycloak_domain_attribute: Keycloak attribute used to define your domain
-        @param keycloak_realm: Realm for Keycloak server
+        Args:
+            keycloak_base_url: Base URL for Keycloak server
+            keycloak_domain_attribute: Keycloak attribute used to define your domain
+            keycloak_realm: Realm for Keycloak server
+            kwargs: OAuthClient keyword arguments
         """
         self.base_url = keycloak_base_url
         self.domain_attribute = keycloak_domain_attribute
