@@ -216,7 +216,7 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """Validates a list of users
+        """Validates a list of users.
 
         Args:
             annotated_users: a list of users to validate
