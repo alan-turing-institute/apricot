@@ -34,7 +34,8 @@ This is enabled with the `--background-refresh` flag, which uses the `--refresh-
 ### Using TLS [Optional]
 
 You can set up a TLS listener to communicate with encryption enabled over the configured port.
-To enable it you need to configure the tls port ex. `--tls-port=1636`, and provide a path to the pem files for the certificate `--tls-certificate=<path>` and the private key `--tls-private-key=<path>`.
+To enable it you need provide a path to the PEM files for the certificate `--tls-certificate=<path>` and the private key `--tls-private-key=<path>`.
+To change the port from the default `1636` use `--tls-port`.
 
 ## Outputs
 
