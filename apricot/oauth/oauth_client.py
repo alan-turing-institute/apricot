@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Self
 import requests
 from oauthlib.oauth2 import (
     BackendApplicationClient,
+    InvalidClientIdError,
     InvalidGrantError,
     LegacyApplicationClient,
     TokenExpiredError,
@@ -180,7 +181,7 @@ class OAuthClient(ABC):
                 client_id=self.session_interactive._client.client_id,
                 client_secret=self.client_secret,
             )
-        except InvalidGrantError as exc:
+        except (InvalidClientIdError, InvalidGrantError) as exc:
             self.logger.warn(
                 "Authentication failed for user '{user}'. {error}",
                 user=username,

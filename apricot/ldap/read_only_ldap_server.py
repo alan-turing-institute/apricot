@@ -30,9 +30,10 @@ if TYPE_CHECKING:
 class ReadOnlyLDAPServer(LDAPServer):
     """A read-only LDAP server."""
 
-    def __init__(self: Self) -> None:
+    def __init__(self: Self, *, allow_anonymous_binds: bool = True) -> None:
         """Initialise a ReadOnlyLDAPServer."""
         super().__init__()
+        self.allow_anonymous_binds = allow_anonymous_binds
         self.logger = Logger()
 
     def getRootDSE(  # noqa: N802
@@ -71,6 +72,9 @@ class ReadOnlyLDAPServer(LDAPServer):
         """Handle an LDAP bind request."""
         try:
             self.logger.debug("Handling an LDAP bind request.")
+            if not (self.allow_anonymous_binds or request.dn):
+                msg = "Anonymous binds are disabled"
+                raise ValueError(msg)  # noqa: TRY301
             return super().handle_LDAPBindRequest(request, controls, reply)
         except Exception as exc:
             msg = f"LDAP bind request failed. {exc!s}"
