@@ -42,18 +42,22 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         super().__init__(dn, attributes)
 
     def __str__(self: Self) -> str:
-        output = bytes(self.toWire()).decode("utf-8")
+        """Return a string representation of this entry and its children.
+
+        Returns:
+            A multiline string representing this LDAP entry together with an entry for
+            each child indented by two additional spaces and an empty line between each
+            child.
+        """
+        # Convert internal representation to list of strings
+        lines = [
+            line.strip()
+            for line in bytes(self.toWire()).decode("utf-8").strip().split("\n")
+        ]
+        # Add each child with an empty line to separate them
         for child in self._children.values():
-            try:
-                # Indent children by two spaces
-                indent = "  "
-                output += (
-                    f"{indent}{str(child).strip()}".replace("\n", f"\n{indent}")
-                    + "\n\n"
-                )
-            except TypeError:
-                pass
-        return output
+            lines += [f"  {line}" for line in str(child).split("\n")] + [""]
+        return "\n".join(lines)
 
     @property
     def oauth_client(self: Self) -> OAuthClient:

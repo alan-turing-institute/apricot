@@ -97,7 +97,6 @@ ignore = [
   "DOC501",  # docstring-missing-exception
   "CPY001",  # missing-copyright-notice
   "G010",    # logging-warn (due to incorrect heuristic)
-  "PERF203", # try-except-in-loop
 ]
 
 [tool.ruff.lint.flake8-annotations]

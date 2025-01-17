@@ -69,7 +69,7 @@ class MicrosoftEntraClient(OAuthClient):
                     if user.get("userPrincipalName")
                 ]
                 output.append(attributes)
-            except KeyError as exc:
+            except KeyError as exc:  # noqa: PERF203
                 self.logger.warn(
                     "Failed to process group {group} due to a missing key {key}.",
                     group=group_dict,

@@ -187,7 +187,7 @@ class OAuthDataAdaptor:
                         required_classes=required_classes,
                     ),
                 )
-            except ValidationError as exc:
+            except ValidationError as exc:  # noqa: PERF203
                 self.logger.warn(
                     "... group '{group_name}' failed validation.",
                     group_name=group_dict.get("cn", "unknown"),
