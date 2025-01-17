@@ -31,10 +31,12 @@ class OAuthLDAPTree:
     ) -> None:
         """Initialise an OAuthLDAPTree.
 
-        @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
-        @param oauth_adaptor: An OAuth data adaptor used to construct the LDAP tree
-        @param oauth_client: An OAuth client used to retrieve user and group data
-        @param refresh_interval: Interval in seconds after which the tree must be refreshed
+        Args:
+            background_refresh: Whether to refresh the LDAP tree in the background
+                rather than on access
+            oauth_adaptor: An OAuth data adaptor used to construct the LDAP tree
+            oauth_client: An OAuth client used to retrieve user and group data
+            refresh_interval: Interval in seconds after which the tree must be refreshed
         """
         self.background_refresh = background_refresh
         self.last_update = time.monotonic()
@@ -46,15 +48,22 @@ class OAuthLDAPTree:
 
     @property
     def dn(self: Self) -> DistinguishedName:
+        """The distinguished name of this tree.
+
+        Returns:
+            The distinguished name of the tree root.
+        """
         return self.root.dn
 
     @property
     def root(self: Self) -> OAuthLDAPEntry:
         """Lazy-load the LDAP tree on request.
 
-        @return: An OAuthLDAPEntry for the tree
+        Returns:
+            An OAuthLDAPEntry for the tree
 
-        @raises: ValueError.
+        Raises:
+            ValueError: if the tree could not be loaded.
         """
         if not self.background_refresh:
             self.refresh()
@@ -64,12 +73,21 @@ class OAuthLDAPTree:
         return self.root_
 
     def __repr__(self: Self) -> str:
-        return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"
+        """Generate string representation of OAuthLDAPTree.
+
+        Returns:
+            A string representation of OAuthLDAPTree.
+        """
+        return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"  # noqa: E501
 
     def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
         """Lookup a DistinguishedName in the LDAP tree.
 
-        @return: A Deferred returning an ILDAPEntry.
+        Args:
+            dn: A distinguished name to lookup.
+
+        Returns:
+            The result of the lookup as a deferred LDAP entry.
         """
 
         def result_callback(ldap_entry: OAuthLDAPEntry | None) -> OAuthLDAPEntry | None:

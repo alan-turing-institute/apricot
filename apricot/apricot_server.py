@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class ApricotServer:
     """The Apricot server running via Twisted."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self: Self,
         backend: OAuthBackend,
         client_id: str,
@@ -44,23 +44,30 @@ class ApricotServer:
     ) -> None:
         """Initialise an ApricotServer.
 
-        @param allow_anonymous_binds: Whether to allow anonymous LDAP binds
-        @param backend: An OAuth backend,
-        @param client_id: An OAuth client ID
-        @param client_secret: An OAuth client secret
-        @param domain: The OAuth domain
-        @param port: Port to expose LDAP on
-        @param background_refresh: Whether to refresh the LDAP tree in the background
-        @param debug: Enable debug output
-        @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
-        @param enable_primary_groups: Whether to create an LDAP primary group for each user
-        @param enable_user_domain_verification: Whether to verify users belong to the correct domain
-        @param redis_host: Host for a Redis cache (if used)
-        @param redis_port: Port for a Redis cache (if used)
-        @param refresh_interval: Interval after which the LDAP information is stale
-        @param tls_port: Port to expose LDAPS on
-        @param tls_certificate: TLS certificate for LDAPS
-        @param tls_private_key: TLS private key for LDAPS
+        Args:
+            allow_anonymous_binds: Whether to allow anonymous LDAP binds
+            backend: An OAuth backend,
+            client_id: An OAuth client ID
+            client_secret: An OAuth client secret
+            domain: The OAuth domain
+            port: Port to expose LDAP on
+            background_refresh: Whether to refresh the LDAP tree in the background
+            debug: Enable debug output
+            enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups
+                for each group-of-users
+            enable_primary_groups: Whether to create an LDAP primary group for each user
+            enable_user_domain_verification: Whether to verify users belong to the
+                correct domain
+            redis_host: Host for a Redis cache (if used)
+            redis_port: Port for a Redis cache (if used)
+            refresh_interval: Interval after which the LDAP information is stale
+            tls_port: Port to expose LDAPS on
+            tls_certificate: TLS certificate for LDAPS
+            tls_private_key: TLS private key for LDAPS
+            kwargs: Backend-dependent arguments
+
+        Raises:
+            ValueError: if the OAuth backend could not be initialised
         """
         # Set up Python root logger
         logging.basicConfig(
@@ -109,7 +116,10 @@ class ApricotServer:
                 **{k: v for k, v in kwargs.items() if k in oauth_backend_args},
             )
         except Exception as exc:
-            msg = f"Could not construct an OAuth client for the {backend.value} backend.\n{exc!s}"
+            msg = (
+                f"Could not construct an OAuth client for the {backend.value} backend."
+                f"\n{exc!s}"
+            )
             raise ValueError(msg) from exc
 
         # Initialise the OAuth data adaptor
@@ -148,10 +158,16 @@ class ApricotServer:
         # Attach a listening endpoint
         if tls_certificate or tls_private_key:
             if not tls_certificate:
-                msg = "No TLS certificate provided. Please provide one with --tls-certificate or disable TLS."
+                msg = (
+                    "No TLS certificate provided."
+                    "Please provide one with --tls-certificate or disable TLS."
+                )
                 raise ValueError(msg)
             if not tls_private_key:
-                msg = "No TLS private key provided. Please provide one with --tls-private-key or disable TLS."
+                msg = (
+                    "No TLS private key provided."
+                    "Please provide one with --tls-private-key or disable TLS."
+                )
                 raise ValueError(msg)
             self.logger.info(
                 "Listening for LDAPS requests on port {port}.",
@@ -159,7 +175,13 @@ class ApricotServer:
             )
             ssl_endpoint: IStreamServerEndpoint = serverFromString(
                 self.reactor,
-                f"ssl:{tls_port}:privateKey={quoteStringArgument(tls_private_key)}:certKey={quoteStringArgument(tls_certificate)}",
+                ":".join(
+                    (
+                        f"ssl:{tls_port}",
+                        f"privateKey={quoteStringArgument(tls_private_key)}",
+                        f"certKey={quoteStringArgument(tls_certificate)}",
+                    ),
+                ),
             )
             ssl_endpoint.listen(factory)
 

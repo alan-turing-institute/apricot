@@ -29,11 +29,12 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         attributes: LDAPAttributeDict,
         oauth_client: OAuthClient | None = None,
     ) -> None:
-        """Initialize the object.
+        """Initialise an OAuthLDAPEntry.
 
-        @param dn: Distinguished Name of the object
-        @param attributes: Attributes of the object.
-        @param oauth_client: An OAuth client used for binding
+        Args:
+            dn: Distinguished Name of the object
+            attributes: Attributes of the object.
+            oauth_client: An OAuth client used for binding
         """
         self.logger = Logger()
         self.oauth_client_ = oauth_client
@@ -42,21 +43,35 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         super().__init__(dn, attributes)
 
     def __str__(self: Self) -> str:
-        output = bytes(self.toWire()).decode("utf-8")
-        for child in self._children.values():
-            try:
-                # Indent children by two spaces
-                indent = "  "
-                output += (
-                    f"{indent}{str(child).strip()}".replace("\n", f"\n{indent}")
-                    + "\n\n"
-                )
-            except TypeError:
-                pass
-        return output
+        """Return a string representation of this entry and its children.
+
+        Returns:
+            A multiline string representing this LDAP entry together with an entry for
+            each child indented by two additional spaces and an empty line between each
+            child.
+        """
+        # Convert internal representation to list of strings
+        lines = [
+            line.strip()
+            for line in bytes(self.toWire()).decode("utf-8").strip().split("\n")
+        ]
+        # Add each child with an empty line to separate them
+        for child in self.list_children():
+            lines += [f"  {line}" for line in str(child).split("\n")] + [""]
+        return "\n".join(lines)
 
     @property
     def oauth_client(self: Self) -> OAuthClient:
+        """Find the OAuth client used by this OAuthLDAPEntry.
+
+        If it does not already have one, then use the parent entry.
+
+        Returns:
+            The OAuth client used by this OAuthLDAPEntry.
+
+        Raises:
+            TypeError: if the OAuth client could not be found.
+        """
         if not self.oauth_client_ and hasattr(self._parent, "oauth_client"):
             self.oauth_client_ = self._parent.oauth_client
         if not isinstance(self.oauth_client_, OAuthClient):
@@ -69,6 +84,15 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         rdn: RelativeDistinguishedName | str,
         attributes: LDAPAttributeDict,
     ) -> OAuthLDAPEntry:
+        """Attempt to a child to this entry or return one that already exists.
+
+        Args:
+            rdn: The relative distinguished name of the child
+            attributes: The LDAP attributes of the child
+
+        Returns:
+            An OAuthLDAPEntry for the child.
+        """
         if isinstance(rdn, str):
             rdn = RelativeDistinguishedName(stringValue=rdn)
         try:
@@ -82,6 +106,16 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return cast("OAuthLDAPEntry", output)
 
     def bind(self: Self, password: bytes) -> defer.Deferred[OAuthLDAPEntry]:
+        """Attempt to authenticate as this user.
+
+        Args:
+            password: Password for this user
+
+        Returns:
+            A deferred OAuthLDAPEntry if the password is correct or a deferred Failure
+            if not.
+        """
+
         def _bind(password: bytes) -> OAuthLDAPEntry:
             oauth_username = next(iter(self.get("oauth_username", "unknown")))
             s_password = password.decode("utf-8")
@@ -94,4 +128,9 @@ class OAuthLDAPEntry(ReadOnlyInMemoryLDAPEntry):
         return defer.maybeDeferred(_bind, password)
 
     def list_children(self: Self) -> list[OAuthLDAPEntry]:
+        """Return a list of LDAP children.
+
+        Returns:
+            A list of child OAuthLDAPEntry.
+        """
         return [cast("OAuthLDAPEntry", entry) for entry in self._children.values()]

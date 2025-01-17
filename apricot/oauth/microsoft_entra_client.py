@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import operator
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast, overload
 
 from .oauth_client import OAuthClient
 
@@ -19,7 +19,9 @@ class MicrosoftEntraClient(OAuthClient):
     ) -> None:
         """Initialise a MicrosoftEntraClient.
 
-        @param entra_tenant_id: Tenant ID for the Entra ID
+        Args:
+            entra_tenant_id: Tenant ID for the Entra ID
+            kwargs: OAuthClient keyword arguments
         """
         redirect_uri = "urn:ietf:wg:oauth:2.0:oob"  # this is the "no redirect" URL
         token_url = (
@@ -34,10 +36,12 @@ class MicrosoftEntraClient(OAuthClient):
             **kwargs,
         )
 
+    @overload  # type: ignore[misc]
     @staticmethod
     def extract_token(json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
+    @overload  # type: ignore[misc]
     def groups(self: Self) -> list[JSONDict]:
         output = []
         queries = [
@@ -69,7 +73,7 @@ class MicrosoftEntraClient(OAuthClient):
                     if user.get("userPrincipalName")
                 ]
                 output.append(attributes)
-            except KeyError as exc:
+            except KeyError as exc:  # noqa: PERF203
                 self.logger.warn(
                     "Failed to process group {group} due to a missing key {key}.",
                     group=group_dict,
@@ -77,6 +81,7 @@ class MicrosoftEntraClient(OAuthClient):
                 )
         return output
 
+    @overload  # type: ignore[misc]
     def users(self: Self) -> list[JSONDict]:
         output = []
         try:

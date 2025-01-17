@@ -41,7 +41,19 @@ class ReadOnlyLDAPServer(LDAPServer):
         request: LDAPProtocolRequest,
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> LDAPSearchResultDone:
-        """Handle an LDAP Root DSE request."""
+        """Handle an LDAP Root DSE request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Returns:
+            The LDAP Root DSE.
+
+        Raises:
+            LDAPProtocolError: if the Root DSE request fails
+        """
         try:
             self.logger.debug("Handling an LDAP Root DSE request.")
             return super().getRootDSE(request, reply)
@@ -56,7 +68,16 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP add request."""
+        """Refuse to handle an LDAP add request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Raises:
+            LDAPProtocolError: as we do not handle add requests
+        """
         id((request, controls, reply))  # ignore unused arguments
         self.logger.debug("Handling an LDAP add request.")
         msg = "ReadOnlyLDAPServer will not handle LDAP add requests"
@@ -69,12 +90,26 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP bind request."""
+        """Handle an LDAP bind request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Returns:
+            The result of the bind as a deferred LDAP entry.
+
+        Raises:
+            LDAPProtocolError: if the bind request fails or if an anonymous bind is
+                attempted when they are disabled
+        """
+        self.logger.debug("Handling an LDAP bind request.")
+        if not (self.allow_anonymous_binds or request.dn):
+            msg = "Anonymous LDAP binds are disabled."
+            self.logger.error(msg)
+            raise LDAPProtocolError(msg)
         try:
-            self.logger.debug("Handling an LDAP bind request.")
-            if not (self.allow_anonymous_binds or request.dn):
-                msg = "Anonymous binds are disabled"
-                raise ValueError(msg)  # noqa: TRY301
             return super().handle_LDAPBindRequest(request, controls, reply)
         except Exception as exc:
             msg = f"LDAP bind request failed. {exc!s}"
@@ -87,7 +122,19 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP compare request."""
+        """Handle an LDAP compare request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Returns:
+            The result of the compare as a deferred LDAP entry.
+
+        Raises:
+            LDAPProtocolError: if the compare request fails
+        """
         try:
             self.logger.debug("Handling an LDAP compare request.")
             return super().handle_LDAPCompareRequest(request, controls, reply)
@@ -102,7 +149,16 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP delete request."""
+        """Refuse to handle an LDAP delete request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Raises:
+            LDAPProtocolError: as we do not handle delete requests
+        """
         id((request, controls, reply))  # ignore unused arguments
         self.logger.debug("Handling an LDAP delete request.")
         msg = "ReadOnlyLDAPServer will not handle LDAP delete requests"
@@ -115,7 +171,19 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP extended request."""
+        """Handle an LDAP extended request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Returns:
+            The result of the extended search as a deferred LDAP entry.
+
+        Raises:
+            LDAPProtocolError: if the extended request fails
+        """
         try:
             self.logger.debug("Handling an LDAP extended request.")
             return super().handle_LDAPExtendedRequest(request, controls, reply)
@@ -130,7 +198,16 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP modify DN request."""
+        """Refuse to handle an LDAP modify DN request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Raises:
+            LDAPProtocolError: as we do not handle modify DN requests
+        """
         self.logger.debug("Handling an LDAP modify DN request.")
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP modify DN requests"
@@ -143,7 +220,16 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Refuse to handle an LDAP modify request."""
+        """Refuse to handle an LDAP modify request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Raises:
+            LDAPProtocolError: as we do not handle modify requests
+        """
         self.logger.debug("Handling an LDAP modify request.")
         id((request, controls, reply))  # ignore unused arguments
         msg = "ReadOnlyLDAPServer will not handle LDAP modify requests"
@@ -156,7 +242,19 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[[LDAPSearchResultEntry], None] | None,
     ) -> defer.Deferred[ILDAPEntry]:
-        """Handle an LDAP search request."""
+        """Handle an LDAP search request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Returns:
+            The result of the search as a deferred LDAP entry.
+
+        Raises:
+            LDAPProtocolError: if the search request fails
+        """
         try:
             self.logger.debug("Handling an LDAP search request.")
             return super().handle_LDAPSearchRequest(request, controls, reply)
@@ -171,7 +269,16 @@ class ReadOnlyLDAPServer(LDAPServer):
         controls: list[LDAPControlTuple] | None,
         reply: Callable[..., None] | None,
     ) -> None:
-        """Handle an LDAP unbind request."""
+        """Handle an LDAP unbind request.
+
+        Args:
+            request: LDAP request
+            controls: LDAP controls
+            reply: LDAP callback
+
+        Raises:
+            LDAPProtocolError: if the unbind request fails
+        """
         try:
             self.logger.debug("Handling an LDAP unbind request.")
             super().handle_LDAPUnbindRequest(request, controls, reply)

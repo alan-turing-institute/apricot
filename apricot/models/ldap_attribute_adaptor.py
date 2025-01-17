@@ -13,7 +13,8 @@ class LDAPAttributeAdaptor:
     def __init__(self: Self, attributes: dict[Any, Any]) -> None:
         """Initialise an LDAPAttributeAdaptor.
 
-        @param attributes: A dictionary of attributes to be converted into str: list[str]
+        Args:
+            attributes: A dictionary of attributes to be converted into LDAP format
         """
         self.attributes = {
             str(k): list(map(str, v)) if isinstance(v, list) else [str(v)]
@@ -33,7 +34,15 @@ class LDAPAttributeAdaptor:
         *,
         required_classes: Sequence[type[LDAPObjectClass]],
     ) -> LDAPAttributeAdaptor:
-        """Construct an LDAPAttributeAdaptor from attributes and required classes."""
+        """Construct an LDAPAttributeAdaptor from attributes and required classes.
+
+        Args:
+            input_dict: Dictionary of attributes
+            required_classes: Sequence of required LDAP classes
+
+        Returns:
+            An LDAPAttributeAdaptor with these attributes
+        """
         attributes = {"objectclass": ["top"]}
         for ldap_class in required_classes:
             model = ldap_class(**input_dict)
@@ -42,5 +51,9 @@ class LDAPAttributeAdaptor:
         return cls(attributes)
 
     def to_dict(self: Self) -> LDAPAttributeDict:
-        """Convert the attributes to an LDAPAttributeDict."""
+        """Convert the attributes to an LDAPAttributeDict.
+
+        Returns:
+            Attributes as an LDAPAttributeDict
+        """
         return self.attributes

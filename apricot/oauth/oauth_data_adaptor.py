@@ -37,11 +37,14 @@ class OAuthDataAdaptor:
     ) -> None:
         """Initialise an OAuthDataAdaptor.
 
-        @param domain: The root domain of the LDAP tree
-        @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
-        @param enable_primary_groups: Whether to create an LDAP primary group for each user
-        @param enable_user_domain_verification: Whether to verify users belong to the correct domain
-        @param oauth_client: An OAuth client used to construct the LDAP tree
+        Args:
+            domain: The root domain of the LDAP tree
+            enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups
+                for each group-of-users
+            enable_primary_groups: Whether to create an LDAP primary group for each user
+            enable_user_domain_verification: Whether to verify users belong to the
+                correct domain
+            oauth_client: An OAuth client used to construct the LDAP tree
         """
         self.domain = domain
         self.enable_mirrored_groups = enable_mirrored_groups
@@ -57,13 +60,19 @@ class OAuthDataAdaptor:
     def _dn_from_user_cn(self: Self, user_cn: str) -> str:
         return f"CN={user_cn},OU=users,{self.root_dn}"
 
-    def _retrieve_entries(
+    def _retrieve_entries(  # noqa: C901
         self: Self,
     ) -> tuple[
         list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
         list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ]:
-        """Obtain lists of users and groups, and construct necessary meta-entries."""
+        """Obtain lists of users and groups, and construct necessary meta-entries.
+
+        Returns:
+            Two lists, one for users and one for groups. Each list consists of tuples
+            representing object information in JSON format, together with a list of LDAP
+            object classes that should be used to validate this object.
+        """
         # Get the initial set of users and groups
         oauth_groups = self.oauth_client.groups()
         oauth_users = self.oauth_client.users()
@@ -173,7 +182,14 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_groups: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated group data."""
+        """Validate a list of groups.
+
+        Args:
+            annotated_groups: a list of groups to validate
+
+        Returns:
+            A list with one LDAPAttributeAdaptor for each valid group
+        """
         self.logger.debug(
             "Attempting to validate {n_groups} groups.",
             n_groups=len(annotated_groups),
@@ -187,7 +203,7 @@ class OAuthDataAdaptor:
                         required_classes=required_classes,
                     ),
                 )
-            except ValidationError as exc:
+            except ValidationError as exc:  # noqa: PERF203
                 self.logger.warn(
                     "... group '{group_name}' failed validation.",
                     group_name=group_dict.get("cn", "unknown"),
@@ -206,7 +222,14 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated user data."""
+        """Validate a list of users.
+
+        Args:
+            annotated_users: a list of users to validate
+
+        Returns:
+            A list with one LDAPAttributeAdaptor for each valid user
+        """
         self.logger.debug(
             "Attempting to validate {n_users} users.",
             n_users=len(annotated_users),
@@ -224,7 +247,7 @@ class OAuthDataAdaptor:
                         user_name=user_dict.get("cn", "unknown"),
                     )
                     self.logger.warn(
-                        " -> 'domain': expected '{expected_domain}' but '{actual_domain}' was provided.",
+                        " -> 'domain': expected '{expected_domain}' but '{actual_domain}' was provided.",  # noqa: E501
                         expected_domain=self.domain,
                         actual_domain=user_domain,
                     )
@@ -253,7 +276,11 @@ class OAuthDataAdaptor:
     def retrieve_all(
         self,
     ) -> tuple[list[LDAPAttributeAdaptor], list[LDAPAttributeAdaptor]]:
-        """Retrieve and return validated user and group information."""
+        """Retrieve validated user and group information.
+
+        Returns:
+            A tuple of groups and users
+        """
         annotated_groups, annotated_users = self._retrieve_entries()
         validated_groups = self._validate_groups(annotated_groups)
         validated_users = self._validate_users(annotated_users)

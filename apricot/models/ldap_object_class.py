@@ -15,10 +15,13 @@ class LDAPObjectClass(BaseModel):
         We iterate through the parent classes in MRO order, getting an
         `_ldap_object_class_name` from each class that has one. We then sort these
         before returning a list of names.
+
+        Returns:
+            A sorted list of LDAP object class names for this class.
         """
         return sorted(
             [
-                cls_._ldap_object_class_name.default
+                cls_._ldap_object_class_name.default  # noqa: SLF001
                 for cls_ in cls.__mro__
                 if hasattr(cls_, "_ldap_object_class_name")
             ],

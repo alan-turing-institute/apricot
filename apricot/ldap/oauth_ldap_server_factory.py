@@ -23,11 +23,13 @@ class OAuthLDAPServerFactory(ServerFactory):
     ) -> None:
         """Initialise an OAuthLDAPServerFactory.
 
-        @param allow_anonymous_binds: Whether to allow anonymous LDAP binds
-        @param background_refresh: Whether to refresh the LDAP tree in the background rather than on access
-        @param oauth_adaptor: An OAuth data adaptor used to construct the LDAP tree
-        @param oauth_client: An OAuth client used to retrieve user and group data
-        @param refresh_interval: Interval in seconds after which the tree must be refreshed
+        Args:
+            allow_anonymous_binds: Whether to allow anonymous LDAP binds
+            background_refresh: Whether to refresh the LDAP tree in the background
+                rather than on access
+            oauth_adaptor: An OAuth data adaptor used to construct the LDAP tree
+            oauth_client: An OAuth client used to retrieve user and group data
+            refresh_interval: Interval in seconds after which the tree must be refreshed
         """
         # Create an LDAP lookup tree
         self.adaptor = OAuthLDAPTree(
@@ -39,6 +41,11 @@ class OAuthLDAPServerFactory(ServerFactory):
         self.allow_anonymous_binds = allow_anonymous_binds
 
     def __repr__(self: Self) -> str:
+        """Generate string representation of OAuthLDAPServerFactory.
+
+        Returns:
+            A string representation of OAuthLDAPServerFactory.
+        """
         return f"{self.__class__.__name__} using adaptor {self.adaptor}"
 
     def buildProtocol(self: Self, addr: IAddress) -> Protocol:  # noqa: N802
@@ -46,7 +53,11 @@ class OAuthLDAPServerFactory(ServerFactory):
 
         This instance will use self.adaptor to produce LDAP entries.
 
-        @param addr: an object implementing L{IAddress}
+        Args:
+            addr: an object implementing L{IAddress}
+
+        Returns:
+            The ReadOnlyLDAPServer with an attached OAuth adaptor.
         """
         id(addr)  # ignore unused arguments
         proto = ReadOnlyLDAPServer(allow_anonymous_binds=self.allow_anonymous_binds)

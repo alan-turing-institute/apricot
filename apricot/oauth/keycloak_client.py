@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import operator
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast, overload
 
 from .oauth_client import OAuthClient
 
@@ -23,9 +23,11 @@ class KeycloakClient(OAuthClient):
     ) -> None:
         """Initialise a KeycloakClient.
 
-        @param keycloak_base_url: Base URL for Keycloak server
-        @param keycloak_domain_attribute: Keycloak attribute used to define your domain
-        @param keycloak_realm: Realm for Keycloak server
+        Args:
+            keycloak_base_url: Base URL for Keycloak server
+            keycloak_domain_attribute: Keycloak attribute used to define your domain
+            keycloak_realm: Realm for Keycloak server
+            kwargs: OAuthClient keyword arguments
         """
         self.base_url = keycloak_base_url
         self.domain_attribute = keycloak_domain_attribute
@@ -43,10 +45,12 @@ class KeycloakClient(OAuthClient):
             **kwargs,
         )
 
+    @overload  # type: ignore[misc]
     @staticmethod
     def extract_token(json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
+    @overload  # type: ignore[misc]
     def groups(self: Self) -> list[JSONDict]:
         output = []
         try:
@@ -106,6 +110,7 @@ class KeycloakClient(OAuthClient):
             self.logger.warn(msg)
         return output
 
+    @overload  # type: ignore[misc]
     def users(self: Self) -> list[JSONDict]:
         output = []
         try:

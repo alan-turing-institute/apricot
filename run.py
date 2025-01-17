@@ -8,7 +8,7 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(
             prog="Apricot",
-            description="Apricot is a proxy for delegating LDAP requests to an OpenID Connect backend.",
+            description="Apricot is a proxy for delegating LDAP requests to an OpenID Connect backend.",  # noqa: E501
         )
         # Common server-level options
         parser.add_argument(

@@ -24,8 +24,9 @@ if TYPE_CHECKING:
 class OAuthClient(ABC):
     """Base class for OAuth client talking to a generic backend."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self: Self,
+        *,
         client_id: str,
         client_secret: str,
         redirect_uri: str,
@@ -36,12 +37,17 @@ class OAuthClient(ABC):
     ) -> None:
         """Initialise an OAuthClient.
 
-        @param client_id: OAuth client ID
-        @param client_secret: OAuth client secret
-        @param redirect_uri: OAuth redirect URI
-        @param scopes: OAuth scopes
-        @param token_url: OAuth token URL
-        @param uid_cache: Cache for UIDs
+        Args:
+            client_id: OAuth client ID
+            client_secret: OAuth client secret
+            redirect_uri: OAuth redirect URI
+            scopes_application: OAuth scopes for a client using application credentials
+            scopes_delegated: OAuth scopes for a client using delegated credentials
+            token_url: OAuth token URL
+            uid_cache: Cache for UIDs
+
+        Raises:
+            RuntimeError: if the OAuth client could not be initialised
         """
         # Set attributes
         self.bearer_token_: str | None = None
@@ -85,7 +91,14 @@ class OAuthClient(ABC):
 
     @property
     def bearer_token(self: Self) -> str:
-        """Return a bearer token, requesting a new one if necessary."""
+        """Return a bearer token, requesting a new one if necessary.
+
+        Returns:
+            An OAuth bearer token
+
+        Raises:
+            RuntimeError: if a bearer token could not be retrieved
+        """
         try:
             if not self.bearer_token_:
                 self.logger.info(
@@ -93,7 +106,6 @@ class OAuthClient(ABC):
                 )
                 json_response = self.session_application.fetch_token(
                     token_url=self.token_url,
-                    client_id=self.session_application._client.client_id,
                     client_secret=self.client_secret,
                 )
                 self.bearer_token_ = self.extract_token(json_response)
@@ -113,14 +125,22 @@ class OAuthClient(ABC):
     def groups(self: Self) -> list[JSONDict]:
         """Return JSON data about groups from the OAuth backend.
 
-        This should be a list of JSON dictionaries where 'None' is used to signify missing values.
+        This should be a list of JSON dictionaries where 'None' is used to signify
+        missing values.
+
+        Returns:
+            A list of group data in JSON format
         """
 
     @abstractmethod
     def users(self: Self) -> list[JSONDict]:
         """Return JSON data about users from the OAuth backend.
 
-        This should be a list of JSON dictionaries where 'None' is used to signify missing values.
+        This should be a list of JSON dictionaries where 'None' is used to signify
+        missing values.
+
+        Returns:
+            A list of user data in JSON format
         """
 
     def query(
@@ -129,15 +149,16 @@ class OAuthClient(ABC):
         *,
         use_client_secret: bool = True,
     ) -> dict[str, Any]:
-        """Make a query against the OAuth backend."""
-        kwargs = (
-            {
-                "client_id": self.session_application._client.client_id,
-                "client_secret": self.client_secret,
-            }
-            if use_client_secret
-            else {}
-        )
+        """Make a query against the OAuth backend.
+
+        Args:
+            url: Which backend URL to send the query to.
+            use_client_secret: Whether to send the client secret with the query
+
+        Returns:
+            The JSON response from the OAuth backend.
+        """
+        kwargs = {"client_secret": self.client_secret} if use_client_secret else {}
         return self.request(
             url=url,
             method="GET",
@@ -150,7 +171,16 @@ class OAuthClient(ABC):
         method: str = "GET",
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """Make a request to the OAuth backend."""
+        """Make a request to the OAuth backend.
+
+        Args:
+            method: Which HTTP request method to use
+            args: Arguments to send with the request
+            kwargs: Keyword arguments to send with the request
+
+        Returns:
+            The JSON response from the OAuth backend.
+        """
 
         def request_(*args: Any, **kwargs: Any) -> requests.Response:
             return self.session_application.request(  # type: ignore[no-any-return]
@@ -172,13 +202,22 @@ class OAuthClient(ABC):
         return result.json()  # type: ignore[no-any-return]
 
     def verify(self: Self, username: str, password: str) -> bool:
-        """Verify username and password by attempting to authenticate against the OAuth backend."""
+        """Verify username and password.
+
+        This is done by attempting to authenticate against the OAuth backend.
+
+        Args:
+            username: Username
+            password: User password
+
+        Returns:
+            Whether the username and password were correct
+        """
         try:
             self.session_interactive.fetch_token(
                 token_url=self.token_url,
                 username=username,
                 password=password,
-                client_id=self.session_interactive._client.client_id,
                 client_secret=self.client_secret,
             )
         except (InvalidClientIdError, InvalidGrantError) as exc:
