@@ -60,7 +60,7 @@ class OAuthDataAdaptor:
     def _dn_from_user_cn(self: Self, user_cn: str) -> str:
         return f"CN={user_cn},OU=users,{self.root_dn}"
 
-    def _retrieve_entries(
+    def _retrieve_entries(  # noqa: C901
         self: Self,
     ) -> tuple[
         list[tuple[JSONDict, list[type[LDAPObjectClass]]]],

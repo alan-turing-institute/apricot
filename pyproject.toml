@@ -81,7 +81,6 @@ target-version = ["py310", "py311"]
 # See https://beta.ruff.rs/docs/rules/
 select = ["ALL"]
 ignore = [
-  "C901",    # complex-structure
   "D100",    # missing-docstring-in-module
   "D104",    # missing-docstring-in-package
   "D105",    # missing-docstring-in-magic-method
