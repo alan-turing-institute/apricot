@@ -92,7 +92,6 @@ ignore = [
   "D401",    # non-imperative-mood
   "D413",    # missing-blank-line-after-last-section
   "D415",    # missing-terminal-punctuation
-  "E501",    # line length
   "DOC201",  # docstring-missing-returns
   "CPY001",  # missing-copyright-notice
   "G010",    # logging-warn (due to incorrect heuristic)

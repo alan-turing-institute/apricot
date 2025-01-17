@@ -125,14 +125,22 @@ class OAuthClient(ABC):
     def groups(self: Self) -> list[JSONDict]:
         """Return JSON data about groups from the OAuth backend.
 
-        This should be a list of JSON dictionaries where 'None' is used to signify missing values.
+        This should be a list of JSON dictionaries where 'None' is used to signify
+        missing values.
+
+        Returns:
+            A list of group data in JSON format
         """
 
     @abstractmethod
     def users(self: Self) -> list[JSONDict]:
         """Return JSON data about users from the OAuth backend.
 
-        This should be a list of JSON dictionaries where 'None' is used to signify missing values.
+        This should be a list of JSON dictionaries where 'None' is used to signify
+        missing values.
+
+        Returns:
+            A list of user data in JSON format
         """
 
     def query(
@@ -177,7 +185,17 @@ class OAuthClient(ABC):
         return result.json()  # type: ignore[no-any-return]
 
     def verify(self: Self, username: str, password: str) -> bool:
-        """Verify username and password by attempting to authenticate against the OAuth backend."""
+        """Verify username and password.
+
+        This is done by attempting to authenticate against the OAuth backend.
+
+        Args:
+            username: Username
+            password: User password
+
+        Returns:
+            Whether the username and password were correct
+        """
         try:
             self.session_interactive.fetch_token(
                 token_url=self.token_url,

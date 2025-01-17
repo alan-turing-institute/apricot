@@ -13,7 +13,8 @@ class LDAPAttributeAdaptor:
     def __init__(self: Self, attributes: dict[Any, Any]) -> None:
         """Initialise an LDAPAttributeAdaptor.
 
-        @param attributes: A dictionary of attributes to be converted into str: list[str]
+        Args:
+            attributes: A dictionary of attributes to be converted into LDAP format
         """
         self.attributes = {
             str(k): list(map(str, v)) if isinstance(v, list) else [str(v)]

@@ -37,11 +37,14 @@ class OAuthDataAdaptor:
     ) -> None:
         """Initialise an OAuthDataAdaptor.
 
-        @param domain: The root domain of the LDAP tree
-        @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
-        @param enable_primary_groups: Whether to create an LDAP primary group for each user
-        @param enable_user_domain_verification: Whether to verify users belong to the correct domain
-        @param oauth_client: An OAuth client used to construct the LDAP tree
+        Args:
+            domain: The root domain of the LDAP tree
+            enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups
+                for each group-of-users
+            enable_primary_groups: Whether to create an LDAP primary group for each user
+            enable_user_domain_verification: Whether to verify users belong to the
+                correct domain
+            oauth_client: An OAuth client used to construct the LDAP tree
         """
         self.domain = domain
         self.enable_mirrored_groups = enable_mirrored_groups
@@ -238,7 +241,7 @@ class OAuthDataAdaptor:
                         user_name=user_dict.get("cn", "unknown"),
                     )
                     self.logger.warn(
-                        " -> 'domain': expected '{expected_domain}' but '{actual_domain}' was provided.",
+                        " -> 'domain': expected '{expected_domain}' but '{actual_domain}' was provided.",  # noqa: E501
                         expected_domain=self.domain,
                         actual_domain=user_domain,
                     )
