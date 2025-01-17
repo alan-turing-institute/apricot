@@ -83,7 +83,6 @@ select = ["ALL"]
 ignore = [
   "D100",    # missing-docstring-in-module
   "D104",    # missing-docstring-in-package
-  "D105",    # missing-docstring-in-magic-method
   "D203",    # one-blank-line-before-class (due to conflict with D211)
   "D213",    # multi-line-summary-second-line (due to conflict with D212)
   "D413",    # missing-blank-line-after-last-section

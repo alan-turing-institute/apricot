@@ -73,6 +73,11 @@ class OAuthLDAPTree:
         return self.root_
 
     def __repr__(self: Self) -> str:
+        """Generate string representation of OAuthLDAPTree.
+
+        Returns:
+            A string representation of OAuthLDAPTree.
+        """
         return f"{self.__class__.__name__} with backend {self.oauth_client.__class__.__name__}"  # noqa: E501
 
     def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:

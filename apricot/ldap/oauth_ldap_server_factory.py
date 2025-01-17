@@ -41,6 +41,11 @@ class OAuthLDAPServerFactory(ServerFactory):
         self.allow_anonymous_binds = allow_anonymous_binds
 
     def __repr__(self: Self) -> str:
+        """Generate string representation of OAuthLDAPServerFactory.
+
+        Returns:
+            A string representation of OAuthLDAPServerFactory.
+        """
         return f"{self.__class__.__name__} using adaptor {self.adaptor}"
 
     def buildProtocol(self: Self, addr: IAddress) -> Protocol:  # noqa: N802
