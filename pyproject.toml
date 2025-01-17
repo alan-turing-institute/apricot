@@ -99,7 +99,6 @@ ignore = [
   "G010",    # logging-warn (due to incorrect heuristic)
   "PERF203", # try-except-in-loop
   "PLR0913", # too-many-arguments
-  "PLR0917", # too-many-positional-arguments
 ]
 
 [tool.ruff.lint.flake8-annotations]

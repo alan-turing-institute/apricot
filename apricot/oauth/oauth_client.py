@@ -26,6 +26,7 @@ class OAuthClient(ABC):
 
     def __init__(
         self: Self,
+        *,
         client_id: str,
         client_secret: str,
         redirect_uri: str,
