@@ -94,7 +94,6 @@ ignore = [
   "D415",    # missing-terminal-punctuation
   "E501",    # line length
   "DOC201",  # docstring-missing-returns
-  "DOC501",  # docstring-missing-exception
   "CPY001",  # missing-copyright-notice
   "G010",    # logging-warn (due to incorrect heuristic)
 ]

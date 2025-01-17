@@ -44,23 +44,28 @@ class ApricotServer:
     ) -> None:
         """Initialise an ApricotServer.
 
-        @param allow_anonymous_binds: Whether to allow anonymous LDAP binds
-        @param backend: An OAuth backend,
-        @param client_id: An OAuth client ID
-        @param client_secret: An OAuth client secret
-        @param domain: The OAuth domain
-        @param port: Port to expose LDAP on
-        @param background_refresh: Whether to refresh the LDAP tree in the background
-        @param debug: Enable debug output
-        @param enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
-        @param enable_primary_groups: Whether to create an LDAP primary group for each user
-        @param enable_user_domain_verification: Whether to verify users belong to the correct domain
-        @param redis_host: Host for a Redis cache (if used)
-        @param redis_port: Port for a Redis cache (if used)
-        @param refresh_interval: Interval after which the LDAP information is stale
-        @param tls_port: Port to expose LDAPS on
-        @param tls_certificate: TLS certificate for LDAPS
-        @param tls_private_key: TLS private key for LDAPS
+        Args:
+            allow_anonymous_binds: Whether to allow anonymous LDAP binds
+            backend: An OAuth backend,
+            client_id: An OAuth client ID
+            client_secret: An OAuth client secret
+            domain: The OAuth domain
+            port: Port to expose LDAP on
+            background_refresh: Whether to refresh the LDAP tree in the background
+            debug: Enable debug output
+            enable_mirrored_groups: Whether to create a mirrored LDAP group-of-groups for each group-of-users
+            enable_primary_groups: Whether to create an LDAP primary group for each user
+            enable_user_domain_verification: Whether to verify users belong to the correct domain
+            redis_host: Host for a Redis cache (if used)
+            redis_port: Port for a Redis cache (if used)
+            refresh_interval: Interval after which the LDAP information is stale
+            tls_port: Port to expose LDAPS on
+            tls_certificate: TLS certificate for LDAPS
+            tls_private_key: TLS private key for LDAPS
+            kwargs: Backend-dependent arguments
+
+        Raises:
+            ValueError: if the OAuth backend could not be initialised
         """
         # Set up Python root logger
         logging.basicConfig(

@@ -28,7 +28,14 @@ class LDAPPosixGroup(LDAPObjectClass):
     @validator("gidNumber")  # type: ignore[misc]
     @classmethod
     def validate_gid_number(cls: type[Self], gid_number: int) -> int:
-        """Avoid conflicts with existing groups."""
+        """Avoid conflicts with existing groups.
+
+        Args:
+            gid_number: Proposed gid_number
+
+        Raises:
+            ValueError: if the gid_number is not in an acceptable range
+        """
         if not ID_MIN <= gid_number <= ID_MAX:
             msg = f"Must be in range {ID_MIN} to {ID_MAX}."
             raise ValueError(msg)

@@ -173,7 +173,14 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_groups: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated group data."""
+        """Validates a list of groups.
+
+        Args:
+            annotated_groups: a list of groups to validate
+
+        Returns:
+            A list with one LDAPAttributeAdaptor for each valid group
+        """
         self.logger.debug(
             "Attempting to validate {n_groups} groups.",
             n_groups=len(annotated_groups),
@@ -206,7 +213,14 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """Return a list of LDAPAttributeAdaptors representing validated user data."""
+        """Validates a list of users
+
+        Args:
+            annotated_users: a list of users to validate
+
+        Returns:
+            A list with one LDAPAttributeAdaptor for each valid user
+        """
         self.logger.debug(
             "Attempting to validate {n_users} users.",
             n_users=len(annotated_users),
@@ -253,7 +267,11 @@ class OAuthDataAdaptor:
     def retrieve_all(
         self,
     ) -> tuple[list[LDAPAttributeAdaptor], list[LDAPAttributeAdaptor]]:
-        """Retrieve and return validated user and group information."""
+        """Retrieves validated user and group information.
+
+        Returns:
+            A tuple of groups and users
+        """
         annotated_groups, annotated_users = self._retrieve_entries()
         validated_groups = self._validate_groups(annotated_groups)
         validated_users = self._validate_users(annotated_users)

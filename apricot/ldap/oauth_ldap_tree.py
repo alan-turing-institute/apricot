@@ -52,9 +52,11 @@ class OAuthLDAPTree:
     def root(self: Self) -> OAuthLDAPEntry:
         """Lazy-load the LDAP tree on request.
 
-        @return: An OAuthLDAPEntry for the tree
+        Returns:
+            An OAuthLDAPEntry for the tree
 
-        @raises: ValueError.
+        Raises:
+            ValueError: if the tree could not be loaded.
         """
         if not self.background_refresh:
             self.refresh()

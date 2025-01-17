@@ -37,12 +37,17 @@ class OAuthClient(ABC):
     ) -> None:
         """Initialise an OAuthClient.
 
-        @param client_id: OAuth client ID
-        @param client_secret: OAuth client secret
-        @param redirect_uri: OAuth redirect URI
-        @param scopes: OAuth scopes
-        @param token_url: OAuth token URL
-        @param uid_cache: Cache for UIDs
+        Args:
+            client_id: OAuth client ID
+            client_secret: OAuth client secret
+            redirect_uri: OAuth redirect URI
+            scopes_application: OAuth scopes for a client using application credentials
+            scopes_delegated: OAuth scopes for a client using delegated credentials
+            token_url: OAuth token URL
+            uid_cache: Cache for UIDs
+
+        Raises:
+            RuntimeError: if the OAuth client could not be initialised
         """
         # Set attributes
         self.bearer_token_: str | None = None
@@ -86,7 +91,14 @@ class OAuthClient(ABC):
 
     @property
     def bearer_token(self: Self) -> str:
-        """Return a bearer token, requesting a new one if necessary."""
+        """Return a bearer token, requesting a new one if necessary.
+
+        Returns:
+            An OAuth bearer token
+
+        Raises:
+            RuntimeError: if a bearer token could not be retrieved
+        """
         try:
             if not self.bearer_token_:
                 self.logger.info(
