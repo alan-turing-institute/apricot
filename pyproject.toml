@@ -89,7 +89,6 @@ ignore = [
   "D203",    # one-blank-line-before-class (due to conflict with D211)
   "D213",    # multi-line-summary-second-line (due to conflict with D212)
   "D400",    # missing-trailing-period
-  "D401",    # non-imperative-mood
   "D413",    # missing-blank-line-after-last-section
   "DOC201",  # docstring-missing-returns
   "CPY001",  # missing-copyright-notice

@@ -176,7 +176,7 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_groups: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """Validates a list of groups.
+        """Validate a list of groups.
 
         Args:
             annotated_groups: a list of groups to validate
@@ -216,7 +216,7 @@ class OAuthDataAdaptor:
         self: Self,
         annotated_users: list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ) -> list[LDAPAttributeAdaptor]:
-        """Validates a list of users.
+        """Validate a list of users.
 
         Args:
             annotated_users: a list of users to validate
@@ -270,7 +270,7 @@ class OAuthDataAdaptor:
     def retrieve_all(
         self,
     ) -> tuple[list[LDAPAttributeAdaptor], list[LDAPAttributeAdaptor]]:
-        """Retrieves validated user and group information.
+        """Retrieve validated user and group information.
 
         Returns:
             A tuple of groups and users
