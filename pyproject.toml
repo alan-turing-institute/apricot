@@ -98,7 +98,6 @@ ignore = [
   "CPY001",  # missing-copyright-notice
   "G010",    # logging-warn (due to incorrect heuristic)
   "PERF203", # try-except-in-loop
-  "PLR0913", # too-many-arguments
 ]
 
 [tool.ruff.lint.flake8-annotations]

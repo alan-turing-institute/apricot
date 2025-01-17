@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class OAuthClient(ABC):
     """Base class for OAuth client talking to a generic backend."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self: Self,
         *,
         client_id: str,

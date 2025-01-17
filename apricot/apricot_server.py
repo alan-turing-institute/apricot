@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class ApricotServer:
     """The Apricot server running via Twisted."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self: Self,
         backend: OAuthBackend,
         client_id: str,
