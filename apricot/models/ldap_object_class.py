@@ -18,7 +18,7 @@ class LDAPObjectClass(BaseModel):
         """
         return sorted(
             [
-                cls_._ldap_object_class_name.default
+                cls_._ldap_object_class_name.default  # noqa: SLF001
                 for cls_ in cls.__mro__
                 if hasattr(cls_, "_ldap_object_class_name")
             ],

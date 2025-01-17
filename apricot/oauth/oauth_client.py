@@ -93,7 +93,6 @@ class OAuthClient(ABC):
                 )
                 json_response = self.session_application.fetch_token(
                     token_url=self.token_url,
-                    client_id=self.session_application._client.client_id,
                     client_secret=self.client_secret,
                 )
                 self.bearer_token_ = self.extract_token(json_response)
@@ -130,14 +129,7 @@ class OAuthClient(ABC):
         use_client_secret: bool = True,
     ) -> dict[str, Any]:
         """Make a query against the OAuth backend."""
-        kwargs = (
-            {
-                "client_id": self.session_application._client.client_id,
-                "client_secret": self.client_secret,
-            }
-            if use_client_secret
-            else {}
-        )
+        kwargs = {"client_secret": self.client_secret} if use_client_secret else {}
         return self.request(
             url=url,
             method="GET",
@@ -178,7 +170,6 @@ class OAuthClient(ABC):
                 token_url=self.token_url,
                 username=username,
                 password=password,
-                client_id=self.session_interactive._client.client_id,
                 client_secret=self.client_secret,
             )
         except (InvalidClientIdError, InvalidGrantError) as exc:
