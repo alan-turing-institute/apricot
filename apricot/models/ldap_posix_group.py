@@ -33,6 +33,9 @@ class LDAPPosixGroup(LDAPObjectClass):
         Args:
             gid_number: Proposed gid_number
 
+        Returns:
+            The gid_number if valid.
+
         Raises:
             ValueError: if the gid_number is not in an acceptable range
         """

@@ -66,7 +66,13 @@ class OAuthDataAdaptor:
         list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
         list[tuple[JSONDict, list[type[LDAPObjectClass]]]],
     ]:
-        """Obtain lists of users and groups, and construct necessary meta-entries."""
+        """Obtain lists of users and groups, and construct necessary meta-entries.
+
+        Returns:
+            Two lists, one for users and one for groups. Each list consists of tuples
+            representing object information in JSON format, together with a list of LDAP
+            object classes that should be used to validate this object.
+        """
         # Get the initial set of users and groups
         oauth_groups = self.oauth_client.groups()
         oauth_users = self.oauth_client.users()

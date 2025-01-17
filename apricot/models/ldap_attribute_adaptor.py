@@ -34,7 +34,15 @@ class LDAPAttributeAdaptor:
         *,
         required_classes: Sequence[type[LDAPObjectClass]],
     ) -> LDAPAttributeAdaptor:
-        """Construct an LDAPAttributeAdaptor from attributes and required classes."""
+        """Construct an LDAPAttributeAdaptor from attributes and required classes.
+
+        Args:
+            input_dict: Dictionary of attributes
+            required_classes: Sequence of required LDAP classes
+
+        Returns:
+            An LDAPAttributeAdaptor with these attributes
+        """
         attributes = {"objectclass": ["top"]}
         for ldap_class in required_classes:
             model = ldap_class(**input_dict)
@@ -43,5 +51,9 @@ class LDAPAttributeAdaptor:
         return cls(attributes)
 
     def to_dict(self: Self) -> LDAPAttributeDict:
-        """Convert the attributes to an LDAPAttributeDict."""
+        """Convert the attributes to an LDAPAttributeDict.
+
+        Returns:
+            Attributes as an LDAPAttributeDict
+        """
         return self.attributes

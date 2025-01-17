@@ -149,7 +149,15 @@ class OAuthClient(ABC):
         *,
         use_client_secret: bool = True,
     ) -> dict[str, Any]:
-        """Make a query against the OAuth backend."""
+        """Make a query against the OAuth backend.
+
+        Args:
+            url: Which backend URL to send the query to.
+            use_client_secret: Whether to send the client secret with the query
+
+        Returns:
+            The JSON response from the OAuth backend.
+        """
         kwargs = {"client_secret": self.client_secret} if use_client_secret else {}
         return self.request(
             url=url,
@@ -163,7 +171,16 @@ class OAuthClient(ABC):
         method: str = "GET",
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """Make a request to the OAuth backend."""
+        """Make a request to the OAuth backend.
+
+        Args:
+            method: Which HTTP request method to use
+            args: Arguments to send with the request
+            kwargs: Keyword arguments to send with the request
+
+        Returns:
+            The JSON response from the OAuth backend.
+        """
 
         def request_(*args: Any, **kwargs: Any) -> requests.Response:
             return self.session_application.request(  # type: ignore[no-any-return]

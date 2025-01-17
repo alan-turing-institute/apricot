@@ -40,6 +40,9 @@ class LDAPPosixAccount(LDAPObjectClass):
         Args:
             gid_number: Proposed gid_number
 
+        Returns:
+            The gid_number if valid.
+
         Raises:
             ValueError: if the gid_number is not in an acceptable range
         """
@@ -60,6 +63,9 @@ class LDAPPosixAccount(LDAPObjectClass):
 
         Args:
             uid_number: Proposed uid_number
+
+        Returns:
+            The uid_number if valid.
 
         Raises:
             ValueError: if the uid_number is not in an acceptable range

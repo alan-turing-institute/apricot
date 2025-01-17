@@ -48,6 +48,9 @@ class ReadOnlyLDAPServer(LDAPServer):
             controls: LDAP controls
             reply: LDAP callback
 
+        Returns:
+            The LDAP Root DSE.
+
         Raises:
             LDAPProtocolError: if the Root DSE request fails
         """
@@ -94,6 +97,9 @@ class ReadOnlyLDAPServer(LDAPServer):
             controls: LDAP controls
             reply: LDAP callback
 
+        Returns:
+            The result of the bind as a deferred LDAP entry.
+
         Raises:
             LDAPProtocolError: if the bind request fails or if an anonymous bind is
                 attempted when they are disabled
@@ -122,6 +128,9 @@ class ReadOnlyLDAPServer(LDAPServer):
             request: LDAP request
             controls: LDAP controls
             reply: LDAP callback
+
+        Returns:
+            The result of the compare as a deferred LDAP entry.
 
         Raises:
             LDAPProtocolError: if the compare request fails
@@ -168,6 +177,9 @@ class ReadOnlyLDAPServer(LDAPServer):
             request: LDAP request
             controls: LDAP controls
             reply: LDAP callback
+
+        Returns:
+            The result of the extended search as a deferred LDAP entry.
 
         Raises:
             LDAPProtocolError: if the extended request fails
@@ -236,6 +248,9 @@ class ReadOnlyLDAPServer(LDAPServer):
             request: LDAP request
             controls: LDAP controls
             reply: LDAP callback
+
+        Returns:
+            The result of the search as a deferred LDAP entry.
 
         Raises:
             LDAPProtocolError: if the search request fails

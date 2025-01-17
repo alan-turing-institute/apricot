@@ -73,7 +73,11 @@ class OAuthLDAPTree:
     def lookup(self: Self, dn: DistinguishedName | str) -> defer.Deferred[ILDAPEntry]:
         """Lookup a DistinguishedName in the LDAP tree.
 
-        @return: A Deferred returning an ILDAPEntry.
+        Args:
+            dn: A distinguished name to lookup.
+
+        Returns:
+            The result of the lookup as a deferred LDAP entry.
         """
 
         def result_callback(ldap_entry: OAuthLDAPEntry | None) -> OAuthLDAPEntry | None:

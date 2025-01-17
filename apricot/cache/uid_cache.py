@@ -26,14 +26,22 @@ class UidCache(ABC):
     def get_group_uid(self: Self, identifier: str) -> int:
         """Get UID for a group, constructing one if necessary.
 
-        @param identifier: Identifier for group needing a UID
+        Args:
+            identifier: Identifier for group needing a UID
+
+        Returns:
+            The UID for this group.
         """
         return self.get_uid(identifier, category="group", min_value=3000)
 
     def get_user_uid(self: Self, identifier: str) -> int:
         """Get UID for a user, constructing one if necessary.
 
-        @param identifier: Identifier for user needing a UID
+        Args:
+            identifier: Identifier for user needing a UID
+
+        Returns:
+            The UID for this user.
         """
         return self.get_uid(identifier, category="user", min_value=2000)
 
@@ -45,9 +53,13 @@ class UidCache(ABC):
     ) -> int:
         """Get UID, constructing one if necessary.
 
-        @param identifier: Identifier for object needing a UID
-        @param category: Category the object belongs to
-        @param min_value: Minimum allowed value for the UID
+        Args:
+            identifier: Identifier for object needing a UID
+            category: Category the object belongs to
+            min_value: Minimum allowed value for the UID
+
+        Returns:
+            The UID for a given identifier.
         """
         identifier_ = f"{category}-{identifier}"
         uid = self.get(identifier_)
@@ -60,7 +72,11 @@ class UidCache(ABC):
     def _get_max_uid(self: Self, category: str | None) -> int:
         """Get maximum UID for a given category.
 
-        @param category: Category to check UIDs for
+        Args:
+            category: Category to check UIDs for
+
+        Returns:
+            The maximum UID for this category
         """
         if category:
             keys = [k for k in self.keys() if k.startswith(category)]
@@ -72,24 +88,27 @@ class UidCache(ABC):
     def overwrite_group_uid(self: Self, identifier: str, uid: int) -> None:
         """Set UID for a group, overwriting the existing value if there is one.
 
-        @param identifier: Identifier for group
-        @param uid: Desired UID
+        Args:
+            identifier: Identifier for group
+            uid: Desired UID
         """
         return self.overwrite_uid(identifier, category="group", uid=uid)
 
     def overwrite_user_uid(self: Self, identifier: str, uid: int) -> None:
         """Get UID for a user, constructing one if necessary.
 
-        @param identifier: Identifier for user
-        @param uid: Desired UID
+        Args:
+            identifier: Identifier for user
+            uid: Desired UID
         """
         return self.overwrite_uid(identifier, category="user", uid=uid)
 
     def overwrite_uid(self: Self, identifier: str, category: str, uid: int) -> None:
         """Set UID, overwriting the existing one if necessary.
 
-        @param identifier: Identifier for object
-        @param category: Category the object belongs to
-        @param uid: Desired UID
+        Args:
+            identifier: Identifier for object
+            category: Category the object belongs to
+            uid: Desired UID
         """
         self.set(f"{category}-{identifier}", uid)

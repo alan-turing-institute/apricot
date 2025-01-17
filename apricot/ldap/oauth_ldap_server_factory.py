@@ -48,7 +48,11 @@ class OAuthLDAPServerFactory(ServerFactory):
 
         This instance will use self.adaptor to produce LDAP entries.
 
-        @param addr: an object implementing L{IAddress}
+        Args:
+            addr: an object implementing L{IAddress}
+
+        Returns:
+            The ReadOnlyLDAPServer with an attached OAuth adaptor.
         """
         id(addr)  # ignore unused arguments
         proto = ReadOnlyLDAPServer(allow_anonymous_binds=self.allow_anonymous_binds)
