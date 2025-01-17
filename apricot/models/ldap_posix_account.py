@@ -54,6 +54,11 @@ class LDAPPosixAccount(LDAPObjectClass):
     @validator("homeDirectory")  # type: ignore[misc]
     @classmethod
     def validate_home_directory(cls: type[Self], home_directory: str) -> str:
+        """Validate home directory path by removing whitespace.
+
+        Returns:
+            The sanitised home directory path.
+        """
         return re.sub(r"\s+", "-", home_directory)
 
     @validator("uidNumber")  # type: ignore[misc]

@@ -83,7 +83,6 @@ select = ["ALL"]
 ignore = [
   "C901",    # complex-structure
   "D100",    # missing-docstring-in-module
-  "D102",    # missing-docstring-in-public-method
   "D104",    # missing-docstring-in-package
   "D105",    # missing-docstring-in-magic-method
   "D203",    # one-blank-line-before-class (due to conflict with D211)
@@ -102,6 +101,9 @@ ban-relative-imports = "parents"
 [tool.ruff.lint.isort]
 combine-as-imports = true
 known-first-party = ["apricot"]
+
+[tool.ruff.lint.pydocstyle]
+ignore-decorators = ["typing.overload"]
 
 [tool.mypy]
 disallow_subclassing_any = false  # allow subclassing of types from third-party libraries

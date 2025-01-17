@@ -48,6 +48,11 @@ class OAuthLDAPTree:
 
     @property
     def dn(self: Self) -> DistinguishedName:
+        """The distinguished name of this tree.
+
+        Returns:
+            The distinguished name of the tree root.
+        """
         return self.root.dn
 
     @property

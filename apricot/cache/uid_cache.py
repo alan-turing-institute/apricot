@@ -9,19 +9,42 @@ class UidCache(ABC):
 
     @abstractmethod
     def get(self: Self, identifier: str) -> int | None:
-        """Get the UID for a given identifier, returning None if it does not exist."""
+        """Get the UID for a given identifier, returning None if it does not exist.
+
+        Args:
+            identifier: identifier key to set
+
+        Returns:
+            Value for this identifier or None if it does not exist.
+        """
 
     @abstractmethod
     def keys(self: Self) -> list[str]:
-        """Get list of cached keys."""
+        """Get list of cached keys.
+
+        Returns:
+            A list of keys to entries in the cache.
+        """
 
     @abstractmethod
     def set(self: Self, identifier: str, uid_value: int) -> None:
-        """Set the UID for a given identifier."""
+        """Set the UID for a given identifier.
+
+        Args:
+            identifier: identifier key to set
+            uid_value: value to set for this identifier
+        """
 
     @abstractmethod
     def values(self: Self, keys: list[str]) -> list[int]:
-        """Get list of cached values corresponding to requested keys."""
+        """Get list of cached values corresponding to requested keys.
+
+        Args:
+            keys: list of keys to lookup
+
+        Returns:
+            A value for each key
+        """
 
     def get_group_uid(self: Self, identifier: str) -> int:
         """Get UID for a group, constructing one if necessary.
