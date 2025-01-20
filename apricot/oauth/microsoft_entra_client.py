@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import operator
-from typing import TYPE_CHECKING, Any, Self, cast, overload
+from typing import TYPE_CHECKING, Any, Self, cast
+
+from typing_extensions import override
 
 from .oauth_client import OAuthClient
 
@@ -36,12 +38,12 @@ class MicrosoftEntraClient(OAuthClient):
             **kwargs,
         )
 
-    @overload  # type: ignore[misc]
+    @override
     @staticmethod
     def extract_token(json_response: JSONDict) -> str:
         return str(json_response["access_token"])
 
-    @overload  # type: ignore[misc]
+    @override
     def groups(self: Self) -> list[JSONDict]:
         output = []
         queries = [
@@ -81,7 +83,7 @@ class MicrosoftEntraClient(OAuthClient):
                 )
         return output
 
-    @overload  # type: ignore[misc]
+    @override
     def users(self: Self) -> list[JSONDict]:
         output = []
         try:

@@ -55,6 +55,7 @@ dependencies = [
   "types-oauthlib~=3.2",
   "types-redis~=4.6",
   "types-requests~=2.31",
+  "typing-extensions~=4.12",
 ]
 
 [tool.hatch.envs.lint.scripts]
@@ -101,7 +102,7 @@ known-first-party = ["apricot"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-ignore-decorators = ["typing.overload"]
+ignore-decorators = ["typing.override"]
 
 [tool.mypy]
 disallow_subclassing_any = false  # allow subclassing of types from third-party libraries

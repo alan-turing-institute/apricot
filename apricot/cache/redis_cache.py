@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Self, cast, overload
+from typing import Self, cast
 
 import redis
+from typing_extensions import override
 
 from .uid_cache import UidCache
 
@@ -36,19 +37,19 @@ class RedisCache(UidCache):
             )
         return self.cache_
 
-    @overload  # type: ignore[misc]
+    @override
     def get(self: Self, identifier: str) -> int | None:
         value = self.cache.get(identifier)
         return None if value is None else int(value)
 
-    @overload  # type: ignore[misc]
+    @override
     def keys(self: Self) -> list[str]:
         return [str(k) for k in self.cache.keys()]  # noqa: SIM118
 
-    @overload  # type: ignore[misc]
+    @override
     def set(self: Self, identifier: str, uid_value: int) -> None:
         self.cache.set(identifier, uid_value)
 
-    @overload  # type: ignore[misc]
+    @override
     def values(self: Self, keys: list[str]) -> list[int]:
         return [int(cast("str", v)) for v in self.cache.mget(keys)]
