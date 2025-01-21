@@ -11,6 +11,11 @@ jobs:
   build-and-publish-to-pypi:
     name: Build distribution and publish to PyPI
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/apricot-server/
+    permissions:
+      id-token: write  # needed for trusted publishing
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
