@@ -1,5 +1,5 @@
 ---
-name: Build Docker image
+name: Publish Docker image
 
 # Run workflow on pushes to matching branches
 on:  # yamllint disable-line rule:truthy

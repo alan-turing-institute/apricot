@@ -62,21 +62,18 @@ dependencies = [
 typing = "mypy {args:apricot} run.py"
 
 style = [
-  "black --check --diff {args:apricot} run.py",
-  "ruff check --preview {args:apricot} run.py",
+  "black --check --diff {args:apricot run.py .github}",
+  "ruff check --preview {args:apricot run.py .github}",
 ]
 fmt = [
-  "black {args:apricot} run.py",
-  "ruff check --preview --fix {args:apricot} run.py",
+  "black {args:apricot run.py .github}",
+  "ruff check --preview --fix {args:apricot run.py .github}",
   "style",
 ]
 all = [
   "style",
   "typing",
 ]
-
-[tool.black]
-target-version = ["py310", "py311"]
 
 [tool.ruff.lint]
 # See https://beta.ruff.rs/docs/rules/
