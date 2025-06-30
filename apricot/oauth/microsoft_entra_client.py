@@ -107,9 +107,7 @@ class MicrosoftEntraClient(OAuthClient):
             user_data: list[JSONDict] = []
             initial_query: str = f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}&$top={max_rows}"
             current_query = initial_query
-            while response_data := self.query(
-                current_query,
-            ):
+            while response_data := self.query(current_query):
                 self.logger.debug("Retrieved user response object: {response}", response=response_data,)
                 user_data.extend(cast("list[JSONDict]", response_data["value"]))
                 # @odata.nextLink - there is more data to retrieve
