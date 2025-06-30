@@ -51,12 +51,21 @@ class MicrosoftEntraClient(OAuthClient):
             "displayName",
             "id",
         ]
-        group_data = self.query(
-            f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}",
-        )
-        for group_dict in cast(
-            "list[JSONDict]",
-            sorted(group_data["value"], key=operator.itemgetter("createdDateTime")),
+        group_data: list[JSONDict] = []
+        max_rows = 999
+        current_query: str = f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}&$top={max_rows}"
+        while response_data := self.query(
+            current_query,
+        ):
+            self.logger.debug("Retrieved group response object: {response}", response=response_data,)
+            group_data.extend(cast("list[JSONDict]", response_data["value"]))
+            if "@odata.nextLink" in response_data:
+                current_query = response_data["@odata.nextLink"]
+            else:
+                break
+        for group_dict in sorted(
+            group_data,
+            key=operator.itemgetter("createdDateTime"),
         ):
             try:
                 group_uid = self.uid_cache.get_group_uid(group_dict["id"])
@@ -85,7 +94,8 @@ class MicrosoftEntraClient(OAuthClient):
 
     @override
     def users(self: Self) -> list[JSONDict]:
-        output = []
+        output: list[JSONDict] = []
+        current_query: str = ""
         try:
             queries = [
                 "createdDateTime",
@@ -95,12 +105,23 @@ class MicrosoftEntraClient(OAuthClient):
                 "surname",
                 "userPrincipalName",
             ]
-            user_data = self.query(
-                f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}",
-            )
-            for user_dict in cast(
-                "list[JSONDict]",
-                sorted(user_data["value"], key=operator.itemgetter("createdDateTime")),
+            max_rows = 999 # change this number to a much lower to go into development
+            user_data: list[JSONDict] = []
+            initial_query: str = f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}&$top={max_rows}"
+            current_query = initial_query
+            while response_data := self.query(
+                current_query,
+            ):
+                self.logger.debug("Retrieved user response object: {response}", response=response_data,)
+                user_data.extend(cast("list[JSONDict]", response_data["value"]))
+                # @odata.nextLink - there is more data to retrieve
+                if "@odata.nextLink" in response_data:
+                    current_query = response_data["@odata.nextLink"]
+                else:
+                    break
+            for user_dict in sorted(
+                user_data,
+                key=operator.itemgetter("createdDateTime")
             ):
                 # Get user attributes
                 given_name = user_dict.get("givenName", None)
@@ -121,6 +142,7 @@ class MicrosoftEntraClient(OAuthClient):
                 attributes["uid"] = uid or None
                 attributes["uidNumber"] = user_uid
                 output.append(attributes)
+
         except KeyError as exc:
             self.logger.warn(
                 "Failed to process user {user} due to a missing key {key}.",
