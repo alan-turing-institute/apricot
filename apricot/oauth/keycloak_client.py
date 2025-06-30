@@ -159,9 +159,7 @@ class KeycloakClient(OAuthClient):
                 # Get user attributes
                 first_name = user_dict.get("firstName", None)
                 last_name = user_dict.get("lastName", None)
-                full_name = (
-                    " ".join(filter(lambda x: x, [first_name, last_name])) or None
-                )
+                full_name = " ".join(filter(None, [first_name, last_name])) or None
                 username = user_dict.get("username")
                 attributes: JSONDict = {}
                 attributes["cn"] = username
