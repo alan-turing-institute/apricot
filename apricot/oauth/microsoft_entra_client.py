@@ -53,9 +53,14 @@ class MicrosoftEntraClient(OAuthClient):
         ]
         group_data: list[JSONDict] = []
         max_rows = 999
-        current_query: str = f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}&$top={max_rows}"
+        current_query: str = (
+            f"https://graph.microsoft.com/v1.0/groups?$select={','.join(queries)}&$top={max_rows}"
+        )
         while response_data := self.query(current_query):
-            self.logger.debug("Retrieved group response object: {response}", response=response_data,)
+            self.logger.debug(
+                "Retrieved group response object: {response}",
+                response=response_data,
+            )
             group_data.extend(cast("list[JSONDict]", response_data["value"]))
             if "@odata.nextLink" in response_data:
                 current_query = response_data["@odata.nextLink"]
@@ -103,12 +108,17 @@ class MicrosoftEntraClient(OAuthClient):
                 "surname",
                 "userPrincipalName",
             ]
-            max_rows = 999 # change this number to a much lower to go into development
+            max_rows = 999  # change this number to a much lower to go into development
             user_data: list[JSONDict] = []
-            initial_query: str = f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}&$top={max_rows}"
+            initial_query: str = (
+                f"https://graph.microsoft.com/v1.0/users?$select={','.join(queries)}&$top={max_rows}"
+            )
             current_query = initial_query
             while response_data := self.query(current_query):
-                self.logger.debug("Retrieved user response object: {response}", response=response_data,)
+                self.logger.debug(
+                    "Retrieved user response object: {response}",
+                    response=response_data,
+                )
                 user_data.extend(cast("list[JSONDict]", response_data["value"]))
                 # @odata.nextLink - there is more data to retrieve
                 if "@odata.nextLink" in response_data:
@@ -116,8 +126,7 @@ class MicrosoftEntraClient(OAuthClient):
                 else:
                     break
             for user_dict in sorted(
-                user_data,
-                key=operator.itemgetter("createdDateTime")
+                user_data, key=operator.itemgetter("createdDateTime"),
             ):
                 # Get user attributes
                 given_name = user_dict.get("givenName", None)
