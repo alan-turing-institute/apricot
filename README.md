@@ -19,6 +19,14 @@ docker compose up
 
 from the `docker` directory.
 
+### Pre-built Docker images
+
+These are [available on `ghcr.io`](https://github.com/alan-turing-institute/apricot/pkgs/container/apricot).
+
+```bash
+docker pull ghcr.io/alan-turing-institute/apricot:latest
+```
+
 ### Using Redis [Optional]
 
 You can use a Redis server to store generated `uidNumber` and `gidNumber` values in a more persistent way.
