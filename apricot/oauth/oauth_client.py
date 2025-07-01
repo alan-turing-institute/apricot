@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, Sequence
 
 import requests
 from oauthlib.oauth2 import (
@@ -30,8 +30,8 @@ class OAuthClient(ABC):
         client_id: str,
         client_secret: str,
         redirect_uri: str,
-        scopes_application: list[str],
-        scopes_delegated: list[str],
+        scopes_application: Sequence[str],
+        scopes_delegated: Sequence[str],
         token_url: str,
         uid_cache: UidCache,
     ) -> None:
@@ -66,7 +66,7 @@ class OAuthClient(ABC):
             self.session_application = OAuth2Session(
                 client=BackendApplicationClient(
                     client_id=client_id,
-                    scope=scopes_application,
+                    scope=scopes_application,  # type: ignore [arg-type]
                     redirect_uri=redirect_uri,
                 ),
             )
@@ -80,7 +80,7 @@ class OAuthClient(ABC):
             self.session_interactive = OAuth2Session(
                 client=LegacyApplicationClient(
                     client_id=client_id,
-                    scope=scopes_delegated,
+                    scope=scopes_delegated,  # type: ignore [arg-type]
                     redirect_uri=redirect_uri,
                 ),
             )

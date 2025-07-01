@@ -126,7 +126,8 @@ class MicrosoftEntraClient(OAuthClient):
                 else:
                     break
             for user_dict in sorted(
-                user_data, key=operator.itemgetter("createdDateTime"),
+                user_data,
+                key=operator.itemgetter("createdDateTime"),
             ):
                 # Get user attributes
                 given_name = user_dict.get("givenName", None)

@@ -7,7 +7,7 @@ name = "apricot-server"
 dynamic = ["version"]
 description = "A proxy for delegating LDAP requests to an OpenID Connect backend."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = "BSD-3-Clause"
 keywords = []
 authors = [
@@ -16,7 +16,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
