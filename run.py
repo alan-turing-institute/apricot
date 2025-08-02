@@ -128,6 +128,19 @@ if __name__ == "__main__":
             help="The attribute in Keycloak that contains the users' domain.",
         )
 
+        # Options for Zitadel backend
+        zitadel_group = parser.add_argument_group("Zitadel backend")
+        zitadel_group.add_argument(
+            "--zitadel-base-url",
+            type=str,
+            help="Zitadel base URL.",
+        )
+        zitadel_group.add_argument(
+            "--zitadel-project-id",
+            type=str,
+            help="Zitadel project ID.",
+        )
+
         # Options for Redis cache
         redis_group = parser.add_argument_group("Redis")
         redis_group.add_argument(

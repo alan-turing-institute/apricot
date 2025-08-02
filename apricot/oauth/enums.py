@@ -6,3 +6,4 @@ class OAuthBackend(str, Enum):
 
     MICROSOFT_ENTRA = "MicrosoftEntra"
     KEYCLOAK = "Keycloak"
+    ZITADEL = "Zitadel"
