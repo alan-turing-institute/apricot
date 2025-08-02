@@ -153,6 +153,22 @@ This allows you to attach multiple Apricot servers to the same Keycloak instance
 
 :exclamation: You can disable user domain verification with the `--disable-user-domain-verification` command line option :exclamation:
 
+### Zitadel
+
+You will need to use the following command line arguments:
+
+```bash
+--backend Zitadel
+--zitadel-base-url "<your Zitadel instance>"
+--zitadel-project-id "<you project id>"
+```
+
+You need to ensure that the domain part of your `--zitadel-base-url` argument matches the `--domain` argument to Apricot.
+I.e. `--domain auth.example.com` should have an equivalent `--zitadel-base-url "https://auth.example.com"` argument.
+
+The Zitadel backend implementation makes use of the newer V2 Beta APIs, so breakage can happen until the APIs stabilize.
+It has only been tested with `v4.0.0` released on `2025-07-31`.
+
 #### Client application
 
 You will need to register an application to interact with `Keycloak`.
