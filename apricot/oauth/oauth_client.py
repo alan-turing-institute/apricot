@@ -182,12 +182,17 @@ class OAuthClient(ABC):
             The JSON response from the OAuth backend.
         """
 
+        headers = {"Authorization": f"Bearer {self.bearer_token}"}
+        if "headers" in kwargs and isinstance(kwargs["headers"], dict):
+            headers.update(kwargs["headers"])
+            del kwargs["headers"]
+
         def request_(*args: Any, **kwargs: Any) -> requests.Response:
             return self.session_application.request(  # type: ignore[no-any-return]
                 method,
                 *args,
                 **kwargs,
-                headers={"Authorization": f"Bearer {self.bearer_token}"},
+                headers=headers,
             )
 
         try:
