@@ -86,6 +86,16 @@ if [ -n "${KEYCLOAK_DOMAIN_ATTRIBUTE}" ]; then
 fi
 
 
+# Backend arguments: Zitadel
+if [ -n "${ZITADEL_BASE_URL}" ]; then
+    if [ -z "${ZITADEL_PROJECT_ID}" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S') [INFO    ] ZITADEL_PROJECT_ID environment variable is not set"
+        exit 1
+    fi
+    EXTRA_OPTS="${EXTRA_OPTS} --zitadel-base-url $ZITADEL_BASE_URL --zitadel-project-id $ZITADEL_PROJECT_ID"
+fi
+
+
 # Redis arguments
 if [ -n "${REDIS_HOST}" ]; then
     if [ -z "${REDIS_PORT}" ]; then
