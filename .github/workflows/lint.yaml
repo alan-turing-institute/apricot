@@ -35,6 +35,15 @@ jobs:
       - name: Lint Python
         run: hatch run lint:all
 
+  test_entrypoint:
+    name: Test shell entrypoint argument handling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Test OAuth secret argument handling
+        run: sh docker/test_entrypoint.sh
+
   lint_yaml:
     name: Lint YAML files
     runs-on: ubuntu-latest

@@ -119,7 +119,7 @@ fi
 hatch run python run.py \
     --backend "${BACKEND}" \
     --client-id "${CLIENT_ID}" \
-    --client-secret "${CLIENT_SECRET}"  \
+    --client-secret="${CLIENT_SECRET}"  \
     --domain "${DOMAIN}" \
     --port "${PORT}" \
     $EXTRA_OPTS
